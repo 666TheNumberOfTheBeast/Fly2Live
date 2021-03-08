@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/city_bg_2"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context=".MainFragment">
+
+    <!--<ImageView
+        android:id="@+id/bg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/city_bg_2"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />-->
+
+    <ImageView
+        android:id="@+id/cockpit"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@string/cockpit"
+        android:scaleType="fitXY"
+        android:src="@drawable/cockpit"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <ImageView
+        android:id="@+id/logo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/logo"
+        android:contentDescription="@string/logo"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.252" />
+
+    <TextView
+        android:id="@+id/button_single_player"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/single_player"
+        android:textColor="#00FF00"
+        android:lines="2"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.396"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.793" />
+
+    <TextView
+        android:id="@+id/button_multiplayer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/multiplayer"
+        android:textColor="#00FF00"
+        android:lines="2"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/button_single_player"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.177"
+        app:layout_constraintStart_toEndOf="@+id/button_single_player"
+        app:layout_constraintTop_toTopOf="@+id/button_single_player"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <TextView
+        android:id="@+id/button_stats"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/stats"
+        android:textColor="#00FF00"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.578"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.626" />
+
+
+    <!--<TextView
+        android:id="@+id/button_single_player"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:color/black"
+        android:paddingStart="7dp"
+        android:paddingEnd="7dp"
+        android:paddingTop="25dp"
+        android:paddingBottom="25dp"
+        android:text="@string/single_player"
+        android:textColor="#00FF00"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.392"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.84" />
+
+    <TextView
+        android:id="@+id/button_multiplayer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/multiplayer"
+        android:paddingStart="13dp"
+        android:paddingEnd="13dp"
+        android:paddingTop="25dp"
+        android:paddingBottom="25dp"
+        android:textColor="#00FF00"
+        android:background="@android:color/black"
+        app:layout_constraintBottom_toBottomOf="@+id/button_single_player"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.139"
+        app:layout_constraintStart_toEndOf="@+id/button_single_player"
+        app:layout_constraintTop_toTopOf="@+id/button_single_player" />
+
+    <TextView
+        android:id="@+id/button_stats"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:color/black"
+        android:paddingStart="13dp"
+        android:paddingEnd="13dp"
+        android:paddingBottom="5dp"
+        android:text="@string/stats"
+        android:textColor="#00FF00"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.578"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.63" />-->
+
+</androidx.constraintlayout.widget.ConstraintLayout>

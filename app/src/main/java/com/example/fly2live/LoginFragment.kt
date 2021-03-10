@@ -10,7 +10,10 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.SignInButton
 import android.content.Intent
+import android.content.res.Configuration
+import android.widget.ImageView
 import android.widget.Toast
+import androidx.constraintlayout.widget.ConstraintLayout
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.common.api.ApiException
@@ -40,6 +43,14 @@ class LoginFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        val logo = view.findViewById<ImageView>(R.id.logo)
+        val orientation = resources.configuration.orientation
+
+        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            logo.scaleX = 0.6f
+            logo.scaleY = 0.6f
+        }
 
         val signInButton = view.findViewById<SignInButton>(R.id.button_sign_in)
         signInButton.setSize(SignInButton.SIZE_STANDARD);

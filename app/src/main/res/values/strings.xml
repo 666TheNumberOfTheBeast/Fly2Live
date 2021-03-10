@@ -6,20 +6,21 @@
     <string name="login">Login</string>
 
     <!-- Main fragment -->
-    <string name="single_player">Single \nPlayer</string>
-    <string name="multiplayer">Multi \nplayer</string>
+    <string name="single_player">Single\nPlayer</string>
+    <string name="multiplayer">Multi\nPlayer</string>
     <string name="stats">Stats</string>
 
     <string name="cockpit">Cockpit</string>
     <string name="logo">Logo</string>
 
     <!-- Stats fragment -->
-    <!--<string name="username">Username</string>-->
+    <string name="score_leaderboard">Score Stats</string>
+    <string name="win_leaderboard">WIN% Stats</string>
     <string name="best_players">Best Players</string>
     <string name="W">W</string>
     <string name="L">L</string>
     <string name="win_percentage">WIN%</string>
-    <string name="km">Km</string>
+    <string name="value">Value</string>
 
     <!-- Loading fragment -->
     <string name="connecting">Connecting to the server…</string>

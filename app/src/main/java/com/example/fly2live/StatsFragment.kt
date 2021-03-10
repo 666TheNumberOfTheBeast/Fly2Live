@@ -5,14 +5,38 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import org.json.JSONObject
-import androidx.recyclerview.widget.ConcatAdapter
-import androidx.recyclerview.widget.RecyclerView
-import com.example.fly2live.stats_list.HeaderAdapter
-import com.example.fly2live.stats_list.PlayersAdapter
-import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.viewpager2.adapter.FragmentStateAdapter
+import androidx.viewpager2.widget.ViewPager2
+import androidx.activity.OnBackPressedCallback
+
 
 class StatsFragment : Fragment() {
+    // The pager widget, which handles animation and
+    // allows swiping horizontally to access previous and next wizard steps
+    private lateinit var mPager: ViewPager2
+
+    // The number of pages (wizard steps) to show
+    private val NUM_PAGES = 2
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        activity?.onBackPressedDispatcher?.addCallback(this, object : OnBackPressedCallback(true) {
+
+            override fun handleOnBackPressed() {
+                if (mPager.currentItem == 0) {
+                    // If the user is currently looking at the first step,
+                    // allow the system to handle the Back button
+                    isEnabled = false
+                    activity?.onBackPressed()
+                } else {
+                    // Otherwise, select the previous step
+                    mPager.currentItem = mPager.currentItem - 1
+                }
+            }
+
+        })
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -25,83 +49,28 @@ class StatsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val names = arrayOf("Anna Paola", "Andrea", "Barbara", "Frank", "Ivan", "Maria", "Vittorio")
-        val players = ArrayList<Player>()
+        mPager = view.findViewById(R.id.pager)
 
-        for (i in 1..20) {
-            val player = JSONObject()
-            player.put("name", names.random())
-            player.put("W", Math.random() * 310)
-            player.put("L", Math.random() * 310)
+        // The pager adapter, which provides the pages to the view pager widget
+        val pagerAdapter = ScreenSlidePagerAdapter(this)
+        mPager.adapter   = pagerAdapter
+    }
 
-            val name    = player.getString("name")
-            val wins    = player.getInt("W")
-            val loses   = player.getInt("L")
+    private inner class ScreenSlidePagerAdapter(fm: Fragment) : FragmentStateAdapter(fm) {
+        override fun createFragment(position: Int): Fragment {
+            // Since all Fragment classes you create must have a public, no-arg constructor,
+            // use the arguments Bundle to give additional info to the fragment
+            val args = Bundle()
+            args.putInt("position", position)
 
-            players.add(Player(name, wins, loses))
+            val f = StatsSlideFragment()
+            f.arguments = args
+
+            return f
         }
 
-        players.sortByDescending { player -> player.getWinPercentage() }
-
-        // Instantiates HeaderAdapter and PlayersAdapter.
-        // Both adapters are added to concatAdapter which displays the contents sequentially
-        val headerAdapter  = HeaderAdapter()
-        val playersAdapter = PlayersAdapter(players)
-        val concatAdapter  = ConcatAdapter(headerAdapter, playersAdapter)
-
-        val recyclerView = view.findViewById<RecyclerView>(R.id.recycler_view)
-        recyclerView.adapter = concatAdapter
-
-        val dividerItemDecoration = DividerItemDecoration(
-            recyclerView.context,
-            DividerItemDecoration.VERTICAL
-        )
-        recyclerView.addItemDecoration(dividerItemDecoration)
-
-    }
-}
-
-class Player(name: String, wins: Int, loses: Int) {
-    private val name: String
-    private val wins: Int
-    private val loses: Int
-    private val win_percentage: String
-    private var position = 0
-
-    init {
-        this.name           = name
-        this.wins           = wins
-        this.loses          = loses
-        this.win_percentage = String.format("%.3f", wins / (wins + loses).toFloat())
-    }
-
-    // Getters
-    fun getName(): String {
-        return name
-    }
-
-    fun getWins(): Int {
-        return wins
-    }
-
-    fun getLoses(): Int {
-        return loses
-    }
-
-    fun getWinPercentage(): String {
-        return win_percentage
-    }
-
-    fun getPosition(): Int {
-        return position
-    }
-
-    // Setters
-    fun setPosition(position: Int) {
-        this.position = position
-    }
-
-    override fun toString(): String {
-        return name + " " + win_percentage
+        override fun getItemCount(): Int {
+            return NUM_PAGES
+        }
     }
 }

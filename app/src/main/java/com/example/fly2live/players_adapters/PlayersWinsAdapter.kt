@@ -1,6 +1,5 @@
-package com.example.fly2live.stats_list
+package com.example.fly2live.players_adapters
 
-import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,14 +10,14 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.fly2live.R
-import com.example.fly2live.Player
+import com.example.fly2live.player.Player
 
 
-class PlayersAdapter(players: ArrayList<Player>) :
-    ListAdapter<Player, PlayersAdapter.PlayerViewHolder>(PlayerDiffCallback) {
+class PlayersWinsAdapter(players: ArrayList<Player>) :
+    ListAdapter<Player, PlayersWinsAdapter.PlayerWinsViewHolder>(PlayerDiffCallback) {
     private val data = players
 
-    class PlayerViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    class PlayerWinsViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val playerPositionView       = itemView.findViewById<TextView>(R.id.player_position)
         private val playerNameView           = itemView.findViewById<TextView>(R.id.player_name)
         private val playerWinsView           = itemView.findViewById<TextView>(R.id.W)
@@ -58,13 +57,13 @@ class PlayersAdapter(players: ArrayList<Player>) :
     }
 
     // Creates and inflates view and return PlayerViewHolder
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PlayerViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.stats_item, parent, false)
-        return PlayerViewHolder(view)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PlayerWinsViewHolder {
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.stats_players_wins_item, parent, false)
+        return PlayerWinsViewHolder(view)
     }
 
     // Gets current player and uses it to bind view
-    override fun onBindViewHolder(holder: PlayerViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: PlayerWinsViewHolder, position: Int) {
         val player = data[position]
         player.setPosition(position+1)
         holder.bind(player)

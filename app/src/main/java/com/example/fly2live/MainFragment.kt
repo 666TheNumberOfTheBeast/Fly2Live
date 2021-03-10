@@ -11,8 +11,12 @@ import android.widget.Button
 import android.widget.ImageView
 import androidx.navigation.fragment.findNavController
 import android.content.res.Configuration
+import android.os.Handler
 import android.widget.TextView
 import com.example.fly2live.configuration.Configuration as myConfiguration
+import androidx.core.os.HandlerCompat.postDelayed
+
+
 
 class MainFragment : Fragment() {
 
@@ -47,6 +51,8 @@ class MainFragment : Fragment() {
         val btnMultiplayer  = view.findViewById<TextView>(R.id.button_multiplayer)
         val btnStats        = view.findViewById<TextView>(R.id.button_stats)
 
+        val cockpit = view.findViewById<ImageView>(R.id.cockpit)
+
         // Create animation based on smartphone orientation
         val orientation = resources.configuration.orientation
         val animZoomOut = if (orientation == Configuration.ORIENTATION_LANDSCAPE)
@@ -58,9 +64,13 @@ class MainFragment : Fragment() {
             override fun onAnimationStart(animation: Animation) {}
 
             override fun onAnimationEnd(animation: Animation) {
-                btnSinglePlayer.visibility = View.VISIBLE
-                btnMultiplayer.visibility  = View.VISIBLE
-                btnStats.visibility        = View.VISIBLE
+                cockpit.setImageResource(R.drawable.cockpit_on)
+
+                Handler().postDelayed(Runnable {
+                    btnSinglePlayer.visibility = View.VISIBLE
+                    btnMultiplayer.visibility  = View.VISIBLE
+                    btnStats.visibility        = View.VISIBLE
+                }, 300)
             }
 
             override fun onAnimationRepeat(animation: Animation) {}

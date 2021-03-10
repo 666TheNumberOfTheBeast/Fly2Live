@@ -9,64 +9,13 @@
     android:id="@+id/layout"
     android:background="@android:color/black" >
 
-    <!--<TextView
-        android:id="@+id/best_players"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:fontFamily="@font/audiowide"
-        android:text="@string/best_players"
-        android:textAppearance="@style/TextAppearance.AppCompat.Large"
-        android:textSize="25sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/W"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.02" />
-
-    <TextView
-        android:id="@+id/W"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:fontFamily="@font/audiowide"
-        android:text="@string/W"
-        android:textAppearance="@style/TextAppearance.AppCompat.Large"
-        android:textSize="25sp"
-        app:layout_constraintBottom_toBottomOf="@id/best_players"
-        app:layout_constraintEnd_toStartOf="@id/L"
-        app:layout_constraintStart_toEndOf="@id/best_players"
-        app:layout_constraintTop_toTopOf="@id/best_players" />
-
-    <TextView
-        android:id="@+id/L"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:fontFamily="@font/audiowide"
-        android:text="@string/L"
-        android:textAppearance="@style/TextAppearance.AppCompat.Large"
-        android:textSize="25sp"
-        app:layout_constraintBottom_toBottomOf="@id/W"
-        app:layout_constraintEnd_toStartOf="@id/win_percentage"
-        app:layout_constraintStart_toEndOf="@id/W"
-        app:layout_constraintTop_toTopOf="@id/W" />
-
-    <TextView
-        android:id="@+id/win_percentage"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:fontFamily="@font/audiowide"
-        android:text="@string/win_percentage"
-        android:textAppearance="@style/TextAppearance.AppCompat.Large"
-        android:textSize="25sp"
-        app:layout_constraintBottom_toBottomOf="@id/L"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/L"
-        app:layout_constraintTop_toTopOf="@id/L" />-->
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_view"
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layoutManager="LinearLayoutManager" />
-
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

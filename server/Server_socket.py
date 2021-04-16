@@ -274,6 +274,10 @@ player_bitmap_height = 3.0 # In meters
 player_initial_pos_x = 1.0 # In meters
 player_initial_pos_y = 0.5 # In height ratio
 
+now = 0
+previous = 0
+score = 0.0
+
 
 '''buildings = [
     Obstacle("building_01", 15.0, 100.0, respawn_pos_x, 5.0, speed, respawn_pos_x),
@@ -329,7 +333,34 @@ vehicles = [
     Obstacle("ufo", 4.0, 2.0, respawn_pos_x, 0.05, speed, respawn_pos_x)
 ]
 
-def __checkCollision():
+
+def __pickBuilding():
+    building = random.choice(buildings)
+
+    # Non normalized, used in height/height_ratio
+    #height_ratio = random.randrange(13, 50) / 10.0
+
+    # normalized between [0,1]
+    height_ratio = random.randrange(30, 80) / 100.0
+
+    building.setX(world_width + 3.0)
+    building.setY(height_ratio)
+
+def __pickVehicle():
+    vehicle = random.choice(vehicles)
+
+    # Non normalized, used in height/height_ratio
+    #height_ratio = random.randrange(80, 100) / 10.0
+
+    # normalized between [0,1]
+    height_ratio = random.randrange(5, 15) / 100.0
+
+    building.setX(world_width + 3.0)
+    building.setY(height_ratio)
+
+# Check if the players experiences a collision.
+# Return a boolean tuple, true if a collision happened
+def __checkCollisions():
     def createRect(x, y, w, h):
         return { "x1": x, "y1": y, "x2": x+w, "y2": y+h }
 
@@ -347,7 +378,7 @@ def __checkCollision():
 
         return obstacle_rects
 
-    def checkCollisionAux(rect, list_rects):
+    def checkCollisionsAux(rect, list_rects):
         for r in list_rects:
             if intersect(rect, r):
                 return True
@@ -360,17 +391,112 @@ def __checkCollision():
         return False
 
     # le X le verifico in metri mentre le Y con i rapporti delle altezze
-    player_0_rect = createRect(player_0.getX(), player_0.getY(), player_0.getWidth(), player_0.getHeightScale())
-    player_1_rect = createRect(player_1.getX(), player_1.getY(), player_1.getWidth(), player_1.getHeightScale())
+    player_0_rect = createRect(player_0.getX(), player_0.getY(), player_0.getWidth(), player_0.getBitmapHeightScale())
+    player_1_rect = createRect(player_1.getX(), player_1.getY(), player_1.getWidth(), player_1.getBitmapHeightScale())
 
     obstacles = [building, vehicle]
     obstacles_0_rects = createRects(obstacles, player_0)
     obstacles_1_rects = createRects(obstacles, player_1)
 
-    res_0 = checkCollisionAux(player_0_rect, obstacles_0_rects)
-    res_1 = checkCollisionAux(player_1_rect, obstacles_1_rects)
+    res_0 = checkCollisionsAux(player_0_rect, obstacles_0_rects)
+    res_1 = checkCollisionsAux(player_1_rect, obstacles_1_rects)
 
     return (res_0, res_1)
+
+# Thread that updates game logic
+def game_thread():
+    # Constrain the bitmap in the screen
+    def checkPlayerPosition(pos_y, bitmap_height_scale):
+        if pos_y < 0:
+            return 0.0
+        elif pos_y + bitmap_height_scale > 1.0:
+            return 1.0 - bitmap_height_scale
+        else:
+            return pos_y
+
+    while state == STATE_PLAY and winner == UNDEFINED:
+        # Update players positions
+        player_0_y = player_0.getY() + player_0.getSpeedY()
+        player_1_y = player_1.getY() + player_1.getSpeedY()
+
+        player_0_y = checkPlayerPosition(player_0_y, player_0.getBitmapHeightScale())
+        player_1_y = checkPlayerPosition(player_1_y, player_1.getBitmapHeightScale())
+
+        player_0.setY(player_0_y)
+        player_1.setY(player_1_y)
+
+        # Update obstacles positions
+        building.update(1)
+
+        # Check if the building has been respawn
+        if building.isRespawn():
+            __pickBuilding()
+
+        vehicle.update(1)
+
+        # Check if the vehicle has been respawn
+        if vehicle.isRespawn():
+            __pickVehicle()
+
+        # Check players collisions
+        player_0_is_collided, player_1_is_collided = __checkCollisions()
+
+        if player_0_is_collided and player_1_is_collided:
+            winner = DRAW
+            state  = STATE_END
+        elif player_0_is_collided:
+            winner = player_1
+            state  = STATE_END
+        elif player_1_is_collided:
+            winner = player_0
+            state  = STATE_END
+
+        # Compute time difference
+        now = System.currentTimeMillis()
+        dt = 0
+
+        # Check if this is the first first frame to draw
+        if previous != 0:
+            dt = now - previous
+
+        previous = now
+
+        # Since the score is updated to slowly using m/s,
+        # I speeded it up
+        score += speed * 6 * dt / 1000
+
+        emit("new game response",
+             { "error": False,
+               "message": "GAME STARTED",
+               "building": { "id": building.getId(),
+                             "pos_x": building.getX(),
+                             "pos_y": building.getY(),
+                             "width": building.getWidth(),
+                             "height" building.getHeight()
+                           },
+               "vehicle": { "id": vehicle.getId(),
+                            "pos_x": vehicle.getX(),
+                            "pos_y": vehicle.getY(),
+                            "width": vehicle.getWidth(),
+                            "height" vehicle.getHeight()
+                          },
+               "player_0": { "id": player_0.getId(),
+                             "pos_x": player_0.getX(),
+                             "pos_y": player_0.getY(),
+                             "width": player_0.getWidth(),
+                             "height" player_0.getHeight()
+                           },
+               "player_1": { "id": player_1.getId(),
+                             "pos_x": player_1.getX(),
+                             "pos_y": player_1.getY(),
+                             "width": player_1.getWidth(),
+                             "height" player_1.getHeight()
+                           },
+               "score": score,
+               "winner": winner
+             },
+             broadcast=True )
+        #time.sleep(5)
 
 
 @socketio.on("new game request")
@@ -386,30 +512,6 @@ def new_game_event(json):
         if not "screen_height" in input or not isinstance(input.screen_height, int) or input.height <= 0:
             return False
         return True
-
-    def __pickBuilding():
-        building = random.choice(buildings)
-
-        # Non normalized, used in height/height_ratio
-        #height_ratio = random.randrange(13, 50) / 10.0
-
-        # normalized between [0,1]
-        height_ratio = random.randrange(30, 80) / 100.0
-
-        building.setX(world_width + 3.0)
-        building.setY(height_ratio)
-
-    def __pickVehicle():
-        vehicle = random.choice(vehicles)
-
-        # Non normalized, used in height/height_ratio
-        #height_ratio = random.randrange(80, 100) / 10.0
-
-        # normalized between [0,1]
-        height_ratio = random.randrange(5, 15) / 100.0
-
-        building.setX(world_width + 3.0)
-        building.setY(height_ratio)
 
     #print("received new game event: " + str(json))
 
@@ -450,7 +552,8 @@ def new_game_event(json):
 
             state = STATE_PLAY
 
-            # TODO: start game thread and periodically update game logic and send messages to client
+            # Start game thread
+            thread = socketio.start_background_task(target=game_thread)
 
             emit("new game response",
                  { "error": False,
@@ -478,7 +581,9 @@ def new_game_event(json):
                                  "pos_y": player_1.getY(),
                                  "width": player_1.getWidth(),
                                  "height" player_1.getHeight()
-                               }
+                               },
+                   "score": score,
+                   "winner": winner
                  },
                  broadcast=True )
         else:
@@ -519,26 +624,12 @@ def new_move_event(json):
 
     if state == STATE_PLAY and json.req == NEW_MOVE:
         if json.who == player_0.getId():
-            '''if args.new_pos < 0:
-                last_pos_0[1] = 0
-            elif args.new_pos > screen_size[1]:
-                last_pos_0[1] = screen_size[1]
-            else
-                last_pos_0[1] = args.new_pos'''
-
-            # TODO: use the received value to change position of player_0 in server game logic
-
+            # Use the received value to change the y component of player_0 speed
+            player_0.setSpeedY(json.value)
             emit("new move response", { "error": False, "message": "NEW MOVE ACCEPTED" })
         elif json.who == player_1.getId():
-            '''if args.new_pos < 0:
-                last_pos_1[1] = 0
-            elif args.new_pos > screen_size[1]:
-                last_pos_1[1] = screen_size[1]
-            else
-                last_pos_1[1] = args.new_pos'''
-
-            # TODO: use the received value to change position of player_1 in server game logic
-
+            # Use the received value to change the y component of player_1 speed
+            player_1.setSpeedY(json.value)
             emit("new move response", { "error": False, "message": "NEW MOVE ACCEPTED" })
     else:
         emit("new move response", { "error": True, "message": "INVALID REQUEST" })

@@ -6,8 +6,8 @@ class Obstacle:
         self.height = height # In meters
 
         self.pos_x = pos_x, # In meters
-        self.pos_x = pos_y  # In height ratio
-        
+        self.pos_y = pos_y  # In height ratio
+
         self.speed = speed  # In m/s
 
         self.respawn = False
@@ -24,31 +24,31 @@ class Obstacle:
         return self.height
 
     def getX(self):
-        return self.pos.x
+        return self.pos_x
 
     def getY(self):
-        return self.pos.y
+        return self.pos_y
 
     def getSpeed(self):
         return self.speed
 
     # Setters
     def setX(self, pos_x):
-        self.pos.x = pos_x
+        self.pos_x = pos_x
 
     def setY(self, pos_y):
-        self.pos.y = pos_y
+        self.pos_y = pos_y
 
     def setSpeed(self, speed):
         self.speed = speed
 
     # Update UI
     def update(self, t):
-        #self.pos.x -= self.speed
-        self.pos.x -= self.speed * t
+        #self.pos_x -= self.speed
+        self.pos_x -= self.speed * t
 
-        if (self.pos.x + self.width < 0):
-            self.pos.x = self.respawn_pos_x
+        if (self.pos_x + self.width < 0):
+            self.pos_x = self.respawn_pos_x
             self.respawn = True
         else:
             self.respawn = False

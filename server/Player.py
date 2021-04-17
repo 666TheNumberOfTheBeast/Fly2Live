@@ -10,10 +10,9 @@ class Player:
 
         self.screen_width  = screen_width  # In pixels
         self.screen_height = screen_height # In pixels
-        self.ppm = Math.min(screen_width / world_width, screen_height / world_width)
+        self.ppm = min(screen_width / world_width, screen_height / world_width)
 
-        self.bitmap_height_scale = bitmap_height * ppm / screen_height # In height ratio (5/10 = 0.5)
-        #self.bitmap_height_scale = screen_height / bitmap_height * ppm # In height ratio (10/5 = 2)
+        self.bitmap_height_scale = bitmap_height * self.ppm / screen_height # In height ratio (5/10 = 0.5)
 
         # Speed due to user input (in height ratio)
         self.speed_y = 0

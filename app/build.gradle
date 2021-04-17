@@ -50,4 +50,10 @@ dependencies {
 
     // Volley
     implementation 'com.android.volley:volley:1.1.1'
+
+    // socket.io
+    implementation ('io.socket:socket.io-client:2.0.0') {
+        // excluding org.json which is provided by Android
+        exclude group: 'org.json', module: 'json'
+    }
 }

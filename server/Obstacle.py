@@ -43,9 +43,9 @@ class Obstacle:
         self.speed = speed
 
     # Update UI
-    def update(self, t):
+    def update(self, dt):
         #self.pos_x -= self.speed
-        self.pos_x -= self.speed * t
+        self.pos_x -= self.speed * dt
 
         if (self.pos_x + self.width < 0):
             self.pos_x = self.respawn_pos_x

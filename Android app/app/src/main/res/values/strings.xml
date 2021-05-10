@@ -1,0 +1,43 @@
+<resources>
+    <string name="app_name">Fly2Live</string>
+    <string name="action_settings">Settings</string>
+
+    <!-- Login fragment -->
+    <string name="login">Login</string>
+
+    <!-- Main fragment -->
+    <string name="single_player">Single\nPlayer</string>
+    <string name="multiplayer">Multi\nPlayer</string>
+    <string name="stats">Stats</string>
+
+    <string name="cockpit">Cockpit</string>
+    <string name="logo">Logo</string>
+
+    <!-- Stats fragment -->
+    <string name="score_leaderboard">Score Stats</string>
+    <string name="win_leaderboard">WIN% Stats</string>
+    <string name="best_players">Best Players</string>
+    <string name="W">W</string>
+    <string name="L">L</string>
+    <string name="win_percentage">WIN%</string>
+    <string name="value">Value</string>
+
+    <!-- Loading fragment -->
+    <string name="msg_connecting">Connecting to the server…</string>
+    <string name="msg_bad_request">Bad Request</string>
+    <string name="msg_searching_adv">Searching an adversary…</string>
+    <string name="msg_found_adv">Adversary found…</string>
+    <string name="msg_prepare">Preparing the game…</string>
+    <!--<string name="msg_game_start">Game started</string>
+    <string name="msg_gameplay">Gameplay</string>
+    <string name="msg_game_end">Game ended</string>-->
+    <string name="msg_server_busy">Server busy, wait…</string>
+
+    <!-- Game Over fragment -->
+    <string name="game_over">GAME OVER</string>
+    <string name="restart">RESTART</string>
+    <string name="go_to_main_menu">GO TO MAIN MENU</string>
+
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+</resources>

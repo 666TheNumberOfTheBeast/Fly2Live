@@ -31,21 +31,6 @@ class MainFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        /*view.findViewById<Button>(R.id.button_single_player).setOnClickListener{
-            Configuration.MULTIPLAYER = false
-            findNavController().navigate(R.id.action_mainFragment_to_gameFragment)
-        }
-
-        view.findViewById<Button>(R.id.button_multiplayer).setOnClickListener{
-            Configuration.MULTIPLAYER = true
-            findNavController().navigate(R.id.action_mainFragment_to_loadingFragment)
-        }
-
-        view.findViewById<Button>(R.id.button_stats).setOnClickListener{
-            findNavController().navigate(R.id.action_mainFragment_to_statsFragment)
-        }*/
-
-
         val logo = view.findViewById<ImageView>(R.id.logo)
         val btnSinglePlayer = view.findViewById<TextView>(R.id.button_single_player)
         val btnMultiplayer  = view.findViewById<TextView>(R.id.button_multiplayer)
@@ -56,9 +41,9 @@ class MainFragment : Fragment() {
         // Create animation based on smartphone orientation
         val orientation = resources.configuration.orientation
         val animZoomOut = if (orientation == Configuration.ORIENTATION_LANDSCAPE)
-                            createScaleAnimation(1f, 0.4f, 1f, 0.4f)
-                          else
-                            createScaleAnimation(1f, 0.5f, 1f, 0.5f)
+            createScaleAnimation(1f, 0.4f, 1f, 0.4f)
+        else
+            createScaleAnimation(1f, 0.5f, 1f, 0.5f)
 
         animZoomOut.setAnimationListener(object : Animation.AnimationListener {
             override fun onAnimationStart(animation: Animation) {}
@@ -92,6 +77,9 @@ class MainFragment : Fragment() {
         btnStats.setOnClickListener{
             findNavController().navigate(R.id.action_mainFragment_to_statsFragment)
         }
+
+        // Start main soundtrack if stopped (coming back from game or game over fragments)
+        (activity as MainActivity).startMainSoundtrack()
     }
 
     private fun createScaleAnimation(fromX: Float, toX: Float, fromY: Float, toY: Float): ScaleAnimation {

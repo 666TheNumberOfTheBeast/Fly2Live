@@ -9,9 +9,9 @@ class Vehicle(name: String,
               bitmap: Bitmap,
               bounds_offsets: Array<Array<Float>>,
               width: Float, height: Float,
-              screen_width: Int, screen_height: Int, ppm: Int,
+              screen_width: Int, screen_height: Int, ppm: Float,
               pos_x: Float, pos_y: Float, speed: Float) :
-      Obstacle(name, bitmap, width, height, screen_width, screen_height, ppm, pos_x, pos_y, speed) {
+    Obstacle(name, bitmap, width, height, screen_width, screen_height, ppm, pos_x, pos_y, speed) {
 
     private val bounds_offsets: Array<Array<Float>>
     private val bounds = ArrayList<RectF>()
@@ -30,8 +30,8 @@ class Vehicle(name: String,
     }
 
     // Update UI
-    override fun update() {
-        super.update()
+    override fun update(dt: Float) {
+        super.update(dt)
 
         for (i in bounds_offsets.indices) {
             val offset_array = bounds_offsets[i]

@@ -116,7 +116,7 @@ class LoadingFragment : Fragment() {
             })
 
             requireActivity().onBackPressedDispatcher.addCallback(this) {
-               goBack()
+                goBack()
             }
         })
 

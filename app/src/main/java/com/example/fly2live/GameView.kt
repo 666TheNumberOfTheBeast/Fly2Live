@@ -6,6 +6,7 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener2
 import android.hardware.SensorManager
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import androidx.core.content.res.ResourcesCompat
@@ -13,6 +14,8 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.findFragment
 import com.example.fly2live.vehicle.Vehicle
 import com.example.fly2live.building.Building
+import kotlin.math.max
+import kotlin.math.min
 
 
 class GameView(context: Context?) : View(context), View.OnTouchListener, SensorEventListener2 {
@@ -35,7 +38,7 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
     private lateinit var buildings: Array<Building>
     private lateinit var building: Building
     private lateinit var vehicles: Array<Vehicle>
-    private var vehicle: Vehicle? = null
+    private lateinit var vehicle: Vehicle
 
 
     // Helicopter size
@@ -70,8 +73,10 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
 
 
     // Helicopter position
-    private var user_dx = 0f
-    private var user_dy = 0f
+    //private var user_dx = 0f
+    //private var user_dy = 0f
+    private var user_dx = 1f  // meters
+    private var user_dy = 25f // meters
 
     // Dirigible position
     /*private var dirigible_dx = 0f
@@ -84,9 +89,13 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
     //private var building_dx = 0f
     //private var building_dy = 0f
 
+    // Helicopter rotation
+    private var heli_rotation = 8f // Degrees
+
 
     // Bitmap rect
     private val user_rect = RectF()
+    private val user_rect_matrix = Matrix()
 
 
     // Sensors values
@@ -107,12 +116,13 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
         strokeWidth = 3f
     }
 
-    private var score     = 0.0
+    private var score     = 0.0 // meters
     private var game_over = false
 
-    private val initial_speed = 5f
+    //private var speed = 0.2f // m/s (max 0.5)
+    private var speed = 10f // m/s (max 0.5)
 
-    private var increment = 0f
+    private var last_gyroscope_input = 0f // meters
 
 
 
@@ -139,18 +149,17 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
     private var vy = 0f
 
     // World constants
-    private var speed = 15f   // m/s
+    //private var speed = 15f   // m/s
     private var g     = 9.81f // m/s^2
-    private val l     = 30    // World length in meters
+    private val world_width  = 30f  // meters
+    private val world_height = 60f  // meters
 
     // Pixel per meter
-    private var ppm = 1
+    private var ppm = 1f
 
     // Finger coordinates
     private var fx = 0.0
     private var fy = 0.0
-
-
 
 
     init {
@@ -187,9 +196,15 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
         if (!converted) {
             converted = true
 
-            ppm = Math.min(width / l, height / l)
+            // I used min to keep almost a fixed ratio for drawing the bitmaps when rotating the screen.
+            // I divide both to world_width because I'm interested in width for obstacles respawn
+            ppm = min(width / world_width, height / world_width)
 
-            bg        = ResourcesCompat.getDrawable(resources, R.drawable.city_bg_1, null)?.toBitmap(width, height)!!
+            Log.d("ppm", width.toString())
+            Log.d("ppm", height.toString())
+            Log.d("ppm", ppm.toString())
+
+            bg = ResourcesCompat.getDrawable(resources, R.drawable.city_bg_1, null)?.toBitmap(width, height)!!
 
             //dirigible = ResourcesCompat.getDrawable(resources, R.drawable.dirigible_1, null)?.toBitmap(width, height)!!
             //ufo       = ResourcesCompat.getDrawable(resources, R.drawable.ufo, null)?.toBitmap(width, height)!!
@@ -200,50 +215,52 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
                     "biplane",
                     ResourcesCompat.getDrawable(resources, R.drawable.biplane, null)?.toBitmap(width, height)!!,
                     arrayOf(arrayOf(0f, 0f, 1f, 1f)),
-                    7f, 3f, width, height, ppm, width + 420f, 20f, initial_speed
-                ),
+                    //7f, 3f, width, height, ppm, width + 420f, 20f, speed
+                    //7f, 3f, width, height, ppm, width + 3f*ppm, ppm, speed
+                    7f, 3f, width, height, ppm, world_width + 3f, height*0.05f, speed // Measures in meters except pos_y
+                )/*,
 
                 Vehicle(
                     "dirigible_1",
                     ResourcesCompat.getDrawable(resources, R.drawable.dirigible_1, null)?.toBitmap(width, height)!!,
                     arrayOf(arrayOf(0f, 0f, 1f, 1f)),
-                    20f, 8f, width, height, ppm, width + 420f, 20f, initial_speed
+                    20f, 8f, width, height, ppm, width + 420f, height*0.05f, speed
                 ),
                 Vehicle(
                     "dirigible_2",
                     ResourcesCompat.getDrawable(resources, R.drawable.dirigible_2, null)?.toBitmap(width, height)!!,
                     arrayOf(arrayOf(0f, 0f, 1f, 1f)),
-                    20f, 8f, width, height, ppm, width + 420f, 20f, initial_speed
+                    20f, 8f, width, height, ppm, width + 420f, height*0.05f, speed
                 ),
                 Vehicle(
                     "dirigible_3",
                     ResourcesCompat.getDrawable(resources, R.drawable.dirigible_3, null)?.toBitmap(width, height)!!,
                     arrayOf(arrayOf(0f, 0f, 1f, 1f)),
-                    20f, 8f, width, height, ppm, width + 420f, 20f, initial_speed
+                    20f, 8f, width, height, ppm, width + 420f, height*0.05f, speed
                 ),
                 Vehicle(
                     "dirigible_4",
                     ResourcesCompat.getDrawable(resources, R.drawable.dirigible_4, null)?.toBitmap(width, height)!!,
                     arrayOf(arrayOf(0f, 0f, 1f, 1f)),
-                    20f, 8f, width, height, ppm, width + 420f, 20f, initial_speed
+                    20f, 8f, width, height, ppm, width + 420f, height*0.05f, speed
                 ),
                 Vehicle(
                     "dirigible_5",
                     ResourcesCompat.getDrawable(resources, R.drawable.dirigible_5, null)?.toBitmap(width, height)!!,
                     arrayOf(arrayOf(0f, 0f, 1f, 1f)),
-                    20f, 8f, width, height, ppm, width + 420f, 20f, initial_speed
+                    20f, 8f, width, height, ppm, width + 420f, height*0.05f, speed
                 ),
                 Vehicle(
                     "dirigible_6",
                     ResourcesCompat.getDrawable(resources, R.drawable.dirigible_6, null)?.toBitmap(width, height)!!,
                     arrayOf(arrayOf(0f, 0f, 1f, 1f)),
-                    20f, 8f, width, height, ppm, width + 420f, 20f, initial_speed
+                    20f, 8f, width, height, ppm, width + 420f, height*0.05f, speed
                 ),
                 Vehicle(
                     "dirigible_7",
                     ResourcesCompat.getDrawable(resources, R.drawable.dirigible_7, null)?.toBitmap(width, height)!!,
                     arrayOf(arrayOf(0f, 0f, 1f, 1f)),
-                    20f, 8f, width, height, ppm, width + 420f, 20f, initial_speed
+                    20f, 8f, width, height, ppm, width + 420f, height*0.05f, speed
                 ),
 
 
@@ -251,8 +268,8 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
                     "ufo",
                     ResourcesCompat.getDrawable(resources, R.drawable.ufo, null)?.toBitmap(width, height)!!,
                     arrayOf(arrayOf(0f, 0f, 1f, 1f)),
-                    4f, 2f, width, height, ppm, width + 420f, 20f, initial_speed
-                )
+                    4f, 2f, width, height, ppm, width + 420f, 20f, speed
+                )*/
             )
 
             // ALTERNATIVA USANDO DIMENSIONI ORIGINALI BITMAP, NON MI SEMBRA CAMBI MOLTO,
@@ -274,42 +291,42 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
             vehicles = arrayOf(
                 Vehicle(
                     ResourcesCompat.getDrawable(resources, R.drawable.biplane, null)?.toBitmap()!!,
-                    7f, 3f, bitmaps[0].width, bitmaps[0].height, ppm, width + 20f, 20f, initial_speed
+                    7f, 3f, bitmaps[0].width, bitmaps[0].height, ppm, width + 20f, 20f, speed
                 ),
 
                 Vehicle(
                     ResourcesCompat.getDrawable(resources, R.drawable.dirigible_1, null)?.toBitmap()!!,
-                    20f, 8f, bitmaps[1].width, bitmaps[1].height, ppm, width + 20f + 20f, 20f, initial_speed
+                    20f, 8f, bitmaps[1].width, bitmaps[1].height, ppm, width + 20f + 20f, 20f, speed
                 ),
                 Vehicle(
                     ResourcesCompat.getDrawable(resources, R.drawable.dirigible_2, null)?.toBitmap()!!,
-                    20f, 8f, bitmaps[2].width, bitmaps[2].height, ppm, width + 20f + 20f, 20f, initial_speed
+                    20f, 8f, bitmaps[2].width, bitmaps[2].height, ppm, width + 20f + 20f, 20f, speed
                 ),
                 Vehicle(
                     ResourcesCompat.getDrawable(resources, R.drawable.dirigible_3, null)?.toBitmap()!!,
-                    20f, 8f, bitmaps[3].width, bitmaps[3].height, ppm, width + 20f + 20f, 20f, initial_speed
+                    20f, 8f, bitmaps[3].width, bitmaps[3].height, ppm, width + 20f + 20f, 20f, speed
                 ),
                 Vehicle(
                     ResourcesCompat.getDrawable(resources, R.drawable.dirigible_4, null)?.toBitmap()!!,
-                    20f, 8f, bitmaps[4].width, bitmaps[4].height, ppm, width + 20f + 20f, 20f, initial_speed
+                    20f, 8f, bitmaps[4].width, bitmaps[4].height, ppm, width + 20f + 20f, 20f, speed
                 ),
                 Vehicle(
                     ResourcesCompat.getDrawable(resources, R.drawable.dirigible_5, null)?.toBitmap()!!,
-                    20f, 8f, bitmaps[5].width, bitmaps[5].height, ppm, width + 20f + 20f, 20f, initial_speed
+                    20f, 8f, bitmaps[5].width, bitmaps[5].height, ppm, width + 20f + 20f, 20f, speed
                 ),
                 Vehicle(
                     ResourcesCompat.getDrawable(resources, R.drawable.dirigible_6, null)?.toBitmap()!!,
-                    20f, 8f, bitmaps[6].width, bitmaps[6].height, ppm, width + 20f + 20f, 20f, initial_speed
+                    20f, 8f, bitmaps[6].width, bitmaps[6].height, ppm, width + 20f + 20f, 20f, speed
                 ),
                 Vehicle(
                     ResourcesCompat.getDrawable(resources, R.drawable.dirigible_7, null)?.toBitmap()!!,
-                    20f, 8f, bitmaps[7].width, bitmaps[7].height, ppm, width + 20f + 20f, 20f, initial_speed
+                    20f, 8f, bitmaps[7].width, bitmaps[7].height, ppm, width + 20f + 20f, 20f, speed
                 ),
 
 
                 Vehicle(
                     ResourcesCompat.getDrawable(resources, R.drawable.ufo, null)?.toBitmap()!!,
-                    4f, 2f, bitmaps[8].width, bitmaps[8].height, ppm, width + 20f + 20f, 20f, initial_speed
+                    4f, 2f, bitmaps[8].width, bitmaps[8].height, ppm, width + 20f + 20f, 20f, speed
                 )
             )*/
 
@@ -357,7 +374,7 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
                         arrayOf(0.1f, 0f, 0.18f, 0f),          // Top left rect
                         arrayOf(0.47f, dp2px(32f), 0.63f, 0f)  // Top right rect
                     ),
-                    15f, 100f, width, height, ppm, width + 20f, height/5f, initial_speed
+                    15f, 100f, width, height, ppm, width + 20f, height*0.2f, speed
                 ),
                 Building(
                     "building_02",
@@ -367,7 +384,7 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
                         arrayOf(0.33f, dp2px(232f), 0.7f, 0f),   // Middle rect
                         arrayOf(0.47f, 0f, 0.56f, 0f)            // Top rect
                     ),
-                    10f, 90f, width, height, ppm, width + 20f, height/5f, initial_speed
+                    10f, 90f, width, height, ppm, width + 20f, height*0.2f, speed
                 ),
                 Building(
                     "building_03",
@@ -378,7 +395,7 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
                         arrayOf(0.29f, dp2px(70f), 0.68f, 0f),  // Middle rect
                         arrayOf(0.45f, 0f, 0.6f, 0f)            // Top rect
                     ),
-                    25f, 110f, width, height, ppm, width + 20f, height/5f, initial_speed
+                    25f, 110f, width, height, ppm, width + 20f, height*0.2f, speed
                 ),
                 Building(
                     "building_04",
@@ -389,7 +406,7 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
                         arrayOf(0.24f, dp2px(88f), 0.76f, 0f),  // Middle rect
                         arrayOf(0.32f, 0f, 0.68f, 0f)           // Top rect
                     ),
-                    30f, 90f, width, height, ppm, width + 20f, height/5f, initial_speed
+                    30f, 90f, width, height, ppm, width + 20f, height*0.2f, speed
                 ),
                 Building(
                     "building_05",
@@ -401,7 +418,7 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
                         arrayOf(0.78f, dp2px(112f), 0.9f, 0f),  // Middle right rect
                         arrayOf(0.34f, 0f, 0.75f, 0f)           // Top rect
                     ),
-                    35f, 60f, width, height, ppm, width + 20f, height/5f, initial_speed
+                    35f, 60f, width, height, ppm, width + 20f, height*0.2f, speed
                 ),
                 Building(
                     "building_06",
@@ -412,7 +429,7 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
                         arrayOf(0.53f, dp2px(175f), 0.87f, 0f), // Middle right rect
                         arrayOf(0.07f, 0f, 0.29f, 0f)           // Top rect
                     ),
-                    35f, 40f, width, height, ppm, width + 20f, height/5f, initial_speed
+                    35f, 40f, width, height, ppm, width + 20f, height*0.2f, speed
                 ),*/
                 Building(
                     "building_07",
@@ -421,60 +438,62 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
                         arrayOf(0f, dp2px(319f), 1f, 0f),       // Bottom rect
                         arrayOf(0f, dp2px(164f), 0.91f, 0f),    // Middle rect
                         arrayOf(0f, dp2px(140f), 0.22f, 0f),    // Left "triangle"
-                        arrayOf(0.7f, dp2px(140f), 0.91f, 0f),    // Right "triangle"
-                        arrayOf(0.31f, 0f, 0.4f, 0f)              // Top rect
+                        arrayOf(0.7f, dp2px(140f), 0.91f, 0f),  // Right "triangle"
+                        arrayOf(0.31f, 0f, 0.4f, 0f)               // Top rect
                     ),
-                    15f, 80f, width, height, ppm, width + 20f, height/5f, initial_speed
+                    //15f, 80f, width, height, ppm, width + 20f, height/5f, speed
+                    //15f, 80f, width, height, ppm, width + 3f*ppm, height/5f, speed
+                    15f, 80f, width, height, ppm, world_width + 3f, height*0.2f, speed // Measures in meters except pos_y
                 )/*,
                 Building(
                     "building_08",
                     ResourcesCompat.getDrawable(resources, R.drawable.building_08, null)?.toBitmap(width, height)!!,
-                    10f, 70f, width, height, ppm, width + 20f, height/5f, initial_speed
+                    10f, 70f, width, height, ppm, width + 20f, height*0.2f, speed
                 ),
                 Building(
                     "building_09",
                     ResourcesCompat.getDrawable(resources, R.drawable.building_09, null)?.toBitmap(width, height)!!,
-                    17f, 70f, width, height, ppm, width + 20f, height/5f, initial_speed
+                    17f, 70f, width, height, ppm, width + 20f, height/5f, speed
                 ),
                 Building(
                     "building_10",
                     ResourcesCompat.getDrawable(resources, R.drawable.building_10, null)?.toBitmap(width, height)!!,
-                    10f, 65f, width, height, ppm, width + 20f, height/5f, initial_speed
+                    10f, 65f, width, height, ppm, width + 20f, height/5f, speed
                 ),
                 Building(
                     "building_11",
                     ResourcesCompat.getDrawable(resources, R.drawable.building_11, null)?.toBitmap(width, height)!!,
-                    17f, 55f, width, height, ppm, width + 20f, height/5f, initial_speed
+                    17f, 55f, width, height, ppm, width + 20f, height/5f, speed
                 ),
                 Building(
                     "building_12",
                     ResourcesCompat.getDrawable(resources, R.drawable.building_12, null)?.toBitmap(width, height)!!,
-                    15f, 40f, width, height, ppm, width + 20f, height/5f, initial_speed
+                    15f, 40f, width, height, ppm, width + 20f, height/5f, speed
                 ),
                 Building(
                     "building_13",
                     ResourcesCompat.getDrawable(resources, R.drawable.building_13, null)?.toBitmap(width, height)!!,
-                    15f, 50f, width, height, ppm, width + 20f, height/5f, initial_speed
+                    15f, 50f, width, height, ppm, width + 20f, height/5f, speed
                 ),
                 Building(
                     "building_14",
                     ResourcesCompat.getDrawable(resources, R.drawable.building_14, null)?.toBitmap(width, height)!!,
-                    23f, 70f, width, height, ppm, width + 20f, height/5f, initial_speed
+                    23f, 70f, width, height, ppm, width + 20f, height/5f, speed
                 ),
                 Building(
                     "building_15",
                     ResourcesCompat.getDrawable(resources, R.drawable.building_15, null)?.toBitmap(width, height)!!,
-                    10f, 60f, width, height, ppm, width + 20f, height/5f, initial_speed
+                    10f, 60f, width, height, ppm, width + 20f, height/5f, speed
                 ),
                 Building(
                     "building_16",
                     ResourcesCompat.getDrawable(resources, R.drawable.building_16, null)?.toBitmap(width, height)!!,
-                    18f, 50f, width, height, ppm, width + 20f, height/5f, initial_speed
+                    18f, 50f, width, height, ppm, width + 20f, height/5f, speed
                 ),
                 Building(
                     "building_17",
                     ResourcesCompat.getDrawable(resources, R.drawable.building_17, null)?.toBitmap(width, height)!!,
-                    25f, 60f, width, height, ppm, width + 20f, height/5f, initial_speed
+                    25f, 60f, width, height, ppm, width + 20f, height/5f, speed
                 )*/
             )
 
@@ -504,93 +523,100 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
             buildings = arrayOf(
                 Vehicle(
                     ResourcesCompat.getDrawable(resources, R.drawable.building_01, null)?.toBitmap()!!,
-                    15f, 50f, bitmaps[0].width, bitmaps[0].height, ppm, width + 20f + 20f, height/5f, initial_speed
+                    15f, 50f, bitmaps[0].width, bitmaps[0].height, ppm, width + 20f + 20f, height/5f, speed
                 ),
                 Vehicle(
                     ResourcesCompat.getDrawable(resources, R.drawable.building_02, null)?.toBitmap()!!,
-                    10f, 60f, bitmaps[1].width, bitmaps[1].height, ppm, width + 20f + 20f, height/5f, initial_speed
+                    10f, 60f, bitmaps[1].width, bitmaps[1].height, ppm, width + 20f + 20f, height/5f, speed
                 ),
                 Vehicle(
                     ResourcesCompat.getDrawable(resources, R.drawable.building_03, null)?.toBitmap()!!,
-                    15f, 50f, bitmaps[2].width, bitmaps[2].height, ppm, width + 20f + 20f, height/5f, initial_speed
+                    15f, 50f, bitmaps[2].width, bitmaps[2].height, ppm, width + 20f + 20f, height/5f, speed
                 ),
                 Vehicle(
                     ResourcesCompat.getDrawable(resources, R.drawable.building_04, null)?.toBitmap()!!,
-                    15f, 30f, bitmaps[3].width, bitmaps[3].height, ppm, width + 20f + 20f, height/5f, initial_speed
+                    15f, 30f, bitmaps[3].width, bitmaps[3].height, ppm, width + 20f + 20f, height/5f, speed
                 ),
                 Vehicle(
                     ResourcesCompat.getDrawable(resources, R.drawable.building_05, null)?.toBitmap()!!,
-                    15f, 30f, bitmaps[4].width, bitmaps[4].height, ppm, width + 20f + 20f, height/5f, initial_speed
+                    15f, 30f, bitmaps[4].width, bitmaps[4].height, ppm, width + 20f + 20f, height/5f, speed
                 ),
                 Vehicle(
                     ResourcesCompat.getDrawable(resources, R.drawable.building_06, null)?.toBitmap()!!,
-                    15f, 30f, bitmaps[5].width, bitmaps[5].height, ppm, width + 20f + 20f, height/5f, initial_speed
+                    15f, 30f, bitmaps[5].width, bitmaps[5].height, ppm, width + 20f + 20f, height/5f, speed
                 ),
                 Vehicle(
                     ResourcesCompat.getDrawable(resources, R.drawable.building_07, null)?.toBitmap()!!,
-                    15f, 30f, bitmaps[6].width, bitmaps[6].height, ppm, width + 20f + 20f, height/5f, initial_speed
+                    15f, 30f, bitmaps[6].width, bitmaps[6].height, ppm, width + 20f + 20f, height/5f, speed
                 ),
                 Vehicle(
                     ResourcesCompat.getDrawable(resources, R.drawable.building_08, null)?.toBitmap()!!,
-                    15f, 30f, bitmaps[7].width, bitmaps[7].height, ppm, width + 20f + 20f, height/5f, initial_speed
+                    15f, 30f, bitmaps[7].width, bitmaps[7].height, ppm, width + 20f + 20f, height/5f, speed
                 ),
                 Vehicle(
                     ResourcesCompat.getDrawable(resources, R.drawable.building_09, null)?.toBitmap()!!,
-                    15f, 30f, bitmaps[8].width, bitmaps[8].height, ppm, width + 20f + 20f, height/5f, initial_speed
+                    15f, 30f, bitmaps[8].width, bitmaps[8].height, ppm, width + 20f + 20f, height/5f, speed
                 ),
                 Vehicle(
                     ResourcesCompat.getDrawable(resources, R.drawable.building_10, null)?.toBitmap()!!,
-                    15f, 30f, bitmaps[9].width, bitmaps[9].height, ppm, width + 20f + 20f, height/5f, initial_speed
+                    15f, 30f, bitmaps[9].width, bitmaps[9].height, ppm, width + 20f + 20f, height/5f, speed
                 ),
                 Vehicle(
                     ResourcesCompat.getDrawable(resources, R.drawable.building_11, null)?.toBitmap()!!,
-                    15f, 50f, bitmaps[10].width, bitmaps[10].height, ppm, width + 20f + 20f, height/5f, initial_speed
+                    15f, 50f, bitmaps[10].width, bitmaps[10].height, ppm, width + 20f + 20f, height/5f, speed
                 ),
                 Vehicle(
                     ResourcesCompat.getDrawable(resources, R.drawable.building_12, null)?.toBitmap()!!,
-                    15f, 30f, bitmaps[11].width, bitmaps[11].height, ppm, width + 20f + 20f, height/5f, initial_speed
+                    15f, 30f, bitmaps[11].width, bitmaps[11].height, ppm, width + 20f + 20f, height/5f, speed
                 ),
                 Vehicle(
                     ResourcesCompat.getDrawable(resources, R.drawable.building_13, null)?.toBitmap()!!,
-                    15f, 30f, bitmaps[12].width, bitmaps[12].height, ppm, width + 20f + 20f, height/2f, initial_speed
+                    15f, 30f, bitmaps[12].width, bitmaps[12].height, ppm, width + 20f + 20f, height/2f, speed
                 ),
                 Vehicle(
                     ResourcesCompat.getDrawable(resources, R.drawable.building_14, null)?.toBitmap()!!,
-                    15f, 30f, bitmaps[13].width, bitmaps[13].height, ppm, width + 20f + 20f, height/2f, initial_speed
+                    15f, 30f, bitmaps[13].width, bitmaps[13].height, ppm, width + 20f + 20f, height/2f, speed
                 ),
                 Vehicle(
                     ResourcesCompat.getDrawable(resources, R.drawable.building_15, null)?.toBitmap()!!,
-                    15f, 30f, bitmaps[14].width, bitmaps[14].height, ppm, width + 20f + 20f, height/2f, initial_speed
+                    15f, 30f, bitmaps[14].width, bitmaps[14].height, ppm, width + 20f + 20f, height/2f, speed
                 ),
                 Vehicle(
                     ResourcesCompat.getDrawable(resources, R.drawable.building_16, null)?.toBitmap()!!,
-                    15f, 30f, bitmaps[15].width, bitmaps[15].height, ppm, width + 20f + 20f, height/2f, initial_speed
+                    15f, 30f, bitmaps[15].width, bitmaps[15].height, ppm, width + 20f + 20f, height/2f, speed
                 ),
                 Vehicle(
                     ResourcesCompat.getDrawable(resources, R.drawable.building_17, null)?.toBitmap()!!,
-                    15f, 30f, bitmaps[16].width, bitmaps[16].height, ppm, width + 20f + 20f, height/2f, initial_speed
+                    15f, 30f, bitmaps[16].width, bitmaps[16].height, ppm, width + 20f + 20f, height/2f, speed
                 )
             )*/
 
 
 
 
-            heli_animation = arrayOf(
+            /*heli_animation = arrayOf(
                 ResourcesCompat.getDrawable(resources, R.drawable.heli_1_1, null)?.toBitmap(width, height)!!,
                 ResourcesCompat.getDrawable(resources, R.drawable.heli_1_2, null)?.toBitmap(width, height)!!,
                 ResourcesCompat.getDrawable(resources, R.drawable.heli_1_3, null)?.toBitmap(width, height)!!,
                 ResourcesCompat.getDrawable(resources, R.drawable.heli_1_4, null)?.toBitmap(width, height)!!
+            )*/
+
+            heli_animation = arrayOf(
+                ResourcesCompat.getDrawable(resources, R.drawable.heli_green_0, null)?.toBitmap(width, height)!!,
+                ResourcesCompat.getDrawable(resources, R.drawable.heli_green_1, null)?.toBitmap(width, height)!!,
+                ResourcesCompat.getDrawable(resources, R.drawable.heli_green_2, null)?.toBitmap(width, height)!!,
+                ResourcesCompat.getDrawable(resources, R.drawable.heli_green_3, null)?.toBitmap(width, height)!!
             )
 
 
             heli = heli_animation[0]
 
+            // USO SOLO ppm E NON ANCHE ppm_y PERCHÈ ALTRIMENTI DISTORCE L'IMMAGINE
             // From heli.width * heli_scale = heli_width * ppm
             heli_scale_x      = heli_width * ppm / heli.width
             heli_scale_y      = heli_height * ppm / heli.height
             heli_width_scaled  = heli.width * heli_scale_x
             heli_height_scaled = heli.height * heli_scale_y
-
 
             /*dirigible_scale_x      = dirigible_width * ppm / dirigible.width
             dirigible_scale_y      = dirigible_height * ppm / dirigible.height
@@ -602,9 +628,9 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
             ufo_width_scaled  = ufo.width * ufo_scale_x
             ufo_height_scaled = ufo.height * ufo_scale_y*/
 
-            radius *= ppm
+            /*radius *= ppm
             speed  *= ppm
-            g      *= ppm
+            g      *= ppm*/
 
 
             /*Log.d("ppm", "ppm: " + ppm)
@@ -617,8 +643,12 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
 
 
             // Set translation values
-            user_dx = 30f
-            user_dy = height / 2.5f
+            //user_dx = 30f
+            user_dy = height * 0.4f
+
+            // Set translation values converting from meters
+            user_dx *= ppm
+            //user_dy *= ppm_y
 
             /*dirigible_dx = width + dirigible_width + 20f
             dirigible_dy = 20f
@@ -629,6 +659,25 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
             pickBuilding()
             pickVehicle()
         }
+
+
+        // Compute time difference
+        val now = System.currentTimeMillis()
+        val dt: Float
+
+        // Check if this is the first call to onDraw (i.e. first frame)
+        if (previous == 0L)  dt = 0f
+        else                 dt = (now - previous) / 1000f
+
+        Log.d("TIME", "************")
+        Log.d("TIME", "previous: " + previous)
+        Log.d("TIME", "now: " + now)
+        Log.d("TIME", "dt: " + dt)
+        Log.d("TIME", "speed (m/s): " + speed)
+        Log.d("TIME", "speed (px/s): " + speed*ppm*dt)
+
+        previous = now
+
 
         // Draw background
         canvas?.drawBitmap(bg, 0f, 0f, null)
@@ -650,21 +699,106 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
         Log.d("COORD", "heli.height * heli_scale_y: " + heli.height * heli_scale_y)
         Log.d("COORD", "heli_height: " + heli_height)*/
 
-        user_dy += increment
+        //user_dy += last_gyroscope_input
 
+        // It's correct use ppm_y instead of ppm because if width is much larger than height
+        // 1 meter conversion in the width can be out of scale for the height
+        //user_dy += last_gyroscope_input * ppm_y
+
+        // É CORRETTO COSÌ DAL MOMENTO CHE PER CALCOLARE ppm USO IL MIN TRA LE 2 DIMENSIONI
+        user_dy += last_gyroscope_input * ppm
+
+        // Constrain the bitmap in the screen
         if (user_dy < 0)
             user_dy = 0f
         else if (user_dy + heli_height_scaled > height)
             user_dy = height.toFloat() - heli_height_scaled
 
+        // Constrain the rotation of the bitmap
+        if (last_gyroscope_input > 0 && heli_rotation <= 10f)
+            heli_rotation += 0.5f
+        else if (last_gyroscope_input < 0 && heli_rotation >= -8f)
+            heli_rotation -= 0.5f
+
         // Scale the bitmap
         heli_matrix.setScale(heli_scale_x, heli_scale_y)
+
+        // Rotate the bitmap
+        heli_matrix.postRotate(heli_rotation)
 
         // Put the bitmap on the left-center of the screen
         heli_matrix.postTranslate(user_dx, user_dy)
 
         canvas?.drawBitmap(heli, heli_matrix, null)
+
+        // Draw rotated rectangle
+        /*canvas?.save()
+        canvas?.rotate(heli_rotation, user_dx, user_dy)
         canvas?.drawRect(user_dx, user_dy, user_dx + heli_width_scaled, user_dy + heli_height_scaled, painter_stroke)
+        canvas?.restore()*/
+
+
+        user_rect.set( user_dx, user_dy, user_dx + heli_width_scaled, user_dy + heli_height_scaled )
+
+        // VARI TENTATIVI PER RUOTARE IL RECT DELLA BITMAP DELL'UTENTE SECONDO L'INCLINAZIONE DELLA BITMAP
+        // FINORA NESSUNA SOLUZIONE
+        //user_rect_matrix.postRotate(heli_rotation, user_dx, user_dy)
+        //user_rect_matrix.mapRect(user_rect)
+
+        //original image coords
+        /*val points = floatArrayOf(
+            user_dx, user_dy,                                          // left, top
+            user_dx + heli_width_scaled, user_dy,                      // right, top
+            user_dx + heli_width_scaled, user_dy + heli_height_scaled, // right, bottom
+            user_dx, user_dy + heli_height_scaled                      // left, bottom
+        )
+
+        val matrix = Matrix()
+        matrix.postRotate(heli_rotation, user_dx, user_dy)
+
+        //get the new edges coords
+        matrix.mapPoints(points)
+
+        //user_rect.set(points[0], points[1], points[4], points[5])
+        user_rect.set(points[0], points[3], points[4], points[5])*/
+
+
+        //user_rect.set( user_dx, user_dy, user_dx + heli_width_scaled, user_dy + heli_height_scaled )
+        //user_rect.set( user_dx, user_dy + heli_rotation*2.8f, user_dx + heli_width_scaled, user_dy + heli_height_scaled + heli_rotation*2.8f )
+
+        /*if (heli_rotation >= 0f)
+            user_rect.set( user_dx, user_dy, user_dx + heli_width_scaled, user_dy + heli_height_scaled )
+        else
+            user_rect.set( user_dx, user_dy + heli_rotation*2.8f, user_dx + heli_width_scaled, user_dy + heli_height_scaled + heli_rotation*2.8f )*/
+
+        // NON FUNZIONANO BENE QUESTE SOTTO
+        // With rotation matrix only for y
+        /*user_rect.set(
+            user_dx,
+            user_dx * sin(heli_rotation) + user_dy * cos(heli_rotation),
+            user_dx + heli_width_scaled,
+            (user_dx + heli_width_scaled) * sin(heli_rotation) + (user_dy + heli_height_scaled) * cos(heli_rotation)
+        )*/
+
+        //val rad = ((heli_rotation * Math.PI) / 180f).toFloat()
+
+        // With rotation matrix only for y
+        /*user_rect.set(
+            user_dx,
+            user_dx * sin(rad) + user_dy * cos(rad),
+            user_dx + heli_width_scaled,
+            (user_dx + heli_width_scaled) * sin(rad) + (user_dy + heli_height_scaled) * cos(rad)
+        )*/
+
+        // With rotation matrix
+        /*user_rect.set(
+            user_dx * cos(rad) - user_dy * sin(rad),
+            user_dx * sin(rad) + user_dy * cos(rad),
+            (user_dx + heli_width_scaled) * cos(rad) - (user_dy + heli_height_scaled) * sin(rad),
+            (user_dx + heli_width_scaled) * sin(rad) + (user_dy + heli_height_scaled) * cos(rad)
+        )*/
+
+        canvas?.drawRect(user_rect, painter_stroke)
 
 
         // Scale the bitmap
@@ -709,8 +843,8 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
 
 
         // AGGIORNAMENTO CON VEHICLE UPDATE
-        vehicle?.update()
-        canvas?.drawBitmap(vehicle!!.getBitmap(), vehicle!!.getMatrix(), null)
+        vehicle.update(dt)
+        canvas?.drawBitmap(vehicle.getBitmap(), vehicle.getMatrix(), null)
         /*canvas?.drawRect(
             vehicle!!.getX(),
             vehicle!!.getY(),
@@ -718,12 +852,12 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
             vehicle!!.getY() + vehicle!!.getBitmapScaledHeight(),
             painter_stroke)*/
 
-        val bound = vehicle!!.getBounds()
+        val bound = vehicle.getBounds()
         for (rect in bound)
             canvas?.drawRect(rect, painter_stroke)
 
         // Check if the vehicle has been respawn
-        if (vehicle!!.isRespawn())
+        if (vehicle.isRespawn())
             pickVehicle()
 
 
@@ -742,8 +876,8 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
 
 
         // AGGIORNAMENTO CON VEHICLE UPDATE
-        building.update()
-        building.setX(10f)
+        building.update(dt)
+        //building.setX(10f)
         canvas?.drawBitmap(building.getBitmap(), building.getMatrix(), null)
 
         //canvas?.drawRect(building.getX(), building.getY(),
@@ -768,25 +902,13 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
         }
 
 
-        // Compute time difference
-        val now = System.currentTimeMillis()
-        val dt: Long
 
-        // Check if this is the first call to onDraw (i.e. first frame)
-        if (previous == 0L)  dt = 0L
-        else                 dt = now - previous
+        // s = v * dt  in m/s
+        score += speed * dt
 
-        /*Log.d("TIME", "************")
-        Log.d("TIME", "previous: " + previous)
-        Log.d("TIME", "now: " + now)
-        Log.d("TIME", "dt: " + dt)*/
-
-        previous = now
-
-        //Log.d("TIME", "initial_speed * dt / 1000f: " + initial_speed * dt / 1000f)
-
-        // s = v * dt  tutto in m/s
-        score += initial_speed * dt / 1000
+        // Since the score is updated to slowly using m/s,
+        // I speeded it up
+        //score += speed * 6 * dt
 
         canvas?.drawText("SCORE " + score.toLong(), 20f, 60f, painter_fill)
 
@@ -834,7 +956,7 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
     }
 
     // Convert density indipendent pixels into screen pixels
-    fun dp2px(dp: Float): Float {
+    private fun dp2px(dp: Float): Float {
         return resources.displayMetrics.density * dp
     }
 
@@ -842,34 +964,40 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
     private fun pickBuilding() {
         building = buildings.random()
 
-        // Height range height/1.3f .. height/5f
-        //val r = ((13..50).random() / 10).toFloat()
-        val r = 5f
+        // Height range height*0.2 .. height*0.76 = from 20% to 76% of the screen height
+        // Remember that 0% = top and 100% = bottom
+        val r = (20..76).random() / 100f
+        //val r = 0.2f
 
-        building.setY(height/r)
+        building.setY(height*r)
 
         // Increase the distance between obstacles if the height of
         // the building is greater than a threshold
-        if (r > 3.5f && vehicle != null && building.getX() - vehicle!!.getX() < heli_width_scaled * 2f)
-            building.setX(width + vehicle!!.getBitmapScaledWidth() + heli_width_scaled * 2f)
+        if (r > 3.5f && building.getX() - vehicle.getX() < heli_width_scaled * 2f)
+            building.setX(width + vehicle.getBitmapScaledWidth() + heli_width_scaled * 2f)
     }
 
     // Pick a random vehicle and set a random height for it
     private fun pickVehicle() {
         vehicle = vehicles.random()
 
+        // Height range height*0 .. height*0.2 = from 0% to 20% of the screen height
+        // Remember that 0% = top and 100% = bottom
+        val r = (0..20).random() / 100f
+        vehicle.setY(height*r)
+
         // Increase the distance between obstacles if the height of
         // the building is greater than a threshold
-        if (building.getY() > height/3.5f && vehicle!!.getX() - building.getX() < heli_width_scaled * 2f)
-            vehicle!!.setX(width + building.getBitmapScaledWidth() + heli_width_scaled * 2f)
+        if (building.getY() > height/3.5f && vehicle.getX() - building.getX() < heli_width_scaled * 2f)
+            vehicle.setX(width + building.getBitmapScaledWidth() + heli_width_scaled * 2f)
     }
 
     // Check if the user collides with an obstacle
     private fun checkCollision(): Boolean { return false
-        user_rect.set( user_dx, user_dy, user_dx + heli_width_scaled, user_dy + heli_height_scaled )
+        //user_rect.set( user_dx, user_dy, user_dx + heli_width_scaled, user_dy + heli_height_scaled )
 
         val rects = building.getBounds()
-        rects.addAll(vehicle!!.getBounds())
+        rects.addAll(vehicle.getBounds())
 
         for (r in rects)
             if (RectF.intersects(user_rect, r))
@@ -942,16 +1070,16 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
         }
 
 
-        if (lastGyroscope[0] > 0) {
-            increment = Math.max(1f, Math.min(lastGyroscope[0] * 15, 15f))
-        }
-        else if (lastGyroscope[0] < 0) {
-            increment = Math.min(-1f, Math.max(lastGyroscope[0] * 15, -15f))
-        }
+        if (lastGyroscope[0] > 0)
+        //last_gyroscope_input = Math.max(1f, Math.min(lastGyroscope[0] * 15, 15f))
+            last_gyroscope_input = max(1f, min(lastGyroscope[0] * 1, 15f))
+        else if (lastGyroscope[0] < 0)
+        //last_gyroscope_input = Math.min(-1f, Math.max(lastGyroscope[0] * 15, -15f))
+            last_gyroscope_input = min(-1f, max(lastGyroscope[0] * 1, -15f))
 
         /*Log.d("SENSOR", "****************")
         Log.d("SENSOR", "value: " + lastGyroscope[0])
-        Log.d("SENSOR", "increment: " + increment)*/
+        Log.d("SENSOR", "last_gyroscope_input: " + last_gyroscope_input)*/
 
         invalidate()
     }

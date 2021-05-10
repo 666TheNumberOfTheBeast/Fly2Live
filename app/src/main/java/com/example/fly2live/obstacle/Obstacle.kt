@@ -6,7 +6,7 @@ import android.graphics.Matrix
 abstract class Obstacle(name: String,
                         bitmap: Bitmap,
                         width: Float, height: Float,
-                        screen_width: Int, screen_height: Int, ppm: Int,
+                        screen_width: Int, screen_height: Int, ppm: Float,
                         pos_x: Float, pos_y: Float, speed: Float) {
 
     private val name: String
@@ -16,6 +16,8 @@ abstract class Obstacle(name: String,
 
     private val screen_width: Int
     private val screen_height: Int
+
+    private val ppm: Float
 
     private var bitmap_scale_x: Float
     private var bitmap_scale_y: Float
@@ -28,6 +30,7 @@ abstract class Obstacle(name: String,
     private var speed: Float
 
     private var respawn = false
+    private val respawn_pos_x: Float
 
     init {
         this.name = name
@@ -38,16 +41,23 @@ abstract class Obstacle(name: String,
         this.screen_width  = screen_width
         this.screen_height = screen_height
 
+        this.ppm = ppm
+
         bitmap_scale_x = width * ppm / screen_width
         bitmap_scale_y = height * ppm / screen_height
 
         bitmap_width_scaled  = screen_width * bitmap_scale_x
         bitmap_height_scaled = screen_height * bitmap_scale_y
 
-        this.pos_x = pos_x
+        //this.pos_x = pos_x
         this.pos_y = pos_y
+        this.pos_x = pos_x * ppm
+        //this.pos_y = pos_y * ppm
 
-        this.speed = speed
+        //this.speed = speed
+        this.speed = speed * ppm
+
+        respawn_pos_x = screen_width + ppm
     }
 
     // Getters
@@ -110,19 +120,24 @@ abstract class Obstacle(name: String,
     }
 
     fun setSpeed(speed: Float) {
-        this.speed = speed
+        //this.speed = speed
+        this.speed = speed * ppm
     }
 
     // Update UI
-    open fun update() {
+    open fun update(dt: Float) {
         matrix.setScale(bitmap_scale_x, bitmap_scale_y)
         matrix.postTranslate(pos_x, pos_y)
 
-        pos_x -= speed
+        // CON QUESTA VERSIONE NON LAGGA MAI PERCHÈ NON USO dt
+        //pos_x -= speed
+        // CON QUESTA VERSIONE POTREBBE LAGGARE UN PO' PERCHÈ dt NON È COSTANTE
+        pos_x -= speed * dt
 
         if (pos_x + bitmap_width_scaled < 0) {
             //pos_x = screen_width + bitmap_width_scaled
-            pos_x = screen_width + 20f
+            //pos_x = screen_width + 20f
+            pos_x = respawn_pos_x
             respawn = true
         }
         else

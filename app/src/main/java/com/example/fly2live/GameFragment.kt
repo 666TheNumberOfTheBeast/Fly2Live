@@ -19,8 +19,12 @@ class GameFragment : Fragment() {
         gameView = GameView(context)
 
         // Load soundtrack
-        soundtrack = MediaPlayer.create(context, R.raw.soundtrack)
+        soundtrack = MediaPlayer.create(context, R.raw.soundtrack_gameplay)
         soundtrack?.setOnPreparedListener { mp ->
+            // Stop main soundtrack
+            (activity as MainActivity).stopMainSoundtrack()
+
+            // Start gameplay soundtrack
             mp.isLooping = true
             mp.start()
         }
@@ -29,18 +33,18 @@ class GameFragment : Fragment() {
         return GameView(context)
     }
 
-    public fun gameOver() {
+    fun gameOver() {
         if (soundtrack != null && soundtrack!!.isPlaying)
             soundtrack!!.pause()
 
         findNavController().navigate(R.id.action_gameFragment_to_gameOverFragment)
     }
 
-    /*override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        //findNavController().popBackStack( R.id.loadingFragment, true)
-    }*/
+        findNavController().popBackStack(R.id.loadingFragment, true)
+    }
 
 
     override fun onStart() {

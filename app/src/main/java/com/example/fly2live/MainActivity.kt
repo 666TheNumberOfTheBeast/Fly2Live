@@ -1,11 +1,21 @@
 package com.example.fly2live
 
 
+import android.media.MediaPlayer
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.WindowManager
+import android.widget.Toast
+import java.io.IOException
+import androidx.core.app.ComponentActivity.ExtraData
+import androidx.core.content.ContextCompat.getSystemService
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+import android.net.Uri
+
 
 class MainActivity : AppCompatActivity() {
+    private var soundtrack: MediaPlayer? = null
+    private var play_soundtrack: Boolean = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -14,6 +24,13 @@ class MainActivity : AppCompatActivity() {
         //setSupportActionBar(toolbar)
 
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
+        // Load soundtrack for all fragments
+        soundtrack = MediaPlayer.create(this, R.raw.soundtrack_main)
+        soundtrack?.setOnPreparedListener { mp ->
+            mp.isLooping = true
+            mp.start()
+        }
     }
 
     /*override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -31,6 +48,44 @@ class MainActivity : AppCompatActivity() {
             else -> super.onOptionsItemSelected(item)
         }
     }*/
+
+    // Play soundtrack mediaplayer
+    private fun play() {
+        if (soundtrack != null && !soundtrack!!.isPlaying)
+            soundtrack!!.start()
+    }
+
+    // Stop soundtrack mediaplayer
+    private fun stop() {
+        if (soundtrack != null && soundtrack!!.isPlaying)
+            soundtrack!!.pause()
+    }
+
+    // Play soundtrack (function for handling audio from fragments)
+    fun startMainSoundtrack() {
+        play_soundtrack = true
+        play()
+    }
+
+    // Stop soundtrack(function for handling audio from fragments)
+    fun stopMainSoundtrack() {
+        play_soundtrack = false
+        stop()
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        if (play_soundtrack)
+            play()
+
+    }
+
+    override fun onStop() {
+        stop()
+
+        super.onStop()
+    }
 
 }
 

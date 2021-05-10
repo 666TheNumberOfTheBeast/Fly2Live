@@ -11,6 +11,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.SignInButton
 import android.content.Intent
 import android.content.res.Configuration
+import android.media.MediaPlayer
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -18,6 +19,14 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.newSingleThreadContext
+import android.R.attr.start
+import android.os.Handler
+import android.os.Looper
+import java.lang.Thread.sleep
 
 
 class LoginFragment : Fragment() {
@@ -53,7 +62,7 @@ class LoginFragment : Fragment() {
         }
 
         val signInButton = view.findViewById<SignInButton>(R.id.button_sign_in)
-        signInButton.setSize(SignInButton.SIZE_STANDARD);
+        signInButton.setSize(SignInButton.SIZE_STANDARD)
 
         signInButton.setOnClickListener{
             //signIn()

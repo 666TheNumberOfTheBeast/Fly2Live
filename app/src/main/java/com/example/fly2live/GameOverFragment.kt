@@ -17,8 +17,12 @@ class GameOverFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Load game over sound
-        game_over_sound = MediaPlayer.create(context, R.raw.game_over)
+        game_over_sound = MediaPlayer.create(context, R.raw.soundtrack_game_over)
         game_over_sound?.setOnPreparedListener { mp ->
+            // Stop main soundtrack
+            (activity as MainActivity).stopMainSoundtrack()
+
+            // Start game over soundtrack
             mp.start()
         }
 

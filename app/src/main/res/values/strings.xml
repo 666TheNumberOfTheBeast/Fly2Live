@@ -23,8 +23,15 @@
     <string name="value">Value</string>
 
     <!-- Loading fragment -->
-    <string name="connecting">Connecting to the server…</string>
-    <string name="waiting">Waiting an adversary…</string>
+    <string name="msg_connecting">Connecting to the server…</string>
+    <string name="msg_bad_request">Bad Request</string>
+    <string name="msg_searching_adv">Searching an adversary…</string>
+    <string name="msg_found_adv">Adversary found…</string>
+    <string name="msg_prepare">Preparing the game…</string>
+    <!--<string name="msg_game_start">Game started</string>
+    <string name="msg_gameplay">Gameplay</string>
+    <string name="msg_game_end">Game ended</string>-->
+    <string name="msg_server_busy">Server busy, wait…</string>
 
     <!-- Game Over fragment -->
     <string name="game_over">GAME OVER</string>

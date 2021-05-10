@@ -14,9 +14,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.navigation.fragment.findNavController
 
-// VERSIONE CON SOCKETS
-import com.example.fly2live.configuration.Configuration.Companion.HOST
-import com.example.fly2live.configuration.Configuration.Companion.PORT
 
 // VERSIONE CON VOLLEY E POLLING
 import com.android.volley.Request
@@ -28,7 +25,6 @@ import com.example.fly2live.configuration.Configuration.Companion.PLAYER_ID
 import com.example.fly2live.configuration.Configuration.Companion.NEW_GAME
 import com.example.fly2live.configuration.Configuration.Companion.POLLING
 import com.example.fly2live.configuration.Configuration.Companion.URL
-import com.example.fly2live.configuration.Configuration.Companion.POLLING_PERIOD
 import io.socket.client.IO
 import io.socket.client.Socket
 import io.socket.emitter.Emitter
@@ -36,20 +32,26 @@ import kotlinx.android.synthetic.main.fragment_loading.*
 import org.json.JSONObject
 import java.net.URISyntaxException
 import org.json.JSONException
-import android.app.Activity
 import android.content.res.Resources
-import android.util.DisplayMetrics
-
-
-
-
-
+import androidx.activity.addCallback
+import androidx.lifecycle.lifecycleScope
+import com.example.fly2live.configuration.Configuration.Companion.MSG_CODE_BAD_REQ
+import com.example.fly2live.configuration.Configuration.Companion.MSG_CODE_FOUND_ADV
+import com.example.fly2live.configuration.Configuration.Companion.MSG_CODE_GAMEPLAY
+import com.example.fly2live.configuration.Configuration.Companion.MSG_CODE_GAME_END
+import com.example.fly2live.configuration.Configuration.Companion.MSG_CODE_GAME_START
+import com.example.fly2live.configuration.Configuration.Companion.MSG_CODE_PREPARE
+import com.example.fly2live.configuration.Configuration.Companion.MSG_CODE_SEARCHING_ADV
+import com.example.fly2live.configuration.Configuration.Companion.MSG_CODE_SERVER_BUSY
+import io.socket.engineio.client.transports.WebSocket
+import kotlinx.coroutines.Runnable
 
 
 // Fragment shown only if multiplayer mode
 class LoadingFragment : Fragment() {
     private lateinit var textView: TextView
     //private lateinit var queue:RequestQueue
+    private var searching = false
     private var found = false
 
     private lateinit var mSocket: Socket
@@ -69,23 +71,7 @@ class LoadingFragment : Fragment() {
 
         // VERSIONE CON SOCKETS
         // Connect to server and set ID
-        val res = connect()
-        if (!res)
-            return
-
-        Log.d("json", "connected to server? " + mSocket.connected())
-        Log.d("json", "is socket active? " + mSocket.isActive())
-
-        textView.text = "Connected to the server"
-
-        // Get screen width and height
-        val displayMetrics = Resources.getSystem().displayMetrics
-        val screen_width  = displayMetrics.widthPixels
-        val screen_height = displayMetrics.heightPixels
-
-        textView.text = "Searching a game"
-
-        searchGame(screen_width, screen_height)
+        connect()
 
 
 
@@ -98,16 +84,63 @@ class LoadingFragment : Fragment() {
 
 
     // Connect to server with socket.io
-    private fun connect(): Boolean {
+    private fun connect() {
+        // Force websocket
+        val options = IO.Options.builder()
+            .setTransports(arrayOf(WebSocket.NAME))
+            .build()
+
         try {
-            mSocket = IO.socket(URL)
-            mSocket.connect()
-            return true
+            mSocket = IO.socket(URL, options)
         } catch (e: URISyntaxException) {
-            Toast.makeText(context, "Error in connecting to the server", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Error in connecting to the server: bad URL", Toast.LENGTH_SHORT).show()
             goBack()
-            return false
         }
+
+        mSocket.connect()
+
+        mSocket.on(Socket.EVENT_CONNECT, Emitter.Listener() { args ->
+            Log.d("json", "connected to the server")
+            Log.d("json", "socket ID: " + mSocket.id()) // sid (e.g. x8WIv7-mJelg7on_ALbx)
+
+            searching = true
+            activity?.runOnUiThread(Runnable {
+                // Get screen width and height
+                val displayMetrics = Resources.getSystem().displayMetrics
+                val screen_width  = displayMetrics.widthPixels
+                val screen_height = displayMetrics.heightPixels
+
+                //textView.text = getString(R.string.searching)
+
+                searchGame(screen_width, screen_height)
+            })
+
+            requireActivity().onBackPressedDispatcher.addCallback(this) {
+               goBack()
+            }
+        })
+
+        mSocket.on(Socket.EVENT_CONNECT_ERROR, Emitter.Listener() { args ->
+            /*activity?.runOnUiThread(Runnable {
+                Toast.makeText(context, "Error in connecting to the server", Toast.LENGTH_SHORT).show()
+            })
+            goBack()*/
+
+            activity?.runOnUiThread(Runnable {
+                // Create Toast outside the looper to avoid crashes due to bad context
+                val toast = Toast.makeText(context, "Error in connecting to the server", Toast.LENGTH_SHORT)
+
+                // Delay action for a better UX
+                Handler(Looper.myLooper()!!).postDelayed({
+                    toast.show()
+                    goBack()
+                }, 1000)
+            })
+        })
+
+        mSocket.on(Socket.EVENT_DISCONNECT, Emitter.Listener() { args ->
+            Log.d("json", "disconnected from the server")
+        })
     }
 
     private fun searchGame(screen_width: Int, screen_height: Int) {
@@ -121,15 +154,15 @@ class LoadingFragment : Fragment() {
 
 
         mSocket.on("new game response", Emitter.Listener { args ->
-            activity!!.runOnUiThread(Runnable {
+            activity?.runOnUiThread(Runnable {
                 Log.d("json", "response arrived")
                 val data = args[0] as JSONObject
                 val error: Boolean
-                val message: String
+                val message_code: Int
 
                 try {
-                    error   = data.getBoolean("error")
-                    message = data.getString("message")
+                    error        = data.getBoolean("error")
+                    message_code = data.getInt("msg_code")
                 } catch (e: JSONException) {
                     return@Runnable
                 }
@@ -139,18 +172,52 @@ class LoadingFragment : Fragment() {
                     goBack()
                 }
                 else
-                    textView.text = message
+                    textView.text = toMessage(message_code)
 
-                if (message.equals("OPPONENT FOUND")) {
+                /*if (message_code == MSG_CODE_GAME_START) {
                     findNavController().navigate(R.id.action_loadingFragment_to_gameFragment)
-                }
+                }*/
             })
         })
     }
 
     private fun goBack() {
-        Handler(Looper.myLooper()!!).postDelayed({ findNavController().navigateUp() }, 1000)
+        // Remove all listeners (for any event)
+        mSocket.off()
+
+        // Disconnect the socket
+        mSocket.disconnect()
+
+        // Go to previous fragment using a coroutine tied to the fragment lifecycle
+        // in order to avoid crashes
+        lifecycleScope.launchWhenResumed {
+            // Attempt to pop the controller's back stack back to a specific destination
+            // in order to avoid to double go back if the user goes back
+            findNavController().popBackStack(R.id.mainFragment, false)
+        }
     }
+
+    private fun toMessage(msg_code: Int): String {
+        when (msg_code) {
+            MSG_CODE_BAD_REQ       -> return getString(R.string.msg_bad_request)
+            MSG_CODE_SEARCHING_ADV -> return getString(R.string.msg_searching_adv)
+            MSG_CODE_FOUND_ADV     -> return getString(R.string.msg_found_adv)
+            MSG_CODE_PREPARE       -> return getString(R.string.msg_prepare)
+            /*MSG_CODE_GAME_START    -> return getString(R.string.msg_game_start)
+            MSG_CODE_GAMEPLAY      -> return getString(R.string.msg_gameplay)
+            MSG_CODE_GAME_END      -> return getString(R.string.msg_game_end)*/
+            MSG_CODE_SERVER_BUSY   -> return getString(R.string.msg_server_busy)
+        }
+
+        return ""
+    }
+
+
+
+
+
+
+
 
 
 // Connect to server with standard sockets

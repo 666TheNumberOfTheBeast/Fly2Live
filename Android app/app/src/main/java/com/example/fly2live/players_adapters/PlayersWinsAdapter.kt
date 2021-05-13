@@ -40,10 +40,18 @@ class PlayersWinsAdapter(players: ArrayList<Player>) :
             playerWinPercentageView.text  = player.getWinPercentage()
 
             // Interleave color of each row
-            if (player.getPosition() % 2 == 0)
+            /*if (player.getPosition() % 2 == 0)
                 setBackground(ContextCompat.getColor(context, R.color.blue_bg))
             else
-                setBackground(ContextCompat.getColor(context, R.color.red_bg))//*/
+                setBackground(ContextCompat.getColor(context, R.color.red_bg))*/
+
+            // Set top 3 colors
+            when (player.getPosition()) {
+                1 -> setTextColor(ContextCompat.getColor(context, R.color.gold))
+                2 -> setTextColor(ContextCompat.getColor(context, R.color.silver))
+                3 -> setTextColor(ContextCompat.getColor(context, R.color.bronze))
+                else -> setTextColor(ContextCompat.getColor(context, R.color.green))
+            }
         }
 
         private fun setBackground(colorID: Int) {
@@ -52,6 +60,14 @@ class PlayersWinsAdapter(players: ArrayList<Player>) :
             playerWinsCell.setBackgroundColor(colorID)
             playerLosesCell.setBackgroundColor(colorID)
             playerWinPercentageCell.setBackgroundColor(colorID)
+        }
+
+        private fun setTextColor(colorID: Int) {
+            playerPositionView.setTextColor(colorID)
+            playerNameView.setTextColor(colorID)
+            playerWinsView.setTextColor(colorID)
+            playerLosesView.setTextColor(colorID)
+            playerWinPercentageView.setTextColor(colorID)
         }
 
     }

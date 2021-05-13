@@ -33,11 +33,15 @@ class GameFragment : Fragment() {
         return GameView(context)
     }
 
-    fun gameOver() {
+    fun gameOver(score: Long, winner: Boolean) {
         if (soundtrack != null && soundtrack!!.isPlaying)
             soundtrack!!.pause()
 
-        findNavController().navigate(R.id.action_gameFragment_to_gameOverFragment)
+        val bundle = Bundle()
+        bundle.putLong("score", score)
+        bundle.putBoolean("winner", winner)
+
+        findNavController().navigate(R.id.action_gameFragment_to_gameOverFragment, bundle)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

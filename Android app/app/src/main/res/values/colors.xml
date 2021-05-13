@@ -4,9 +4,19 @@
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
 
+    <!-- Text color for cockpit screens -->
+    <color name="green">#00FF00</color>
+
+    <!-- Text colors for stats podium -->
+    <color name="gold">#d4af37</color>
     <color name="silver">#C0C0C0</color>
+    <color name="bronze">#cd7f32</color>
+
+    <!-- Background colors for stats screen -->
     <color name="orange_bg">#4DFFA500</color>
     <color name="green_bg">#4D00FF00</color>
     <color name="red_bg">#4DFF0000</color>
     <color name="blue_bg">#4D0000FF</color>
+
+    <color name="dark_green_bg">#2b472b</color>
 </resources>

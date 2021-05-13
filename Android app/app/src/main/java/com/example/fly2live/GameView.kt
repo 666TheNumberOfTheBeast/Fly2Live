@@ -894,11 +894,8 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
         if (checkCollision()) {
             game_over = true
 
-            //val activity = context as MainActivity
-            //activity.gameOver()
-
             val fragment = findFragment<GameFragment>()
-            fragment.gameOver()
+            fragment.gameOver(score.toLong(), false)
         }
 
 
@@ -993,7 +990,7 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
     }
 
     // Check if the user collides with an obstacle
-    private fun checkCollision(): Boolean { return false
+    private fun checkCollision(): Boolean { //return false
         //user_rect.set( user_dx, user_dy, user_dx + heli_width_scaled, user_dy + heli_height_scaled )
 
         val rects = building.getBounds()

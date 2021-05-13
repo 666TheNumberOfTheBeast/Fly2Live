@@ -86,8 +86,7 @@
         app:layout_constraintHorizontal_weight="0.25" />-->
 
     <!-- CON COLORI COLONNE-->
-
-    <LinearLayout
+    <!--<LinearLayout
         android:id="@+id/player_position_cell"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -201,6 +200,119 @@
             android:text="0.631"
             android:textSize="14sp"
             android:textColor="@color/silver" />
+    </LinearLayout>-->
+
+
+    <!-- SENZA COLORI COLONNE-->
+    <LinearLayout
+        android:id="@+id/player_position_cell"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/player_name_cell"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintHorizontal_weight="0.15" >
+
+        <TextView
+            android:id="@+id/player_position"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:fontFamily="@font/audiowide"
+            android:text="1"
+            android:textSize="14sp"
+            android:textColor="@color/green" />
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:id="@+id/player_name_cell"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="@id/player_position_cell"
+        app:layout_constraintEnd_toStartOf="@id/W_cell"
+        app:layout_constraintStart_toEndOf="@id/player_position_cell"
+        app:layout_constraintTop_toTopOf="@id/player_position_cell"
+        app:layout_constraintHorizontal_weight="0.43" >
+
+        <TextView
+            android:id="@+id/player_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:fontFamily="@font/audiowide"
+            android:text="player_name"
+            android:textSize="14sp"
+            android:textColor="@color/green" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/W_cell"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="3dp"
+        app:layout_constraintBottom_toBottomOf="@id/player_name_cell"
+        app:layout_constraintEnd_toStartOf="@id/L_cell"
+        app:layout_constraintStart_toEndOf="@id/player_name_cell"
+        app:layout_constraintTop_toTopOf="@id/player_name_cell"
+        app:layout_constraintHorizontal_weight="0.16" >
+
+        <TextView
+            android:id="@+id/W"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:fontFamily="@font/audiowide"
+            android:text="175"
+            android:textSize="14sp"
+            android:textColor="@color/green" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/L_cell"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="3dp"
+        app:layout_constraintBottom_toBottomOf="@id/W_cell"
+        app:layout_constraintEnd_toStartOf="@id/win_percentage_cell"
+        app:layout_constraintStart_toEndOf="@id/W_cell"
+        app:layout_constraintTop_toTopOf="@id/W_cell"
+        app:layout_constraintHorizontal_weight="0.16" >
+
+        <TextView
+            android:id="@+id/L"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:fontFamily="@font/audiowide"
+            android:text="134"
+            android:textSize="14sp"
+            android:textColor="@color/green" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/win_percentage_cell"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="3dp"
+        android:layout_marginEnd="10dp"
+        app:layout_constraintBottom_toBottomOf="@id/L_cell"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/L_cell"
+        app:layout_constraintTop_toTopOf="@id/L_cell"
+        app:layout_constraintHorizontal_weight="0.25" >
+
+        <TextView
+            android:id="@+id/win_percentage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:fontFamily="@font/audiowide"
+            android:text="0.631"
+            android:textSize="14sp"
+            android:textColor="@color/green" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

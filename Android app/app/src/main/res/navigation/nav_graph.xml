@@ -63,9 +63,9 @@
 
     <fragment
         android:id="@+id/gameOverFragment"
-        android:name="com.example.fly2live.GameOverFragment"
+        android:name="com.example.fly2live.GameEndFragment"
         android:label="fragment_game_over"
-        tools:layout="@layout/fragment_game_over">
+        tools:layout="@layout/fragment_game_end">
         <action
             android:id="@+id/action_gameOverFragment_to_gameFragment"
             app:destination="@id/gameFragment"

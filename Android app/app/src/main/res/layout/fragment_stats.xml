@@ -7,7 +7,7 @@
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".StatsFragment"
     android:id="@+id/layout"
-    android:background="@android:color/black" >
+    android:background="@drawable/gradient" >
 
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/pager"

@@ -17,13 +17,13 @@ class PlayersScoresAdapter(players: ArrayList<Player>) :
     private val data = players
 
     class PlayerScoresViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val playerPositionView       = itemView.findViewById<TextView>(R.id.player_position)
-        private val playerNameView           = itemView.findViewById<TextView>(R.id.player_name)
-        private val playerValueView           = itemView.findViewById<TextView>(R.id.value)
+        private val playerPositionView = itemView.findViewById<TextView>(R.id.player_position)
+        private val playerNameView     = itemView.findViewById<TextView>(R.id.player_name)
+        private val playerValueView    = itemView.findViewById<TextView>(R.id.value)
 
-        private val playerPositionCell      = itemView.findViewById<LinearLayout>(R.id.player_position_cell)
-        private val playerNameCell          = itemView.findViewById<LinearLayout>(R.id.player_name_cell)
-        private val playerValueCell          = itemView.findViewById<LinearLayout>(R.id.value_cell)
+        private val playerPositionCell = itemView.findViewById<LinearLayout>(R.id.player_position_cell)
+        private val playerNameCell     = itemView.findViewById<LinearLayout>(R.id.player_name_cell)
+        private val playerValueCell    = itemView.findViewById<LinearLayout>(R.id.value_cell)
 
         private val context = itemView.context
 
@@ -33,16 +33,30 @@ class PlayersScoresAdapter(players: ArrayList<Player>) :
             playerValueView.text          = player.getBestScore().toString()
 
             // Interleave color of each row
-            if (player.getPosition() % 2 == 0)
+            /*if (player.getPosition() % 2 == 0)
                 setBackground(ContextCompat.getColor(context, R.color.green_bg))
             else
-                setBackground(ContextCompat.getColor(context, R.color.orange_bg))//*/
+                setBackground(ContextCompat.getColor(context, R.color.orange_bg))*/
+
+            // Set top 3 colors
+            when (player.getPosition()) {
+                1 -> setTextColor(ContextCompat.getColor(context, R.color.gold))
+                2 -> setTextColor(ContextCompat.getColor(context, R.color.silver))
+                3 -> setTextColor(ContextCompat.getColor(context, R.color.bronze))
+                else -> setTextColor(ContextCompat.getColor(context, R.color.green))
+            }
         }
 
         private fun setBackground(colorID: Int) {
             playerPositionCell.setBackgroundColor(colorID)
             playerNameCell.setBackgroundColor(colorID)
             playerValueCell.setBackgroundColor(colorID)
+        }
+
+        private fun setTextColor(colorID: Int) {
+            playerPositionView.setTextColor(colorID)
+            playerNameView.setTextColor(colorID)
+            playerValueView.setTextColor(colorID)
         }
 
     }

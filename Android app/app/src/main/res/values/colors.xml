@@ -6,6 +6,7 @@
 
     <!-- Text color for cockpit screens -->
     <color name="green">#00FF00</color>
+    <color name="red">#FF0000</color>
 
     <!-- Text colors for stats podium -->
     <color name="gold">#d4af37</color>

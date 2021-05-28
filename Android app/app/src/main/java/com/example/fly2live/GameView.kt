@@ -895,7 +895,7 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
             game_over = true
 
             val fragment = findFragment<GameFragment>()
-            fragment.gameOver(score.toLong(), false)
+            fragment.gameEnd(score.toLong(), false)
         }
 
 

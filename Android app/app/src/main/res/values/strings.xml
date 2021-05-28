@@ -12,6 +12,7 @@
 
     <string name="cockpit">Cockpit</string>
     <string name="logo">Logo</string>
+    <string name="logout">Logout</string>
 
     <!-- Stats fragment -->
     <string name="score_leaderboard">Score Stats</string>

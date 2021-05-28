@@ -11,6 +11,8 @@ import android.widget.TextView
 import androidx.navigation.fragment.findNavController
 import com.example.fly2live.configuration.Configuration
 import androidx.lifecycle.lifecycleScope
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.games.Games
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.lang.Thread.sleep
@@ -24,14 +26,26 @@ class GameEndFragment : Fragment() {
 
     private var new_high_score = false
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Get passed arguments
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        // Access control
+        val account = GoogleSignIn.getLastSignedInAccount(activity)
+        if (account == null) {
+            // Attempt to pop the controller's back stack back to a specific destination
+            findNavController().popBackStack(R.id.mainFragment, false)
+            return
+        }
+
+        // Get passed arguments the first time the fragment is created
         if (savedInstanceState == null) {
             score  = arguments!!.getLong("score")
             winner = arguments!!.getBoolean("winner")
+
+
+            val mLeaderboardClient = Games.getLeaderboardsClient(context!!, account)
+            //mLeaderboardClient.submitScore(getString(R.string.leaderboard_best_score_id), score)
+            //mLeaderboardClient.submitScore(getString(R.string.leaderboard_win_percentage_id), winner)
 
             // TODO: retrieve player high score
 
@@ -45,6 +59,12 @@ class GameEndFragment : Fragment() {
         else
             loadSound(R.raw.soundtrack_game_over)
 
+    }
+
+        override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_game_end, container, false)
     }
@@ -82,11 +102,11 @@ class GameEndFragment : Fragment() {
 
 
         view.findViewById<TextView>(R.id.restart).setOnClickListener{
-            findNavController().navigate(R.id.action_gameOverFragment_to_gameFragment)
+            findNavController().navigate(R.id.action_gameEndFragment_to_gameFragment)
         }
 
         view.findViewById<TextView>(R.id.go_to_menu).setOnClickListener{
-            findNavController().navigate(R.id.action_gameOverFragment_to_mainFragment)
+            findNavController().navigate(R.id.action_gameEndFragment_to_mainFragment)
         }
 
         // Check if the player has won a multiplayer game or has achieved a new high score

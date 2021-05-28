@@ -3,7 +3,7 @@ package com.example.fly2live.configuration
 class Configuration {
     companion object {
         // Player ID
-        var PLAYER_ID = (0..50).random().toString()
+        var PLAYER_ID = ""
 
         // Game mode
         var MULTIPLAYER = false

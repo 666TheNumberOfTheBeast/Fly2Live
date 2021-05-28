@@ -7,7 +7,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
-import androidx.activity.OnBackPressedCallback
+import androidx.activity.addCallback
+import androidx.navigation.fragment.findNavController
+import com.google.android.gms.auth.api.signin.GoogleSignIn
 
 
 class StatsFragment : Fragment() {
@@ -16,26 +18,33 @@ class StatsFragment : Fragment() {
     private lateinit var mPager: ViewPager2
 
     // The number of pages (wizard steps) to show
-    private val NUM_PAGES = 2
+    private val NUM_PAGES = 3
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        activity?.onBackPressedDispatcher?.addCallback(this, object : OnBackPressedCallback(true) {
+        // Access control
+        val account = GoogleSignIn.getLastSignedInAccount(activity)
+        if (account == null) {
+            // Attempt to pop the controller's back stack back to a specific destination
+            findNavController().popBackStack(R.id.mainFragment, false)
+            return
+        }
 
-            override fun handleOnBackPressed() {
-                if (mPager.currentItem == 0) {
-                    // If the user is currently looking at the first step,
-                    // allow the system to handle the Back button
-                    isEnabled = false
-                    activity?.onBackPressed()
-                } else {
-                    // Otherwise, select the previous step
-                    mPager.currentItem = mPager.currentItem - 1
-                }
+        activity?.onBackPressedDispatcher?.addCallback {
+            if (mPager.currentItem == 0) {
+                // If the user is currently looking at the first step,
+                // allow the system to handle the Back button
+                isEnabled = false
+                activity?.onBackPressed()
+            } else {
+                // Otherwise, select the first step
+                mPager.currentItem = 0
+                // Otherwise, select the previous step
+                //mPager.currentItem = mPager.currentItem - 1
             }
-
-        })
+        }
     }
 
     override fun onCreateView(

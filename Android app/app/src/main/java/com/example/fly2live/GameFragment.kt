@@ -33,7 +33,9 @@ class GameFragment : Fragment() {
         return GameView(context)
     }
 
-    fun gameOver(score: Long, winner: Boolean) {
+    // GameView call this function when the game ends
+    // (single player -> game over, multiplayer -> game winner or loser)
+    fun gameEnd(score: Long, winner: Boolean) {
         if (soundtrack != null && soundtrack!!.isPlaying)
             soundtrack!!.pause()
 
@@ -41,7 +43,7 @@ class GameFragment : Fragment() {
         bundle.putLong("score", score)
         bundle.putBoolean("winner", winner)
 
-        findNavController().navigate(R.id.action_gameFragment_to_gameOverFragment, bundle)
+        findNavController().navigate(R.id.action_gameFragment_to_gameEndFragment, bundle)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

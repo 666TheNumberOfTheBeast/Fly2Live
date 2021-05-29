@@ -17,8 +17,10 @@ class StatsFragment : Fragment() {
     // allows swiping horizontally to access previous and next wizard steps
     private lateinit var mPager: ViewPager2
 
-    // The number of pages (wizard steps) to show
-    private val NUM_PAGES = 3
+    companion object {
+        // The number of pages (wizard steps) to show
+        val NUM_PAGES = 3
+    }
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -61,8 +63,7 @@ class StatsFragment : Fragment() {
         mPager = view.findViewById(R.id.pager)
 
         // The pager adapter, which provides the pages to the view pager widget
-        val pagerAdapter = ScreenSlidePagerAdapter(this)
-        mPager.adapter   = pagerAdapter
+        mPager.adapter = ScreenSlidePagerAdapter(this)
     }
 
     private inner class ScreenSlidePagerAdapter(fm: Fragment) : FragmentStateAdapter(fm) {

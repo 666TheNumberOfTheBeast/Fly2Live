@@ -9,10 +9,10 @@
     <string name="single_player">Single\nPlayer</string>
     <string name="multiplayer">Multi\nPlayer</string>
     <string name="stats">Stats</string>
+    <string name="settings">Settings</string>
 
     <string name="cockpit">Cockpit</string>
     <string name="logo">Logo</string>
-    <string name="logout">Logout</string>
 
     <!-- Stats fragment -->
     <string name="score_leaderboard">Score Stats</string>
@@ -22,6 +22,14 @@
     <string name="L">L</string>
     <string name="win_percentage">WIN%</string>
     <string name="value">Value</string>
+
+    <!-- Settings fragment -->
+    <string name="audio_on">Audio ON</string>
+    <string name="audio_off">Audio OFF</string>
+    <string name="logout">Logout</string>
+
+    <string name="shared_preferences_name">Fly2LiveSharedPreferences</string>
+    <string name="shared_preference_audio">Fly2LiveSharedPreferenceAudio</string>
 
     <!-- Loading fragment -->
     <string name="msg_connecting">Connecting to the server…</string>

@@ -1,5 +1,6 @@
 package com.example.fly2live
 
+import android.content.Context
 import android.content.Intent
 import android.media.MediaPlayer
 import android.os.Bundle
@@ -53,11 +54,17 @@ class GameEndFragment : Fragment() {
                 new_high_score = true*/
         }
 
-        // Load the correct sound
-        if (Configuration.MULTIPLAYER && winner)
-            loadSound(R.raw.soundtrack_game_win)
-        else
-            loadSound(R.raw.soundtrack_game_over)
+        val sharedPref = context?.getSharedPreferences(getString(R.string.shared_preferences_name), Context.MODE_PRIVATE)
+        val isAudioEnabled = sharedPref?.getBoolean(getString(R.string.shared_preference_audio), true)!!
+
+        // Load & Start the audio only if the preference is enabled
+        if (isAudioEnabled) {
+            // Load the correct sound
+            if (Configuration.MULTIPLAYER && winner)
+                loadSound(R.raw.soundtrack_game_win)
+            else
+                loadSound(R.raw.soundtrack_game_over)
+        }
 
     }
 

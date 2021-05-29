@@ -1,15 +1,20 @@
 package com.example.fly2live
 
 
+import android.content.Context
 import android.media.MediaPlayer
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.WindowManager
 
 
 class MainActivity : AppCompatActivity() {
     private var soundtrack: MediaPlayer? = null
-    private var play_soundtrack: Boolean = true
+
+    // Variable for handling the audio from the fragments
+    private var playSoundtrack: Boolean = true
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,7 +28,6 @@ class MainActivity : AppCompatActivity() {
         soundtrack = MediaPlayer.create(this, R.raw.soundtrack_main)
         soundtrack?.setOnPreparedListener { mp ->
             mp.isLooping = true
-            mp.start()
         }
     }
 
@@ -43,13 +47,13 @@ class MainActivity : AppCompatActivity() {
         }
     }*/
 
-    // Play soundtrack mediaplayer
+    // Play soundtrack mediaplayer if is not playing
     private fun play() {
         if (soundtrack != null && !soundtrack!!.isPlaying)
             soundtrack!!.start()
     }
 
-    // Stop soundtrack mediaplayer
+    // Stop soundtrack mediaplayer if is playing
     private fun stop() {
         if (soundtrack != null && soundtrack!!.isPlaying)
             soundtrack!!.pause()
@@ -57,22 +61,25 @@ class MainActivity : AppCompatActivity() {
 
     // Play soundtrack (function for handling audio from fragments)
     fun startMainSoundtrack() {
-        play_soundtrack = true
+        playSoundtrack = true
         play()
     }
 
     // Stop soundtrack(function for handling audio from fragments)
     fun stopMainSoundtrack() {
-        play_soundtrack = false
+        playSoundtrack = false
         stop()
     }
 
+    // Start main soundtrack based on audio preference (useful for login fragment)
     override fun onStart() {
         super.onStart()
 
-        if (play_soundtrack)
-            play()
+        val sharedPref = getSharedPreferences(getString(R.string.shared_preferences_name), Context.MODE_PRIVATE)!!
+        val isAudioEnabled = sharedPref.getBoolean(getString(R.string.shared_preference_audio), true)
 
+        if (playSoundtrack && isAudioEnabled)
+            play()
     }
 
     override fun onStop() {

@@ -1,5 +1,6 @@
 package com.example.fly2live
 
+import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -18,15 +19,21 @@ class GameFragment : Fragment() {
     ): View? {
         gameView = GameView(context)
 
-        // Load soundtrack
-        soundtrack = MediaPlayer.create(context, R.raw.soundtrack_gameplay)
-        soundtrack?.setOnPreparedListener { mp ->
-            // Stop main soundtrack
-            (activity as MainActivity).stopMainSoundtrack()
+        val sharedPref = context?.getSharedPreferences(getString(R.string.shared_preferences_name), Context.MODE_PRIVATE)
+        val isAudioEnabled = sharedPref?.getBoolean(getString(R.string.shared_preference_audio), true)!!
 
-            // Start gameplay soundtrack
-            mp.isLooping = true
-            mp.start()
+        // Load & Start the audio only if the preference is enabled
+        if (isAudioEnabled) {
+            // Load soundtrack
+            soundtrack = MediaPlayer.create(context, R.raw.soundtrack_gameplay)
+            soundtrack?.setOnPreparedListener { mp ->
+                // Stop main soundtrack
+                (activity as MainActivity).stopMainSoundtrack()
+
+                // Start gameplay soundtrack
+                mp.isLooping = true
+                mp.start()
+            }
         }
 
         // Inflate the layout for this fragment

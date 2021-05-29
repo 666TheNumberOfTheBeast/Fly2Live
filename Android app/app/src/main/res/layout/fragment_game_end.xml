@@ -7,7 +7,6 @@
     android:background="@android:color/black"
     tools:context=".GameEndFragment">
 
-
     <TextView
         android:id="@+id/game_status_text"
         android:layout_width="wrap_content"

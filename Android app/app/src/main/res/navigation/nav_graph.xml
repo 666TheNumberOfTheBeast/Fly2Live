@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/loginFragment">
+    app:startDestination="@id/loginFragment" >
 
     <fragment
         android:id="@+id/loginFragment"
@@ -23,11 +23,8 @@
         android:label="fragment_main"
         tools:layout="@layout/fragment_main" >
         <action
-            android:id="@+id/action_mainFragment_to_loadingFragment"
-            app:destination="@id/loadingFragment" />
-        <action
-            android:id="@+id/action_mainFragment_to_gameFragment"
-            app:destination="@id/gameFragment" />
+            android:id="@+id/action_mainFragment_to_scenariosFragment"
+            app:destination="@id/scenariosFragment" />
         <action
             android:id="@+id/action_mainFragment_to_statsFragment"
             app:destination="@id/statsFragment" />
@@ -57,6 +54,28 @@
             app:destination="@id/loginFragment"
             app:popUpTo="@+id/mainFragment"
             app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_settingsFragment_to_creditsFragment"
+            app:destination="@id/creditsFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/creditsFragment"
+        android:name="com.example.fly2live.CreditsFragment"
+        android:label="CreditsFragment"
+        tools:layout="@layout/fragment_credits" />
+
+    <fragment
+        android:id="@+id/scenariosFragment"
+        android:name="com.example.fly2live.ScenariosFragment"
+        android:label="ScenariosFragment"
+        tools:layout="@layout/fragment_scenarios">
+        <action
+            android:id="@+id/action_scenariosFragment_to_gameFragment"
+            app:destination="@id/gameFragment" />
+        <action
+            android:id="@+id/action_scenariosFragment_to_loadingFragment"
+            app:destination="@id/loadingFragment" />
     </fragment>
 
     <fragment

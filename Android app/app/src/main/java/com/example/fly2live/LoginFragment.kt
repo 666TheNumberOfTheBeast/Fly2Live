@@ -18,6 +18,7 @@ import androidx.activity.result.contract.ActivityResultContracts.StartActivityFo
 import com.example.fly2live.configuration.Configuration.Companion.PLAYER_ID
 import com.google.android.gms.auth.api.Auth
 import com.google.android.gms.auth.api.signin.*
+import com.google.android.gms.games.Games
 import com.google.android.gms.games.Games.getPlayersClient
 
 
@@ -100,7 +101,9 @@ class LoginFragment : Fragment() {
             getPlayerInfo(account!!, "Bentornato ")
         }*/
         if (account != null) {
-            // Account already signed in and stored in the 'account' variable
+            // Account already signed in and stored in the 'account' variable.
+            // Show Google Games pop-up
+            Games.getGamesClient(context!!, account).setViewForPopups(activity?.findViewById(android.R.id.content)!!)
             getPlayerInfo(account, "Bentornato ")
         }
         else {
@@ -142,22 +145,26 @@ class LoginFragment : Fragment() {
     private fun getPlayerInfo(account: GoogleSignInAccount, msgText: String) {
         // Retrieve player information
         getPlayersClient(context!!, account).currentPlayer.addOnCompleteListener { task ->
-            val player = task.result
+            if (task.isSuccessful) {
+                val player = task.result
 
-            val name        = player.name
-            val displayName = player.displayName
-            val id          = player.playerId
+                val name        = player.name
+                val displayName = player.displayName
+                val id          = player.playerId
 
-            Toast.makeText(context, msgText + player.name, Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, msgText + player.name, Toast.LENGTH_SHORT).show()
 
-            Log.d("login", "name: $name")
-            Log.d("login", "displayName: $displayName")
-            Log.d("login", "id: $id")
+                Log.d("login", "name: $name")
+                Log.d("login", "displayName: $displayName")
+                Log.d("login", "id: $id")
 
-            // Set player ID using the Google account one
-            PLAYER_ID = id
+                // Set player ID using the Google account one
+                PLAYER_ID = id
 
-            updateUI()
+                updateUI()
+            }
+            else
+                signIn()
         }
     }
 

@@ -48,6 +48,7 @@ class SettingsFragment : Fragment() {
 
         btnAudio       = view.findViewById(R.id.button_audio)
         val btnLogout  = view.findViewById<TextView>(R.id.button_logout)
+        val btnCredits = view.findViewById<TextView>(R.id.button_credits)
 
         isAudioEnabled = sharedPref.getBoolean(getString(R.string.shared_preference_audio), true)
         handleAudio()
@@ -60,6 +61,10 @@ class SettingsFragment : Fragment() {
 
         btnLogout.setOnClickListener {
             signOut()
+        }
+
+        btnCredits.setOnClickListener {
+            findNavController().navigate(R.id.action_settingsFragment_to_creditsFragment)
         }
     }
 

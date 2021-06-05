@@ -2,11 +2,12 @@ package com.example.fly2live.configuration
 
 class Configuration {
     companion object {
-        // Player ID
+        // Google Games player ID
         var PLAYER_ID = ""
 
         // Game mode
         var MULTIPLAYER = false
+        var SCENARIO    = 0
 
         // Server URL
         const val URL = "http://192.168.1.110:5000/"

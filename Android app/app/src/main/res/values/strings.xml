@@ -27,9 +27,24 @@
     <string name="audio_on">Audio ON</string>
     <string name="audio_off">Audio OFF</string>
     <string name="logout">Logout</string>
+    <string name="credits">Credits</string>
 
     <string name="shared_preferences_name">Fly2LiveSharedPreferences</string>
     <string name="shared_preference_audio">Fly2LiveSharedPreferenceAudio</string>
+
+    <!-- Settings fragment -->
+    <string name="developer">DEVELOPER</string>
+    <string name="developer_name">Ivan Fardin</string>
+    <string name="special_thanks">SPECIAL THANKS</string>
+    <string name="special_thanks_name_0">Francesco Lovascio</string>
+    <string name="special_thanks_name_1">Starder</string>
+    <string name="special_thanks_name_2">Vectorpocket</string>
+    <string name="special_thanks_name_3">.</string>
+
+    <!-- Scenarios fragment -->
+    <string name="scenario">Scenario</string>
+    <string name="city_day">CITY BY DAY</string>
+    <string name="city_night">CITY BY NIGHT</string>
 
     <!-- Loading fragment -->
     <string name="msg_connecting">Connecting to the server…</string>
@@ -42,7 +57,7 @@
     <string name="msg_game_end">Game ended</string>-->
     <string name="msg_server_busy">Server busy, wait…</string>
 
-    <!-- Game Over fragment -->
+    <!-- Game End fragment -->
     <string name="game_over">GAME OVER</string>
     <string name="you_win">YOU WIN</string>
     <string name="score">SCORE:</string>
@@ -50,6 +65,5 @@
     <string name="go_to_main_menu">GO TO MAIN MENU</string>
     <string name="share">SHARE</string>
 
-    <string name="dummy_button">Dummy Button</string>
-    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="new_high_score">NEW HIGH SCORE</string>
 </resources>

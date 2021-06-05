@@ -131,12 +131,12 @@ class MainFragment : Fragment() {
         // Set buttons listeners
         btnSinglePlayer.setOnClickListener{
             myConfiguration.MULTIPLAYER = false
-            findNavController().navigate(R.id.action_mainFragment_to_gameFragment)
+            findNavController().navigate(R.id.action_mainFragment_to_scenariosFragment)
         }
 
         btnMultiplayer.setOnClickListener{
             myConfiguration.MULTIPLAYER = true
-            findNavController().navigate(R.id.action_mainFragment_to_loadingFragment)
+            findNavController().navigate(R.id.action_mainFragment_to_scenariosFragment)
         }
 
         btnStats.setOnClickListener{

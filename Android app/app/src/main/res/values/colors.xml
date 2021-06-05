@@ -20,4 +20,7 @@
     <color name="blue_bg">#4D0000FF</color>
 
     <color name="dark_green_bg">#2b472b</color>
+
+    <!-- Text color for locked scenario -->
+    <color name="white_locked">#4DFFFFFF</color>
 </resources>

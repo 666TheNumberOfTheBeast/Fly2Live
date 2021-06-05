@@ -47,7 +47,6 @@
         app:layout_constraintTop_toTopOf="@id/best_players"
         app:layout_constraintHorizontal_weight="0.45" />
 
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view"
         android:layout_width="match_parent"

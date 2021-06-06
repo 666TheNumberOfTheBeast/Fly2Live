@@ -36,10 +36,10 @@
     <string name="developer">DEVELOPER</string>
     <string name="developer_name">Ivan Fardin</string>
     <string name="special_thanks">SPECIAL THANKS</string>
-    <string name="special_thanks_name_0">Francesco Lovascio</string>
+    <string name="special_thanks_name_0">Frank</string>
     <string name="special_thanks_name_1">Starder</string>
     <string name="special_thanks_name_2">Vectorpocket</string>
-    <string name="special_thanks_name_3">.</string>
+    <string name="special_thanks_name_3">Yhdf</string>
 
     <!-- Scenarios fragment -->
     <string name="scenario">Scenario</string>

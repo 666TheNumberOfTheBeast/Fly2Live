@@ -110,7 +110,7 @@ class SettingsFragment : Fragment() {
         mGoogleSignInClient.signOut().addOnCompleteListener{
             findNavController().navigate(R.id.action_settingsFragment_to_loginFragment)
 
-            Toast.makeText(context, "A presto", Toast.LENGTH_SHORT).show()
+            //Toast.makeText(context, "A presto", Toast.LENGTH_SHORT).show()
         }
     }
 }

@@ -152,7 +152,7 @@ class LoginFragment : Fragment() {
                 val displayName = player.displayName
                 val id          = player.playerId
 
-                Toast.makeText(context, msgText + player.name, Toast.LENGTH_SHORT).show()
+                //Toast.makeText(context, msgText + player.name, Toast.LENGTH_SHORT).show()
 
                 Log.d("login", "name: $name")
                 Log.d("login", "displayName: $displayName")

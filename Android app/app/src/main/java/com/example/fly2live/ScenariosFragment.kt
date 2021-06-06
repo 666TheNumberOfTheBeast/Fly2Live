@@ -5,11 +5,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.fly2live.configuration.Configuration.Companion.MULTIPLAYER
 import com.example.fly2live.configuration.Configuration.Companion.SCENARIO
+import com.example.fly2live.configuration.Configuration.Companion.SCENARIO_CITY_DAY
+import com.example.fly2live.configuration.Configuration.Companion.SCENARIO_CITY_NIGHT
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 
 
@@ -43,21 +46,26 @@ class ScenariosFragment : Fragment() {
         val btnScenario2 = view.findViewById<TextView>(R.id.button_scenario_2)
 
         // TODO: get player level by querying the DB
-        val playerLevel = 1
+        val playerLevel = 6
 
         // Set buttons listeners
         btnScenario1.setOnClickListener {
-            SCENARIO = 0
+            SCENARIO = SCENARIO_CITY_DAY
             navigate()
         }
 
+        // Check if the player has unlocked the 2nd scenario
         if (playerLevel >= 5) {
             btnScenario2.setTextColor(ContextCompat.getColor(context!!, android.R.color.white))
-            btnScenario2.isClickable = true
 
             btnScenario2.setOnClickListener {
-                SCENARIO = 1
+                SCENARIO = SCENARIO_CITY_NIGHT
                 navigate()
+            }
+        }
+        else {
+            btnScenario2.setOnClickListener {
+                Toast.makeText(context, "You have not unlocked this scenario yet", Toast.LENGTH_SHORT).show()
             }
         }
     }

@@ -9,6 +9,10 @@ class Configuration {
         var MULTIPLAYER = false
         var SCENARIO    = 0
 
+        // Constants for the scenarios codes
+        const val SCENARIO_CITY_DAY   = 0
+        const val SCENARIO_CITY_NIGHT = 1
+
         // Server URL
         const val URL = "http://192.168.1.110:5000/"
 

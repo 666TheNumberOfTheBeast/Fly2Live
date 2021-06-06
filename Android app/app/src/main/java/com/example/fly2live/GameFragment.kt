@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.fragment.findNavController
 import android.media.MediaPlayer
+import com.example.fly2live.configuration.Configuration.Companion.MULTIPLAYER
 
 class GameFragment : Fragment() {
     private lateinit var gameView: View
@@ -36,6 +37,10 @@ class GameFragment : Fragment() {
             }
         }
 
+        // Remove LoadingFragment from the backstack if multiplayer mode
+        if (MULTIPLAYER)
+            findNavController().popBackStack(R.id.loadingFragment, true)
+
         // Inflate the layout for this fragment
         return GameView(context)
     }
@@ -53,11 +58,11 @@ class GameFragment : Fragment() {
         findNavController().navigate(R.id.action_gameFragment_to_gameEndFragment, bundle)
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    /*override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         findNavController().popBackStack(R.id.loadingFragment, true)
-    }
+    }*/
 
 
     override fun onStart() {

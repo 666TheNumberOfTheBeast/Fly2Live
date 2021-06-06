@@ -14,27 +14,23 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.findFragment
 import com.example.fly2live.vehicle.Vehicle
 import com.example.fly2live.building.Building
+import com.example.fly2live.configuration.Configuration.Companion.SCENARIO
+import com.example.fly2live.configuration.Configuration.Companion.SCENARIO_CITY_DAY
 import kotlin.math.max
 import kotlin.math.min
 
 
 class GameView(context: Context?) : View(context), View.OnTouchListener, SensorEventListener2 {
-    // Bitmaps
-    private var converted = false
+    // Convert images into bitmaps once
+    private var areImagesConverted = false
 
-    // Helicopter animation
+    // Bitmaps for user's helicopter animation
     private lateinit var heli_animation: Array<Bitmap>
     private lateinit var heli: Bitmap
     private var heli_animation_index = 0
 
     // Other bitmaps
     private lateinit var bg: Bitmap
-    //private lateinit var buildings: Array<Bitmap>
-    //private lateinit var building: Bitmap
-    //private lateinit var dirigible: Bitmap
-    //private lateinit var ufo: Bitmap
-
-
     private lateinit var buildings: Array<Building>
     private lateinit var building: Building
     private lateinit var vehicles: Array<Vehicle>
@@ -49,47 +45,17 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
     private var heli_width_scaled  = 0f
     private var heli_height_scaled = 0f
 
-    // Dirigible size
-    /*private val dirigible_width  = 20f // meters
-    private val dirigible_height = 8f // meters
-    private var dirigible_scale_x = 0f
-    private var dirigible_scale_y = 0f
-    private var dirigible_width_scaled  = 0f
-    private var dirigible_height_scaled = 0f
 
-    // Ufo size
-    private val ufo_width  = 4f // meters
-    private val ufo_height = 2f // meters
-    private var ufo_scale_x = 0f
-    private var ufo_scale_y = 0f
-    private var ufo_width_scaled  = 0f
-    private var ufo_height_scaled = 0f*/
-
-
-    // Graphics bitmaps matrix
+    // Graphics helicopter bitmap matrix
     private var heli_matrix      = Matrix()
-    /*private var dirigible_matrix = Matrix()
-    private var ufo_matrix       = Matrix()*/
 
 
     // Helicopter position
-    //private var user_dx = 0f
-    //private var user_dy = 0f
     private var user_dx = 1f  // meters
     private var user_dy = 25f // meters
 
-    // Dirigible position
-    /*private var dirigible_dx = 0f
-    private var dirigible_dy = 0f
 
-    // Ufo position
-    private var ufo_dx = 0f
-    private var ufo_dy = 0f*/
-
-    //private var building_dx = 0f
-    //private var building_dy = 0f
-
-    // Helicopter rotation
+    // Helicopter rotation (inclination)
     private var heli_rotation = 8f // Degrees
 
 
@@ -110,26 +76,24 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
         textSize    = 50f
     }
 
+    // Painter for the debug of bitmap rects
     private val painter_stroke = Paint().apply {
         style       = Paint.Style.STROKE
         color       = Color.BLACK
         strokeWidth = 3f
     }
 
-    private var score     = 0.0 // meters
-    private var game_over = false
+    private var score   = 0.0 // meters
+    private var gameEnd = false
 
     //private var speed = 0.2f // m/s (max 0.5)
-    private var speed = 10f // m/s (max 0.5)
+    private var speed = 10f // m/s
 
     private var last_gyroscope_input = 0f // meters
 
 
-
-
-
     // Cannon ball graphics variables
-    private var radius = 0.18f // meters
+    /*private var radius = 0.18f // meters
     private var cx = 0f
     private var cy = 0f
 
@@ -141,12 +105,12 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
     private var shaderMatrix = Matrix()
 
     // Variables for handling the shooting
-    private var fired = false
+    private var fired = false*/
     private var previous = 0L
 
     // Cannon ball velocity components
-    private var vx = 0f
-    private var vy = 0f
+    /*private var vx = 0f
+    private var vy = 0f*/
 
     // World constants
     //private var speed = 15f   // m/s
@@ -158,8 +122,8 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
     private var ppm = 1f
 
     // Finger coordinates
-    private var fx = 0.0
-    private var fy = 0.0
+    /*private var fx = 0.0
+    private var fy = 0.0*/
 
 
     init {
@@ -189,12 +153,13 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
 
-        if (game_over)
+        // Check if game ended and stop drawing
+        if (gameEnd)
             return
 
-        // Convert the image once
-        if (!converted) {
-            converted = true
+        // Convert the images into bitmaps once
+        if (!areImagesConverted) {
+            areImagesConverted = true
 
             // I used min to keep almost a fixed ratio for drawing the bitmaps when rotating the screen.
             // I divide both to world_width because I'm interested in width for obstacles respawn
@@ -204,11 +169,281 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
             Log.d("ppm", height.toString())
             Log.d("ppm", ppm.toString())
 
-            bg = ResourcesCompat.getDrawable(resources, R.drawable.city_bg_1, null)?.toBitmap(width, height)!!
+            // Convert the correct scenario images
+            if (SCENARIO == SCENARIO_CITY_DAY) {
+                bg = ResourcesCompat.getDrawable(resources, R.drawable.city_bg_day, null)?.toBitmap(width, height)!!
 
-            //dirigible = ResourcesCompat.getDrawable(resources, R.drawable.dirigible_1, null)?.toBitmap(width, height)!!
-            //ufo       = ResourcesCompat.getDrawable(resources, R.drawable.ufo, null)?.toBitmap(width, height)!!
+                buildings = arrayOf(
+                    /*Building(
+                        "building_01",
+                        ResourcesCompat.getDrawable(resources, R.drawable.building_day_01, null)?.toBitmap(width, height)!!,
+                        arrayOf(
+                            arrayOf(0f, dp2px(64f), 1f, 0f),       // Bottom rect
+                            arrayOf(0.07f, dp2px(43f), 0.38f, 0f), // Middle left rect
+                            arrayOf(0.47f, dp2px(44f), 0.8f, 0f),  // Middle right rect
+                            arrayOf(0.1f, 0f, 0.18f, 0f),          // Top left rect
+                            arrayOf(0.47f, dp2px(32f), 0.63f, 0f)  // Top right rect
+                        ),
+                        //15f, 100f, width, height, ppm, width + 20f, height*0.2f, speed
+                        15f, 100f, width, height, ppm, world_width + 3f, height*0.2f, speed
+                    ),
+                    Building(
+                        "building_02",
+                        ResourcesCompat.getDrawable(resources, R.drawable.building_day_02, null)?.toBitmap(width, height)!!,
+                        arrayOf(
+                            arrayOf(0.22f, dp2px(450f), 0.81f, 0f),  // Bottom rect
+                            arrayOf(0.33f, dp2px(232f), 0.7f, 0f),   // Middle rect
+                            arrayOf(0.47f, 0f, 0.56f, 0f)            // Top rect
+                        ),
+                        //10f, 90f, width, height, ppm, width + 20f, height*0.2f, speed
+                        10f, 90f, width, height, ppm, world_width + 3f, height*0.2f, speed
+                    ),
+                    Building(
+                        "building_03",
+                        ResourcesCompat.getDrawable(resources, R.drawable.building_day_03, null)?.toBitmap(width, height)!!,
+                        arrayOf(
+                            arrayOf(0f, dp2px(230f), 1f, 0f),       // Bottom rect
+                            arrayOf(0.14f, dp2px(160f), 0.87f, 0f), // Middle rect
+                            arrayOf(0.29f, dp2px(70f), 0.68f, 0f),  // Middle rect
+                            arrayOf(0.45f, 0f, 0.6f, 0f)            // Top rect
+                        ),
+                        //25f, 110f, width, height, ppm, width + 20f, height*0.2f, speed
+                        25f, 110f, width, height, ppm, world_width + 3f, height*0.2f, speed
+                    ),
+                    Building(
+                        "building_04",
+                        ResourcesCompat.getDrawable(resources, R.drawable.building_day_04, null)?.toBitmap(width, height)!!,
+                        arrayOf(
+                            arrayOf(0.14f, dp2px(348f), 0.87f, 0f), // Bottom rect
+                            arrayOf(0.21f, dp2px(212f), 0.79f, 0f), // Middle rect
+                            arrayOf(0.24f, dp2px(88f), 0.76f, 0f),  // Middle rect
+                            arrayOf(0.32f, 0f, 0.68f, 0f)           // Top rect
+                        ),
+                        //30f, 90f, width, height, ppm, width + 20f, height*0.2f, speed
+                        30f, 90f, width, height, ppm, world_width + 3f, height*0.2f, speed
+                    ),
+                    Building(
+                        "building_05",
+                        ResourcesCompat.getDrawable(resources, R.drawable.building_day_05, null)?.toBitmap(width, height)!!,
+                        arrayOf(
+                            arrayOf(0f, dp2px(154f), 1f, 0f),       // Bottom rect
+                            arrayOf(0f, dp2px(74f), 0.24f, 0f),     // Middle left rect
+                            arrayOf(0.27f, dp2px(112f), 0.75f, 0f), // Middle center rect
+                            arrayOf(0.78f, dp2px(112f), 0.9f, 0f),  // Middle right rect
+                            arrayOf(0.34f, 0f, 0.75f, 0f)           // Top rect
+                        ),
+                        //35f, 60f, width, height, ppm, width + 20f, height*0.2f, speed
+                        35f, 60f, width, height, ppm, world_width + 3f, height*0.2f, speed
+                    ),
+                    Building(
+                        "building_06",
+                        ResourcesCompat.getDrawable(resources, R.drawable.building_day_06, null)?.toBitmap(width, height)!!,
+                        arrayOf(
+                            arrayOf(0f, dp2px(301f), 1f, 0f),       // Bottom rect
+                            arrayOf(0f, dp2px(75f), 0.37f, 0f),     // Middle left rect
+                            arrayOf(0.53f, dp2px(175f), 0.87f, 0f), // Middle right rect
+                            arrayOf(0.07f, 0f, 0.29f, 0f)           // Top rect
+                        ),
+                        //35f, 40f, width, height, ppm, width + 20f, height*0.2f, speed
+                        35f, 40f, width, height, ppm, world_width + 3f, height*0.2f, speed // Measures in meters except pos_y
+                    ),
+                    Building(
+                        "building_07",
+                        ResourcesCompat.getDrawable(resources, R.drawable.building_day_07, null)?.toBitmap(width, height)!!,
+                        arrayOf(
+                            arrayOf(0f, dp2px(319f), 1f, 0f),       // Bottom rect
+                            arrayOf(0f, dp2px(164f), 0.91f, 0f),    // Middle rect
+                            arrayOf(0f, dp2px(140f), 0.22f, 0f),    // Left "triangle"
+                            arrayOf(0.7f, dp2px(140f), 0.91f, 0f),  // Right "triangle"
+                            arrayOf(0.31f, 0f, 0.4f, 0f)            // Top rect
+                        ),
+                        //15f, 80f, width, height, ppm, width + 20f, height/5f, speed
+                        //15f, 80f, width, height, ppm, width + 3f*ppm, height/5f, speed
+                        15f, 80f, width, height, ppm, world_width + 3f, height*0.2f, speed // Measures in meters except pos_y
+                    ),*/
+                    Building(
+                        "building_08",
+                        ResourcesCompat.getDrawable(resources, R.drawable.building_day_08, null)?.toBitmap(width, height)!!,
+                        arrayOf(
+                            arrayOf(0f, dp2px(120f), 1f, 0f),      // Bottom rect
+                            arrayOf(0.1f, 0f, 0.9f, 0f)               // Top rect
+                        ),
+                        //10f, 70f, width, height, ppm, width + 20f, height*0.2f, speed
+                        10f, 70f, width, height, ppm, world_width + 3f, height*0.2f, speed
+                    )/*,
+                    Building(
+                        "building_09",
+                        ResourcesCompat.getDrawable(resources, R.drawable.building_day_09, null)?.toBitmap(width, height)!!,
+                        17f, 70f, width, height, ppm, width + 20f, height/5f, speed
+                    ),
+                    Building(
+                        "building_10",
+                        ResourcesCompat.getDrawable(resources, R.drawable.building_day_10, null)?.toBitmap(width, height)!!,
+                        10f, 65f, width, height, ppm, width + 20f, height/5f, speed
+                    ),
+                    Building(
+                        "building_11",
+                        ResourcesCompat.getDrawable(resources, R.drawable.building_day_11, null)?.toBitmap(width, height)!!,
+                        17f, 55f, width, height, ppm, width + 20f, height/5f, speed
+                    ),
+                    Building(
+                        "building_12",
+                        ResourcesCompat.getDrawable(resources, R.drawable.building_day_12, null)?.toBitmap(width, height)!!,
+                        15f, 40f, width, height, ppm, width + 20f, height/5f, speed
+                    ),
+                    Building(
+                        "building_13",
+                        ResourcesCompat.getDrawable(resources, R.drawable.building_day_13, null)?.toBitmap(width, height)!!,
+                        15f, 50f, width, height, ppm, width + 20f, height/5f, speed
+                    ),
+                    Building(
+                        "building_14",
+                        ResourcesCompat.getDrawable(resources, R.drawable.building_day_14, null)?.toBitmap(width, height)!!,
+                        23f, 70f, width, height, ppm, width + 20f, height/5f, speed
+                    ),
+                    Building(
+                        "building_15",
+                        ResourcesCompat.getDrawable(resources, R.drawable.building_day_15, null)?.toBitmap(width, height)!!,
+                        10f, 60f, width, height, ppm, width + 20f, height/5f, speed
+                    ),
+                    Building(
+                        "building_16",
+                        ResourcesCompat.getDrawable(resources, R.drawable.building_day_16, null)?.toBitmap(width, height)!!,
+                        18f, 50f, width, height, ppm, width + 20f, height/5f, speed
+                    ),
+                    Building(
+                        "building_17",
+                        ResourcesCompat.getDrawable(resources, R.drawable.building_day_17, null)?.toBitmap(width, height)!!,
+                        25f, 60f, width, height, ppm, width + 20f, height/5f, speed
+                    )*/
+                )
+            }
+            else {
+                bg = ResourcesCompat.getDrawable(resources, R.drawable.city_bg_night, null)?.toBitmap(width, height)!!
 
+                buildings = arrayOf(
+                    /*Building(
+                        "building_01",
+                        ResourcesCompat.getDrawable(resources, R.drawable.building_night_01, null)?.toBitmap(width, height)!!,
+                        arrayOf(
+                            arrayOf(0f, dp2px(260f), 1f, 0f),       // Bottom rect
+                            arrayOf(0.05f, dp2px(210f), 0.92f, 0f), // Middle rect 1
+                            arrayOf(0.85f, dp2px(185f), 0.92f, 0f), // Middle rect 1
+                            arrayOf(0.1f, dp2px(165f), 0.86f, 0f),  // Middle rect 2
+                            arrayOf(0.78f, dp2px(145f), 0.86f, 0f), // Middle rect 2
+                            arrayOf(0.18f, dp2px(135f), 0.78f, 0f), // Middle rect 3
+                            arrayOf(0.2f, dp2px(118f), 0.75f, 0f),  // Top rect
+                            arrayOf(0.25f, dp2px(100f), 0.7f, 0f),  // Top rect
+                            arrayOf(0.3f, dp2px(90f), 0.65f, 0f),    // Top rect
+                            arrayOf(0.35f, dp2px(82f), 0.6f, 0f)    // Top rect
+                        ),
+                        //15f, 100f, width, height, ppm, width + 20f, height*0.2f, speed
+                        15f, 100f, width, height, ppm, world_width + 3f, height*0.2f, speed
+                    ),
+                    Building(
+                        "building_02",
+                        ResourcesCompat.getDrawable(resources, R.drawable.building_night_02, null)?.toBitmap(width, height)!!,
+                        arrayOf(
+                            arrayOf(0.26f, dp2px(345f), 0.72f, 0f),  // Bottom rect
+                            arrayOf(0.4f, dp2px(153f), 0.6f, 0f),   // Middle rect
+                            arrayOf(0.45f, 0f, 0.54f, 0f)            // Top rect
+                        ),
+                        //10f, 90f, width, height, ppm, width + 20f, height*0.2f, speed
+                        10f, 110f, width, height, ppm, world_width + 3f, height*0.2f, speed
+                    ),
+                    Building(
+                        "building_03",
+                        ResourcesCompat.getDrawable(resources, R.drawable.building_night_03, null)?.toBitmap(width, height)!!,
+                        arrayOf(
+                            arrayOf(0.75f, dp2px(75f), 1f, 0f),    // Bottom rect
+                            arrayOf(0f, dp2px(43f), 0.75f, 0f),    // Bottom rect
+                            arrayOf(0.68f, dp2px(19f), 0.82f, 0f), // Top rect
+                            arrayOf(0.16f, 0f, 0.68f, 0f)             // Top rect
+                        ),
+                        //25f, 110f, width, height, ppm, width + 20f, height*0.2f, speed
+                        18f, 70f, width, height, ppm, world_width + 3f, height*0.2f, speed
+                    ),*/
+                    Building(
+                        "building_04",
+                        ResourcesCompat.getDrawable(resources, R.drawable.building_night_04, null)?.toBitmap(width, height)!!,
+                        arrayOf(
+                            arrayOf(0f, dp2px(112f), 0.24f, 0f),  // Bottom rect
+                            arrayOf(0.24f, dp2px(85f), 1f, 0f),   // Bottom rect
+                            arrayOf(0.16f, dp2px(18f), 0.3f, 0f), // Top rect
+                            arrayOf(0.3f, 0f, 0.82f, 0f)             // Top rect
+                        ),
+                        //30f, 90f, width, height, ppm, width + 20f, height*0.2f, speed
+                        20f, 70f, width, height, ppm, world_width + 3f, height*0.2f, speed
+                    )/*,
+                    Building(
+                        "building_05",
+                        ResourcesCompat.getDrawable(resources, R.drawable.building_night_05, null)?.toBitmap(width, height)!!,
+                        arrayOf(
+                            arrayOf(0f, dp2px(154f), 1f, 0f),       // Bottom rect
+                            arrayOf(0f, dp2px(74f), 0.24f, 0f),     // Middle left rect
+                            arrayOf(0.27f, dp2px(112f), 0.75f, 0f), // Middle center rect
+                            arrayOf(0.78f, dp2px(112f), 0.9f, 0f),  // Middle right rect
+                            arrayOf(0.34f, 0f, 0.75f, 0f)           // Top rect
+                        ),
+                        //35f, 60f, width, height, ppm, width + 20f, height*0.2f, speed
+                        35f, 60f, width, height, ppm, world_width + 3f, height*0.2f, speed
+                    ),
+                    Building(
+                        "building_06",
+                        ResourcesCompat.getDrawable(resources, R.drawable.building_night_06, null)?.toBitmap(width, height)!!,
+                        arrayOf(
+                            arrayOf(0f, dp2px(301f), 1f, 0f),       // Bottom rect
+                            arrayOf(0f, dp2px(75f), 0.37f, 0f),     // Middle left rect
+                            arrayOf(0.53f, dp2px(175f), 0.87f, 0f), // Middle right rect
+                            arrayOf(0.07f, 0f, 0.29f, 0f)           // Top rect
+                        ),
+                        //35f, 40f, width, height, ppm, width + 20f, height*0.2f, speed
+                        35f, 40f, width, height, ppm, world_width + 3f, height*0.2f, speed // Measures in meters except pos_y
+                    ),
+                    Building(
+                        "building_07",
+                        ResourcesCompat.getDrawable(resources, R.drawable.building_night_07, null)?.toBitmap(width, height)!!,
+                        arrayOf(
+                            arrayOf(0f, dp2px(319f), 1f, 0f),       // Bottom rect
+                            arrayOf(0f, dp2px(164f), 0.91f, 0f),    // Middle rect
+                            arrayOf(0f, dp2px(140f), 0.22f, 0f),    // Left "triangle"
+                            arrayOf(0.7f, dp2px(140f), 0.91f, 0f),  // Right "triangle"
+                            arrayOf(0.31f, 0f, 0.4f, 0f)            // Top rect
+                        ),
+                        //15f, 80f, width, height, ppm, width + 20f, height/5f, speed
+                        //15f, 80f, width, height, ppm, width + 3f*ppm, height/5f, speed
+                        15f, 80f, width, height, ppm, world_width + 3f, height*0.2f, speed // Measures in meters except pos_y
+                    ),
+                    Building(
+                        "building_08",
+                        ResourcesCompat.getDrawable(resources, R.drawable.building_night_08, null)?.toBitmap(width, height)!!,
+                        arrayOf(
+                            arrayOf(0f, dp2px(20f), 1f, 0f),      // Bottom rect
+                            arrayOf(0.1f, dp2px(15f), 0.95f, 0f), // Middle rect 1
+                            arrayOf(0.27f, dp2px(10f), 0.9f, 0f), // Middle rect 2
+                            arrayOf(0.47f, dp2px(5f), 0.8f, 0f),  // Middle rect 3
+                            arrayOf(0.65f, 0f, 0.75f, 0f)            // Top rect
+                        ),
+                        //10f, 70f, width, height, ppm, width + 20f, height*0.2f, speed
+                        10f, 70f, width, height, ppm, world_width + 3f, height*0.2f, speed
+                    ),
+                    Building(
+                        "building_09",
+                        ResourcesCompat.getDrawable(resources, R.drawable.building_night_09, null)?.toBitmap(width, height)!!,
+                        17f, 70f, width, height, ppm, width + 20f, height/5f, speed
+                    ),
+                    Building(
+                        "building_10",
+                        ResourcesCompat.getDrawable(resources, R.drawable.building_night_10, null)?.toBitmap(width, height)!!,
+                        10f, 65f, width, height, ppm, width + 20f, height/5f, speed
+                    ),
+                    Building(
+                        "building_11",
+                        ResourcesCompat.getDrawable(resources, R.drawable.building_night_11, null)?.toBitmap(width, height)!!,
+                        17f, 55f, width, height, ppm, width + 20f, height/5f, speed
+                    )*/
+                )
+            }
 
             vehicles = arrayOf(
                 Vehicle(
@@ -363,139 +598,6 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
             )*/
 
 
-            buildings = arrayOf(
-                /*Building(
-                    "building_01",
-                    ResourcesCompat.getDrawable(resources, R.drawable.building_01, null)?.toBitmap(width, height)!!,
-                    arrayOf(
-                        arrayOf(0f, dp2px(64f), 1f, 0f),       // Bottom rect
-                        arrayOf(0.07f, dp2px(43f), 0.38f, 0f), // Middle left rect
-                        arrayOf(0.47f, dp2px(44f), 0.8f, 0f),  // Middle right rect
-                        arrayOf(0.1f, 0f, 0.18f, 0f),          // Top left rect
-                        arrayOf(0.47f, dp2px(32f), 0.63f, 0f)  // Top right rect
-                    ),
-                    15f, 100f, width, height, ppm, width + 20f, height*0.2f, speed
-                ),
-                Building(
-                    "building_02",
-                    ResourcesCompat.getDrawable(resources, R.drawable.building_02, null)?.toBitmap(width, height)!!,
-                    arrayOf(
-                        arrayOf(0.22f, dp2px(450f), 0.81f, 0f),  // Bottom rect
-                        arrayOf(0.33f, dp2px(232f), 0.7f, 0f),   // Middle rect
-                        arrayOf(0.47f, 0f, 0.56f, 0f)            // Top rect
-                    ),
-                    10f, 90f, width, height, ppm, width + 20f, height*0.2f, speed
-                ),
-                Building(
-                    "building_03",
-                    ResourcesCompat.getDrawable(resources, R.drawable.building_03, null)?.toBitmap(width, height)!!,
-                    arrayOf(
-                        arrayOf(0f, dp2px(230f), 1f, 0f),       // Bottom rect
-                        arrayOf(0.14f, dp2px(160f), 0.87f, 0f), // Middle rect
-                        arrayOf(0.29f, dp2px(70f), 0.68f, 0f),  // Middle rect
-                        arrayOf(0.45f, 0f, 0.6f, 0f)            // Top rect
-                    ),
-                    25f, 110f, width, height, ppm, width + 20f, height*0.2f, speed
-                ),
-                Building(
-                    "building_04",
-                    ResourcesCompat.getDrawable(resources, R.drawable.building_04, null)?.toBitmap(width, height)!!,
-                    arrayOf(
-                        arrayOf(0.14f, dp2px(348f), 0.87f, 0f), // Bottom rect
-                        arrayOf(0.21f, dp2px(212f), 0.79f, 0f), // Middle rect
-                        arrayOf(0.24f, dp2px(88f), 0.76f, 0f),  // Middle rect
-                        arrayOf(0.32f, 0f, 0.68f, 0f)           // Top rect
-                    ),
-                    30f, 90f, width, height, ppm, width + 20f, height*0.2f, speed
-                ),
-                Building(
-                    "building_05",
-                    ResourcesCompat.getDrawable(resources, R.drawable.building_05, null)?.toBitmap(width, height)!!,
-                    arrayOf(
-                        arrayOf(0f, dp2px(154f), 1f, 0f),       // Bottom rect
-                        arrayOf(0f, dp2px(74f), 0.24f, 0f),     // Middle left rect
-                        arrayOf(0.27f, dp2px(112f), 0.75f, 0f), // Middle center rect
-                        arrayOf(0.78f, dp2px(112f), 0.9f, 0f),  // Middle right rect
-                        arrayOf(0.34f, 0f, 0.75f, 0f)           // Top rect
-                    ),
-                    35f, 60f, width, height, ppm, width + 20f, height*0.2f, speed
-                ),
-                Building(
-                    "building_06",
-                    ResourcesCompat.getDrawable(resources, R.drawable.building_06, null)?.toBitmap(width, height)!!,
-                    arrayOf(
-                        arrayOf(0f, dp2px(301f), 1f, 0f),       // Bottom rect
-                        arrayOf(0f, dp2px(75f), 0.37f, 0f),     // Middle left rect
-                        arrayOf(0.53f, dp2px(175f), 0.87f, 0f), // Middle right rect
-                        arrayOf(0.07f, 0f, 0.29f, 0f)           // Top rect
-                    ),
-                    35f, 40f, width, height, ppm, width + 20f, height*0.2f, speed
-                ),*/
-                Building(
-                    "building_07",
-                    ResourcesCompat.getDrawable(resources, R.drawable.building_07, null)?.toBitmap(width, height)!!,
-                    arrayOf(
-                        arrayOf(0f, dp2px(319f), 1f, 0f),       // Bottom rect
-                        arrayOf(0f, dp2px(164f), 0.91f, 0f),    // Middle rect
-                        arrayOf(0f, dp2px(140f), 0.22f, 0f),    // Left "triangle"
-                        arrayOf(0.7f, dp2px(140f), 0.91f, 0f),  // Right "triangle"
-                        arrayOf(0.31f, 0f, 0.4f, 0f)               // Top rect
-                    ),
-                    //15f, 80f, width, height, ppm, width + 20f, height/5f, speed
-                    //15f, 80f, width, height, ppm, width + 3f*ppm, height/5f, speed
-                    15f, 80f, width, height, ppm, world_width + 3f, height*0.2f, speed // Measures in meters except pos_y
-                )/*,
-                Building(
-                    "building_08",
-                    ResourcesCompat.getDrawable(resources, R.drawable.building_08, null)?.toBitmap(width, height)!!,
-                    10f, 70f, width, height, ppm, width + 20f, height*0.2f, speed
-                ),
-                Building(
-                    "building_09",
-                    ResourcesCompat.getDrawable(resources, R.drawable.building_09, null)?.toBitmap(width, height)!!,
-                    17f, 70f, width, height, ppm, width + 20f, height/5f, speed
-                ),
-                Building(
-                    "building_10",
-                    ResourcesCompat.getDrawable(resources, R.drawable.building_10, null)?.toBitmap(width, height)!!,
-                    10f, 65f, width, height, ppm, width + 20f, height/5f, speed
-                ),
-                Building(
-                    "building_11",
-                    ResourcesCompat.getDrawable(resources, R.drawable.building_11, null)?.toBitmap(width, height)!!,
-                    17f, 55f, width, height, ppm, width + 20f, height/5f, speed
-                ),
-                Building(
-                    "building_12",
-                    ResourcesCompat.getDrawable(resources, R.drawable.building_12, null)?.toBitmap(width, height)!!,
-                    15f, 40f, width, height, ppm, width + 20f, height/5f, speed
-                ),
-                Building(
-                    "building_13",
-                    ResourcesCompat.getDrawable(resources, R.drawable.building_13, null)?.toBitmap(width, height)!!,
-                    15f, 50f, width, height, ppm, width + 20f, height/5f, speed
-                ),
-                Building(
-                    "building_14",
-                    ResourcesCompat.getDrawable(resources, R.drawable.building_14, null)?.toBitmap(width, height)!!,
-                    23f, 70f, width, height, ppm, width + 20f, height/5f, speed
-                ),
-                Building(
-                    "building_15",
-                    ResourcesCompat.getDrawable(resources, R.drawable.building_15, null)?.toBitmap(width, height)!!,
-                    10f, 60f, width, height, ppm, width + 20f, height/5f, speed
-                ),
-                Building(
-                    "building_16",
-                    ResourcesCompat.getDrawable(resources, R.drawable.building_16, null)?.toBitmap(width, height)!!,
-                    18f, 50f, width, height, ppm, width + 20f, height/5f, speed
-                ),
-                Building(
-                    "building_17",
-                    ResourcesCompat.getDrawable(resources, R.drawable.building_17, null)?.toBitmap(width, height)!!,
-                    25f, 60f, width, height, ppm, width + 20f, height/5f, speed
-                )*/
-            )
 
 
 
@@ -593,7 +695,7 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
 
 
 
-
+            // Convert the user's helicopter images for the animation and store them in an array
             /*heli_animation = arrayOf(
                 ResourcesCompat.getDrawable(resources, R.drawable.heli_1_1, null)?.toBitmap(width, height)!!,
                 ResourcesCompat.getDrawable(resources, R.drawable.heli_1_2, null)?.toBitmap(width, height)!!,
@@ -608,7 +710,7 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
                 ResourcesCompat.getDrawable(resources, R.drawable.heli_green_3, null)?.toBitmap(width, height)!!
             )
 
-
+            // Init the helicopter bitmap with the first bitmap in the animation array
             heli = heli_animation[0]
 
             // USO SOLO ppm E NON ANCHE ppm_y PERCHÈ ALTRIMENTI DISTORCE L'IMMAGINE
@@ -617,16 +719,6 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
             heli_scale_y      = heli_height * ppm / heli.height
             heli_width_scaled  = heli.width * heli_scale_x
             heli_height_scaled = heli.height * heli_scale_y
-
-            /*dirigible_scale_x      = dirigible_width * ppm / dirigible.width
-            dirigible_scale_y      = dirigible_height * ppm / dirigible.height
-            dirigible_width_scaled  = dirigible.width * dirigible_scale_x
-            dirigible_height_scaled = dirigible.height * dirigible_scale_y*/
-
-            /*ufo_scale_x       = ufo_width * ppm / ufo.width
-            ufo_scale_y       = ufo_height * ppm / ufo.height
-            ufo_width_scaled  = ufo.width * ufo_scale_x
-            ufo_height_scaled = ufo.height * ufo_scale_y*/
 
             /*radius *= ppm
             speed  *= ppm
@@ -649,12 +741,6 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
             // Set translation values converting from meters
             user_dx *= ppm
             //user_dy *= ppm_y
-
-            /*dirigible_dx = width + dirigible_width + 20f
-            dirigible_dy = 20f
-
-            ufo_dx = width + ufo_width + 20f
-            ufo_dy = width - 20f*/
 
             pickBuilding()
             pickVehicle()
@@ -892,7 +978,7 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
             pickBuilding()
 
         if (checkCollision()) {
-            game_over = true
+            gameEnd = true
 
             val fragment = findFragment<GameFragment>()
             fragment.gameEnd(score.toLong(), false)
@@ -963,15 +1049,19 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
 
         // Height range height*0.2 .. height*0.76 = from 20% to 76% of the screen height
         // Remember that 0% = top and 100% = bottom
-        val r = (20..76).random() / 100f
-        //val r = 0.2f
+        //val r = (20..76).random() / 100f
+
+        // For debug
+        val r = 0.2f
+        building.setX(width*0.35f)
+
 
         building.setY(height*r)
 
         // Increase the distance between obstacles if the height of
         // the building is greater than a threshold
-        if (r > 3.5f && building.getX() - vehicle.getX() < heli_width_scaled * 2f)
-            building.setX(width + vehicle.getBitmapScaledWidth() + heli_width_scaled * 2f)
+        //if (r > 3.5f && building.getX() - vehicle.getX() < heli_width_scaled * 2f)
+        //    building.setX(width + vehicle.getBitmapScaledWidth() + heli_width_scaled * 2f)
     }
 
     // Pick a random vehicle and set a random height for it

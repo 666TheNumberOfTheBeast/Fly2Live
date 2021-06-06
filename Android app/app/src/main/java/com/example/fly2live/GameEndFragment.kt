@@ -66,8 +66,8 @@ class GameEndFragment : Fragment() {
                 submitScore(getString(R.string.leaderboard_best_score_multiplayer_id))
                 //mLeaderboardClient.submitScore(getString(R.string.leaderboard_best_score_multiplayer_id), score)
             }
-            else
-                submitScore(getString(R.string.leaderboard_best_score_single_player_id))
+            //else
+                //submitScore(getString(R.string.leaderboard_best_score_single_player_id))
                 //mLeaderboardClient.submitScore(getString(R.string.leaderboard_best_score_single_player_id), score)
         }
 

@@ -45,7 +45,6 @@
         android:text="@string/city_night"
         android:textColor="@color/white_locked"
         android:textSize="33sp"
-        android:clickable="false"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/button_scenario_1"
         app:layout_constraintBottom_toBottomOf="parent"

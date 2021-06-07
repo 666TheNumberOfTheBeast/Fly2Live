@@ -7,7 +7,6 @@
     android:background="@android:color/black"
     tools:context=".SettingsFragment">
 
-
     <TextView
         android:id="@+id/menu_title"
         android:layout_width="wrap_content"
@@ -50,5 +49,57 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintVertical_bias="0.108" />
+
+    <TextView
+        android:id="@+id/player_level_current"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/audiowide"
+        android:text="1"
+        android:textColor="@color/white_locked"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toBottomOf="@id/progress_player_level"
+        app:layout_constraintEnd_toStartOf="@id/progress_player_level"
+        app:layout_constraintHorizontal_bias="0.66"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/progress_player_level" />
+
+    <TextView
+        android:id="@+id/player_level_next"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/audiowide"
+        android:text="2"
+        android:textColor="@color/white_locked"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toBottomOf="@id/progress_player_level"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.34"
+        app:layout_constraintStart_toEndOf="@id/progress_player_level"
+        app:layout_constraintTop_toTopOf="@id/progress_player_level" />
+
+    <ProgressBar
+        android:id="@+id/progress_player_level"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:progress="10"
+        android:progressTint="@color/blue"
+        android:progressBackgroundTint="@android:color/white"
+        android:scaleY="3"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/button_scenario_2"
+        app:layout_constraintVertical_bias="0.882"
+        app:layout_constraintWidth_percent="0.5"/>
+    <!--
+        android:secondaryProgressTint="#FFFFFF"
+        android:secondaryProgress="100"
+        android:progressTint="#1F51FF"
+        android:progressTint="#40E0D0"
+        android:progressTint="#0096FF
+        android:progressTint="#00FFFF"
+        style="@android:style/Widget.ProgressBar.Horizontal" -->
 
 </androidx.constraintlayout.widget.ConstraintLayout>

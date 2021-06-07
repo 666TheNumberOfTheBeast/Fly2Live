@@ -4,7 +4,7 @@
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
 
-    <!-- Text color for cockpit screens -->
+    <!-- Text color for main fragment -->
     <color name="green">#00FF00</color>
     <color name="red">#FF0000</color>
 
@@ -13,7 +13,7 @@
     <color name="silver">#C0C0C0</color>
     <color name="bronze">#cd7f32</color>
 
-    <!-- Background colors for stats screen -->
+    <!-- Background colors for stats fragment -->
     <color name="orange_bg">#4DFFA500</color>
     <color name="green_bg">#4D00FF00</color>
     <color name="red_bg">#4DFF0000</color>
@@ -23,4 +23,8 @@
 
     <!-- Text color for locked scenario -->
     <color name="white_locked">#4DFFFFFF</color>
+
+    <!-- Text color for game end fragment -->
+    <color name="orange">#FFAA00</color>
+    <color name="blue">#1F51FF</color>
 </resources>

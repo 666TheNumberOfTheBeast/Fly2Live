@@ -66,6 +66,7 @@ class GameEndFragment : Fragment() {
                 submitScore(getString(R.string.leaderboard_best_score_multiplayer_id))
                 //mLeaderboardClient.submitScore(getString(R.string.leaderboard_best_score_multiplayer_id), score)
             }
+            // temp disabled to save api calls
             //else
                 //submitScore(getString(R.string.leaderboard_best_score_single_player_id))
                 //mLeaderboardClient.submitScore(getString(R.string.leaderboard_best_score_single_player_id), score)
@@ -125,17 +126,25 @@ class GameEndFragment : Fragment() {
             scoreView.text = scoreView.text.toString() + " " + score.toString()*/
 
 
-        view.findViewById<TextView>(R.id.restart).setOnClickListener{
+        // Show earned XP
+        val xpView = view.findViewById<TextView>(R.id.xp)
+        val xp = (score * 1.1).toInt()
+        xpView.text = xpView.text.toString() + " " + xp.toString()
+
+        // TODO: submit earned xp to the DB
+
+        // Set button listeners
+        view.findViewById<TextView>(R.id.button_restart).setOnClickListener{
             findNavController().navigate(R.id.action_gameEndFragment_to_gameFragment)
         }
 
-        view.findViewById<TextView>(R.id.go_to_menu).setOnClickListener{
+        view.findViewById<TextView>(R.id.button_go_to_menu).setOnClickListener{
             findNavController().navigate(R.id.action_gameEndFragment_to_mainFragment)
         }
 
         // Check if the player has won a multiplayer game or has achieved a new high score
         /*if (winner || newHighScore) {
-            val shareView = view.findViewById<TextView>(R.id.share)
+            val shareView = view.findViewById<TextView>(R.id.button_share)
 
             // Make the share button visible and add listener
             shareView.visibility = View.VISIBLE
@@ -213,7 +222,7 @@ class GameEndFragment : Fragment() {
             scoreView.text = scoreView.text.toString() + " " + score.toString()
 
         if (winner || newHighScore) {
-            val shareView = view!!.findViewById<TextView>(R.id.share)
+            val shareView = view!!.findViewById<TextView>(R.id.button_share)
 
             // Make the share button visible and add listener
             shareView.visibility = View.VISIBLE

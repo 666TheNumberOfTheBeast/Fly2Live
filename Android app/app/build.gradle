@@ -2,6 +2,10 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
+// MongoDB Realm
+apply plugin: 'kotlin-kapt'
+apply plugin: 'realm-android'
+
 android {
     compileSdkVersion 30
     buildToolsVersion "29.0.2"
@@ -19,6 +23,11 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+}
+
+// MongoDB Realm Sync to connect with backend
+realm {
+    syncEnabled = true
 }
 
 dependencies {
@@ -47,7 +56,7 @@ dependencies {
     implementation 'com.google.android.gms:play-services-games:21.0.0'
 
     // RecyclerView
-    implementation "androidx.recyclerview:recyclerview:1.2.0"
+    implementation "androidx.recyclerview:recyclerview:1.2.1"
 
     // Volley
     implementation 'com.android.volley:volley:1.2.0'
@@ -60,5 +69,8 @@ dependencies {
 
     // Coroutines
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.1'
+
+    // MongoDB Realm
+    //implementation "io.realm:android-adapters:4.0.0"
 }
 

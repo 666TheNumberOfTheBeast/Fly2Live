@@ -5,8 +5,8 @@ import android.content.Context
 import android.media.MediaPlayer
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.WindowManager
+import io.realm.Realm
 
 
 class MainActivity : AppCompatActivity() {
@@ -29,6 +29,10 @@ class MainActivity : AppCompatActivity() {
         soundtrack?.setOnPreparedListener { mp ->
             mp.isLooping = true
         }
+
+        // Initialize the Realm library.
+        // Your application should initialize Realm just once each time the application runs
+        Realm.init(this)
     }
 
     /*override fun onCreateOptionsMenu(menu: Menu): Boolean {

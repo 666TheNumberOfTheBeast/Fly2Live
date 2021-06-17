@@ -3,6 +3,7 @@ package com.example.fly2live
 import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,6 +13,8 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import io.realm.mongodb.App
+import io.realm.mongodb.AppConfiguration
 
 
 class SettingsFragment : Fragment() {
@@ -111,6 +114,19 @@ class SettingsFragment : Fragment() {
             findNavController().navigate(R.id.action_settingsFragment_to_loginFragment)
 
             //Toast.makeText(context, "A presto", Toast.LENGTH_SHORT).show()
+        }
+
+        // Log out from MongoDB Realm
+        val mongoRealmAppID = getString(R.string.mongo_db_realm_app_id)
+        val app = App(AppConfiguration.Builder(mongoRealmAppID).build())
+        val user = app.currentUser()
+
+        user?.logOutAsync {
+            if (it.isSuccess) {
+                Log.d("login", "Successfully logged out from MongoDB Realm")
+            } else {
+                Log.e("login", it.error.toString())
+            }
         }
     }
 }

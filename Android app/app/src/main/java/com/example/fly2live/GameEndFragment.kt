@@ -13,16 +13,27 @@ import android.widget.TextView
 import androidx.navigation.fragment.findNavController
 import androidx.lifecycle.lifecycleScope
 import com.example.fly2live.configuration.Configuration.Companion.MULTIPLAYER
+import com.example.fly2live.configuration.Configuration.Companion.PLAYER_LEVEL
+import com.example.fly2live.configuration.Configuration.Companion.PLAYER_XP
+import com.example.fly2live.player.PlayersLevelsCollection
+import com.example.fly2live.utils.isNewLevel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.games.Games
 import com.google.android.gms.games.LeaderboardsClient
 import com.google.android.gms.games.leaderboard.LeaderboardVariant.TIME_SPAN_ALL_TIME
+import io.realm.Realm
+import io.realm.mongodb.App
+import io.realm.mongodb.AppConfiguration
+import io.realm.mongodb.sync.SyncConfiguration
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.lang.Thread.sleep
 
 
 class GameEndFragment : Fragment() {
+    var account: GoogleSignInAccount? = null
+
     private var score  = 0L
     private var winner = false
 
@@ -37,7 +48,7 @@ class GameEndFragment : Fragment() {
         super.onCreate(savedInstanceState)
 
         // Access control
-        val account = GoogleSignIn.getLastSignedInAccount(activity)
+        account = GoogleSignIn.getLastSignedInAccount(activity)
         if (account == null) {
             // Attempt to pop the controller's back stack back to a specific destination
             findNavController().popBackStack(R.id.mainFragment, false)
@@ -50,8 +61,8 @@ class GameEndFragment : Fragment() {
             winner = arguments!!.getBoolean("winner")
 
             // Get events and leaderboards clients
-            val mEventsClient  = Games.getEventsClient(context!!, account)
-            mLeaderboardClient = Games.getLeaderboardsClient(context!!, account)
+            val mEventsClient  = Games.getEventsClient(context!!, account!!)
+            mLeaderboardClient = Games.getLeaderboardsClient(context!!, account!!)
 
             // Increment the correct event for the currently signed-in player.
             // Submit a score to a leaderboard for the currently signed-in player.
@@ -64,12 +75,10 @@ class GameEndFragment : Fragment() {
                     mEventsClient.increment(getString(R.string.event_game_lost_multiplayer_id), 1)
 
                 submitScore(getString(R.string.leaderboard_best_score_multiplayer_id))
-                //mLeaderboardClient.submitScore(getString(R.string.leaderboard_best_score_multiplayer_id), score)
             }
-            // temp disabled to save api calls
+            // TEMP DISABLED TO SAVE API CALLS
             //else
                 //submitScore(getString(R.string.leaderboard_best_score_single_player_id))
-                //mLeaderboardClient.submitScore(getString(R.string.leaderboard_best_score_single_player_id), score)
         }
 
         val sharedPref = context?.getSharedPreferences(getString(R.string.shared_preferences_name), Context.MODE_PRIVATE)
@@ -86,7 +95,7 @@ class GameEndFragment : Fragment() {
 
     }
 
-        override fun onCreateView(
+    override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
@@ -101,37 +110,60 @@ class GameEndFragment : Fragment() {
         if (MULTIPLAYER && winner)
             view.findViewById<TextView>(R.id.game_status_text).text = getString(R.string.you_win)
 
-        /*val scoreView = view.findViewById(R.id.score)
-
-        // Check if the player has achieved a new high score
-        if (newHighScore) {
-            scoreView.text = "NEW HIGH SCORE: " + score.toString()
-
-            // A LifecycleScope is defined for each Lifecycle object.
-            // Any coroutine launched in this scope is canceled when the Lifecycle is destroyed.
-            lifecycleScope.launch(Dispatchers.Default) {
-                while (true) {
-                    sleep(700)
-
-                    // Blink the high score text
-                    activity?.runOnUiThread(kotlinx.coroutines.Runnable {
-                        if (scoreView.visibility == View.VISIBLE) scoreView.visibility =
-                            View.INVISIBLE
-                        else scoreView.visibility = View.VISIBLE
-                    })
-                }
-            }
-        }
-        else
-            scoreView.text = scoreView.text.toString() + " " + score.toString()*/
-
-
         // Show earned XP
         val xpView = view.findViewById<TextView>(R.id.xp)
-        val xp = (score * 1.1).toInt()
-        xpView.text = xpView.text.toString() + " " + xp.toString()
+        //val xp = (score * 1.1).toInt()
+        val earnedXp = (score * 0.3).toInt()
+        xpView.text = xpView.text.toString() + " " + earnedXp.toString()
 
-        // TODO: submit earned xp to the DB
+        // Check if local configuration has been initialized (it should be)
+        if (PLAYER_LEVEL <= 0) {
+            // 2 strade: recupera da DB e lavora oppure manda errore.
+            // Dal momento che questo non dovrebbe avvenire, mi sembra opportuno mandare errore
+
+            Log.e("playerLevel", "Error: Local configuration has not been initialized when game ended")
+        }
+        else {
+            // Local configuration has been initialized, so use it
+            PLAYER_XP += earnedXp
+
+            // Check if a new level has been achieved
+            var isNewLevel = isNewLevel(PLAYER_LEVEL, PLAYER_XP)
+
+            // Check if multiple levels have been achieved
+            while (isNewLevel) {
+                PLAYER_LEVEL += 1
+                isNewLevel = isNewLevel(PLAYER_LEVEL, PLAYER_XP)
+            }
+        }
+
+        // Submit earned xp to the DB
+        val mongoRealmAppID = getString(R.string.mongo_db_realm_app_id)
+        val app = App(AppConfiguration.Builder(mongoRealmAppID).build())
+
+        val user = app.currentUser()
+
+        // Open the Realm
+        val partitionValue = account!!.id
+        val config = SyncConfiguration.Builder(user, partitionValue)
+            .build()
+        val realm = Realm.getInstance(config)
+
+        realm.executeTransactionAsync { transactionRealm ->
+            // Get player by querying the DB
+            val player = transactionRealm.where(PlayersLevelsCollection::class.java)
+                .equalTo("player_id", account!!.id)
+                .findFirst()
+
+            // Check if a record about the player has been found (it should be)
+            if (player != null) {
+                // Update record values
+                player.player_level = PLAYER_LEVEL
+                player.player_xp    = PLAYER_XP
+            }
+            else
+                Log.e("playerLevel", "Error: player record not in the DB while updating its record when game ended")
+        }
 
         // Set button listeners
         view.findViewById<TextView>(R.id.button_restart).setOnClickListener{
@@ -141,33 +173,6 @@ class GameEndFragment : Fragment() {
         view.findViewById<TextView>(R.id.button_go_to_menu).setOnClickListener{
             findNavController().navigate(R.id.action_gameEndFragment_to_mainFragment)
         }
-
-        // Check if the player has won a multiplayer game or has achieved a new high score
-        /*if (winner || newHighScore) {
-            val shareView = view.findViewById<TextView>(R.id.button_share)
-
-            // Make the share button visible and add listener
-            shareView.visibility = View.VISIBLE
-            shareView.setOnClickListener {
-                val sharingIntent = Intent(Intent.ACTION_SEND)
-                sharingIntent.type = "text/plain"
-
-                // TODO: add link to open stats page at the correct position
-
-                val shareBody: String
-                if (winner && newHighScore)
-                    shareBody = "I've won with a new high score of " + score + " on Fly2Live - multiplayer"
-                else if (winner)
-                    shareBody = "I've won with a score of " + score + " on Fly2Live - multiplayer"
-                else
-                    shareBody = "I've achieved a new high score of " + score + " on Fly2Live - single player"
-
-                sharingIntent.putExtra(Intent.EXTRA_SUBJECT, "Fly2Live winner")
-                sharingIntent.putExtra(Intent.EXTRA_TEXT, shareBody)
-
-                startActivity(Intent.createChooser(sharingIntent, "Share via"))
-            }
-        }*/
 
         updateUI()
     }
@@ -211,9 +216,8 @@ class GameEndFragment : Fragment() {
 
                     // Blink the high score text
                     activity?.runOnUiThread(kotlinx.coroutines.Runnable {
-                        if (scoreView.visibility == View.VISIBLE) scoreView.visibility =
-                            View.INVISIBLE
-                        else scoreView.visibility = View.VISIBLE
+                        if (scoreView.visibility == View.VISIBLE)   scoreView.visibility = View.INVISIBLE
+                        else                                        scoreView.visibility = View.VISIBLE
                     })
                 }
             }

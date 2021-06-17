@@ -58,12 +58,6 @@ class GameFragment : Fragment() {
         findNavController().navigate(R.id.action_gameFragment_to_gameEndFragment, bundle)
     }
 
-    /*override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        findNavController().popBackStack(R.id.loadingFragment, true)
-    }*/
-
 
     override fun onStart() {
         super.onStart()

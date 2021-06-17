@@ -132,6 +132,7 @@ class LoginFragment : Fragment() {
         val mongoRealmAppID = getString(R.string.mongo_db_realm_app_id)
         val app = App(AppConfiguration.Builder(mongoRealmAppID).build())
 
+        // GOOGLE AUTHENTICATION
         // QUESTI 2 METODI DI AUTENTICAZIONE TRAMITE GOOGLE NON FUNZIONANO PER PROBLEMI DELLA LIBRERIA DI MONGODB REALM!
         /*val authorizationCode = account.serverAuthCode
         Log.d("login","authorizationCode: $authorizationCode")
@@ -158,6 +159,7 @@ class LoginFragment : Fragment() {
         }*/
 
 
+        // API KEY AUTHENTICATION
         // OK MA OGNI VOLTA CREA UN DEVICE ID DIVERSO LATO SERVER
         // E SALVARE LA CLIENT KEY SUL DISPOSITIVO PUÒ ESSERE PERICOLOSO DAL MOMENTO CHE PUÒ ANDARE PERSA!
         /*val id = account.id
@@ -176,9 +178,9 @@ class LoginFragment : Fragment() {
         }*/
 
 
+        // CUSTOM JWT AUTHENTICATION
         val jwt = generateJWT(account)
         //Log.d("login","jwt: $jwt")
-
 
         // Debug
         /*val bytes = jwt.toByteArray()
@@ -193,11 +195,22 @@ class LoginFragment : Fragment() {
             Log.d("login", "substr decoded: ${String(decoded)}")
         }*/
 
-
         val customJWTCredentials = Credentials.jwt(jwt)
         app.loginAsync(customJWTCredentials) {
             if (it.isSuccess) {
-                Log.v("login", "Successfully authenticated using a custom JWT")
+                Log.d("login", "Successfully authenticated using a custom JWT")
+
+                /*val user = app.currentUser()
+                Log.d("login", "user!!.identities[0].id: " + user!!.identities[0].id)*/
+
+                /*val user = app.currentUser()
+                user?.linkCredentialsAsync(customJWTCredentials) { task ->
+                    if (task.isSuccess) {
+                        Log.d("login", "Credentials linked with success")
+                    }
+                    else
+                        Log.e("login", "Error logging in: ${task.error}")
+                }*/
 
                 // Retrieve player information
                 getPlayerInfo(account, "Bentornato ")
@@ -208,7 +221,6 @@ class LoginFragment : Fragment() {
     }
 
     private fun generateJWT(account: GoogleSignInAccount): String {
-
         // CUSTOM JWT TOKEN
         // HEADER:
         // {
@@ -231,12 +243,21 @@ class LoginFragment : Fragment() {
 
         // Get Google user ID
         val userId = account.id
-        Log.d("login","id: $userId")
+        Log.d("login","account.id: $userId")
 
         // Get current time in seconds from epoch (NumericDate)
         val now = System.currentTimeMillis() / 1000
         // Set token expiry to one hour from now
         val exp = now + 3600
+
+        // Get user data
+        Log.d("login","account.displayName: ${account.displayName}")
+        Log.d("login","account.email: ${account.email}")
+        Log.d("login","account.givenName: ${account.givenName}")
+        val userData = JSONObject()
+        userData.put("user_id", userId)
+        userData.put("user_name", account.displayName)
+        //userData.put("user_name", "Nome prova")
 
         val jwtHeader = JSONObject()
         jwtHeader.put("alg", "HS256")
@@ -245,14 +266,16 @@ class LoginFragment : Fragment() {
         val jwtPayload = JSONObject()
         jwtPayload.put("aud", getString(R.string.mongo_db_realm_app_id))
         jwtPayload.put("sub", userId)
+        //jwtPayload.put("sub", "id prova")
         jwtPayload.put("exp", exp)
         jwtPayload.put("iat", now)
+        jwtPayload.put("user_data", userData)
 
         val hashingAlgorithm = "HmacSHA256"
         val key              = getString(R.string.mongo_db_realm_custom_jwt_auth_secret)
 
-        var message = ""
-        var signature64 = ""
+        val message: String
+        val signature64: String
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             // Version >= O => use the URL and Filename safe Base64 Alphabet ('-' replaces '+' and '_' replaces '/')
@@ -365,9 +388,9 @@ class LoginFragment : Fragment() {
 
                 //Toast.makeText(context, msgText + player.name, Toast.LENGTH_SHORT).show()
 
-                Log.d("login", "name: $name")
-                Log.d("login", "displayName: $displayName")
-                Log.d("login", "id: $id")
+                Log.d("login", "player.name: $name")
+                Log.d("login", "player.displayName: $displayName")
+                Log.d("login", "player.id: $id")
 
                 // Set player ID using the Google account one
                 PLAYER_ID = id

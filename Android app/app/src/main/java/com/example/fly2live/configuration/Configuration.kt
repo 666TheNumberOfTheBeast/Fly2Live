@@ -4,6 +4,11 @@ class Configuration {
     companion object {
         // Google Games player ID
         var PLAYER_ID = ""
+        // Player levels and xp (retrieve the first time and then handle them locally)
+        var PLAYER_LEVEL = -1
+        var PLAYER_XP    = -1L
+        var PLAYER_SCORE = -1L
+
 
         // Game mode
         var MULTIPLAYER = false

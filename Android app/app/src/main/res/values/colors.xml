@@ -27,4 +27,5 @@
     <!-- Text color for game end fragment -->
     <color name="orange">#FFAA00</color>
     <color name="blue">#1F51FF</color>
+    <color name="bright_blue">#0096FF</color>
 </resources>

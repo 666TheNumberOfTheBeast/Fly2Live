@@ -10,12 +10,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.navigation.fragment.findNavController
 import androidx.lifecycle.lifecycleScope
 import com.example.fly2live.configuration.Configuration.Companion.MULTIPLAYER
 import com.example.fly2live.configuration.Configuration.Companion.PLAYER_LEVEL
 import com.example.fly2live.configuration.Configuration.Companion.PLAYER_XP
 import com.example.fly2live.player.PlayersLevelsCollection
+import com.example.fly2live.utils.getCurrentLevelMaxXp
 import com.example.fly2live.utils.isNewLevel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -107,8 +109,11 @@ class GameEndFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         // Check if the player has won in multiplayer mode
-        if (MULTIPLAYER && winner)
-            view.findViewById<TextView>(R.id.game_status_text).text = getString(R.string.you_win)
+        if (MULTIPLAYER && winner) {
+            val gameStatusView = view.findViewById<TextView>(R.id.game_status_text)
+            gameStatusView.text = getString(R.string.you_win)
+            gameStatusView.setTextColor(ContextCompat.getColor(context!!, R.color.green))
+        }
 
         // Show earned XP
         val xpView = view.findViewById<TextView>(R.id.xp)
@@ -129,11 +134,23 @@ class GameEndFragment : Fragment() {
 
             // Check if a new level has been achieved
             var isNewLevel = isNewLevel(PLAYER_LEVEL, PLAYER_XP)
+            val showText = isNewLevel
 
             // Check if multiple levels have been achieved
             while (isNewLevel) {
+                // Subtract current level max xp to store xp in relative terms
+                PLAYER_XP    -= getCurrentLevelMaxXp(PLAYER_LEVEL)
+                // Increment player level
                 PLAYER_LEVEL += 1
+                // Check if a new level has been achieved
                 isNewLevel = isNewLevel(PLAYER_LEVEL, PLAYER_XP)
+            }
+
+            // Show text if a new level has been achieved
+            if (showText) {
+                val newLevelView = view.findViewById<TextView>(R.id.new_level)
+                newLevelView.text = newLevelView.text.toString() + " " + PLAYER_LEVEL
+                newLevelView.blink()
             }
         }
 
@@ -164,6 +181,9 @@ class GameEndFragment : Fragment() {
             else
                 Log.e("playerLevel", "Error: player record not in the DB while updating its record when game ended")
         }
+
+        // Close realm to free resources
+        realm.close()
 
         // Set button listeners
         view.findViewById<TextView>(R.id.button_restart).setOnClickListener{
@@ -207,20 +227,7 @@ class GameEndFragment : Fragment() {
         if (newHighScore) {
             newHighScoreFired = true
             scoreView.text = getString(R.string.new_high_score) + ": " + score.toString()
-
-            // A LifecycleScope is defined for each Lifecycle object.
-            // Any coroutine launched in this scope is canceled when the Lifecycle is destroyed.
-            lifecycleScope.launch(Dispatchers.Default) {
-                while (true) {
-                    sleep(700)
-
-                    // Blink the high score text
-                    activity?.runOnUiThread(kotlinx.coroutines.Runnable {
-                        if (scoreView.visibility == View.VISIBLE)   scoreView.visibility = View.INVISIBLE
-                        else                                        scoreView.visibility = View.VISIBLE
-                    })
-                }
-            }
+            scoreView.blink()
         }
         else
             scoreView.text = scoreView.text.toString() + " " + score.toString()
@@ -248,6 +255,24 @@ class GameEndFragment : Fragment() {
                 sharingIntent.putExtra(Intent.EXTRA_TEXT, shareBody)
 
                 startActivity(Intent.createChooser(sharingIntent, "Share via"))
+            }
+        }
+    }
+
+    private fun TextView.blink() {
+        val view = this
+
+        // A LifecycleScope is defined for each Lifecycle object.
+        // Any coroutine launched in this scope is canceled when the Lifecycle is destroyed.
+        lifecycleScope.launch(Dispatchers.Default) {
+            while (true) {
+                sleep(700)
+
+                // Blink the high score text
+                activity?.runOnUiThread(kotlinx.coroutines.Runnable {
+                    if (view.visibility == View.VISIBLE)   view.visibility = View.INVISIBLE
+                    else                                   view.visibility = View.VISIBLE
+                })
             }
         }
     }

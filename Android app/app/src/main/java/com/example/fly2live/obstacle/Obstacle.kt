@@ -132,7 +132,7 @@ abstract class Obstacle(name: String,
         // CON QUESTA VERSIONE NON LAGGA MAI PERCHÈ NON USO dt
         //pos_x -= speed
         // CON QUESTA VERSIONE POTREBBE LAGGARE UN PO' PERCHÈ dt NON È COSTANTE
-        //pos_x -= speed * dt
+        pos_x -= speed * dt
 
         if (pos_x + bitmap_width_scaled < 0) {
             //pos_x = screen_width + bitmap_width_scaled

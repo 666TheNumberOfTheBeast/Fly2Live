@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:fontFamily="@font/audiowide"
         android:text="@string/game_over"
-        android:textColor="@color/green"
+        android:textColor="@color/red"
         android:textSize="50sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -51,6 +51,21 @@
         app:layout_constraintVertical_bias="0.038" />
 
     <TextView
+        android:id="@+id/new_level"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/audiowide"
+        android:text="@string/new_level"
+        android:textColor="@color/bright_blue"
+        android:textSize="20sp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/xp"
+        app:layout_constraintVertical_bias="0.038" />
+
+    <TextView
         android:id="@+id/button_restart"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -61,7 +76,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/score"
+        app:layout_constraintTop_toBottomOf="@+id/new_level"
         app:layout_constraintVertical_bias="0.296" />
 
     <TextView

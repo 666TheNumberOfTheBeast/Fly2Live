@@ -174,7 +174,7 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
                 bg = ResourcesCompat.getDrawable(resources, R.drawable.city_bg_day, null)?.toBitmap(width, height)!!
 
                 buildings = arrayOf(
-                    /*Building(
+                    Building(
                         "building_01",
                         ResourcesCompat.getDrawable(resources, R.drawable.building_day_01, null)?.toBitmap(width, height)!!,
                         arrayOf(
@@ -328,7 +328,7 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
                         ),
                         //15f, 50f, width, height, ppm, width + 20f, height/5f, speed
                         15f, 50f, width, height, ppm, world_width + 3f, height/5f, speed
-                    ),*/
+                    ),
                     Building(
                         "building_14",
                         ResourcesCompat.getDrawable(resources, R.drawable.building_day_14, null)?.toBitmap(width, height)!!,
@@ -340,29 +340,53 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
                         ),
                         //23f, 70f, width, height, ppm, width + 20f, height/5f, speed
                         23f, 70f, width, height, ppm, world_width + 3f, height/5f, speed
-                    )/*,
+                    ),
                     Building(
                         "building_15",
                         ResourcesCompat.getDrawable(resources, R.drawable.building_day_15, null)?.toBitmap(width, height)!!,
-                        10f, 60f, width, height, ppm, width + 20f, height/5f, speed
+                        arrayOf(
+                            arrayOf(0f, dp2px(355f), 1f, 0f),       // Bottom rect
+                            arrayOf(0.1f, dp2px(246f), 0.86f, 0f),  // Middle rect 1
+                            arrayOf(0.25f, dp2px(207f), 0.71f, 0f), // Middle rect 2
+                            arrayOf(0.4f, dp2px(148f), 0.57f, 0f),  // Top rect 1
+                            arrayOf(0.53f, 0f, 0.57f, 0f)           // Top rect 2
+                        ),
+                        //10f, 60f, width, height, ppm, width + 20f, height/5f, speed
+                        10f, 60f, width, height, ppm, world_width + 3f, height/5f, speed
                     ),
                     Building(
                         "building_16",
                         ResourcesCompat.getDrawable(resources, R.drawable.building_day_16, null)?.toBitmap(width, height)!!,
-                        18f, 50f, width, height, ppm, width + 20f, height/5f, speed
+                        arrayOf(
+                            arrayOf(0f, dp2px(137f), 1f, 0f),        // Bottom rect
+                            arrayOf(0.13f, dp2px(120f), 0.87f, 0f),  // Middle rect 1
+                            arrayOf(0.24f, dp2px(103f), 0.76f, 0f),  // Middle rect 2
+                            arrayOf(0.28f, dp2px(84f), 0.49f, 0f),   // Middle rect 3
+                            arrayOf(0.6f, dp2px(26f), 0.62f, 0f),    // Top rect 1
+                            arrayOf(0.68f, dp2px(21f), 0.71f, 0f),   // Top rect 2
+                            arrayOf(0.53f, 0f, 0.55f, 0f)               // Top rect 3
+                        ),
+                        //18f, 50f, width, height, ppm, width + 20f, height/5f, speed
+                        18f, 50f, width, height, ppm, world_width + 3f, height/5f, speed
                     ),
                     Building(
                         "building_17",
                         ResourcesCompat.getDrawable(resources, R.drawable.building_day_17, null)?.toBitmap(width, height)!!,
-                        25f, 60f, width, height, ppm, width + 20f, height/5f, speed
-                    )*/
+                        arrayOf(
+                            arrayOf(0f, dp2px(78f), 1f, 0f),        // Bottom rect
+                            arrayOf(0.15f, dp2px(50f), 0.88f, 0f),  // Middle rect
+                            arrayOf(0.41f, 0f, 0.63f, 0f)              // Top rect
+                        ),
+                        //25f, 60f, width, height, ppm, width + 20f, height/5f, speed
+                        25f, 60f, width, height, ppm, world_width + 3f, height/5f, speed
+                    )
                 )
             }
             else {
                 bg = ResourcesCompat.getDrawable(resources, R.drawable.city_bg_night, null)?.toBitmap(width, height)!!
 
                 buildings = arrayOf(
-                    /*Building(
+                    Building(
                         "building_01",
                         ResourcesCompat.getDrawable(resources, R.drawable.building_night_01, null)?.toBitmap(width, height)!!,
                         arrayOf(
@@ -374,7 +398,7 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
                             arrayOf(0.18f, dp2px(135f), 0.78f, 0f), // Middle rect 3
                             arrayOf(0.2f, dp2px(118f), 0.75f, 0f),  // Top rect
                             arrayOf(0.25f, dp2px(100f), 0.7f, 0f),  // Top rect
-                            arrayOf(0.3f, dp2px(90f), 0.65f, 0f),    // Top rect
+                            arrayOf(0.3f, dp2px(90f), 0.65f, 0f),   // Top rect
                             arrayOf(0.35f, dp2px(82f), 0.6f, 0f)    // Top rect
                         ),
                         //15f, 100f, width, height, ppm, width + 20f, height*0.2f, speed
@@ -385,8 +409,8 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
                         ResourcesCompat.getDrawable(resources, R.drawable.building_night_02, null)?.toBitmap(width, height)!!,
                         arrayOf(
                             arrayOf(0.26f, dp2px(345f), 0.72f, 0f),  // Bottom rect
-                            arrayOf(0.4f, dp2px(153f), 0.6f, 0f),   // Middle rect
-                            arrayOf(0.45f, 0f, 0.54f, 0f)            // Top rect
+                            arrayOf(0.4f, dp2px(153f), 0.6f, 0f),    // Middle rect
+                            arrayOf(0.45f, 0f, 0.54f, 0f)               // Top rect
                         ),
                         //10f, 90f, width, height, ppm, width + 20f, height*0.2f, speed
                         10f, 110f, width, height, ppm, world_width + 3f, height*0.2f, speed
@@ -402,7 +426,7 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
                         ),
                         //25f, 110f, width, height, ppm, width + 20f, height*0.2f, speed
                         18f, 70f, width, height, ppm, world_width + 3f, height*0.2f, speed
-                    ),*/
+                    ),
                     Building(
                         "building_04",
                         ResourcesCompat.getDrawable(resources, R.drawable.building_night_04, null)?.toBitmap(width, height)!!,
@@ -414,45 +438,52 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
                         ),
                         //30f, 90f, width, height, ppm, width + 20f, height*0.2f, speed
                         20f, 70f, width, height, ppm, world_width + 3f, height*0.2f, speed
-                    )/*,
+                    ),
                     Building(
                         "building_05",
                         ResourcesCompat.getDrawable(resources, R.drawable.building_night_05, null)?.toBitmap(width, height)!!,
                         arrayOf(
-                            arrayOf(0f, dp2px(154f), 1f, 0f),       // Bottom rect
-                            arrayOf(0f, dp2px(74f), 0.24f, 0f),     // Middle left rect
-                            arrayOf(0.27f, dp2px(112f), 0.75f, 0f), // Middle center rect
-                            arrayOf(0.78f, dp2px(112f), 0.9f, 0f),  // Middle right rect
-                            arrayOf(0.34f, 0f, 0.75f, 0f)           // Top rect
+                            arrayOf(0f, dp2px(72f), 1f, 0f),      // Bottom rect
+                            arrayOf(0f, dp2px(28f), 0.7f, 0f),    // Middle rect 1
+                            arrayOf(0.45f, dp2px(10f), 0.6f, 0f), // Middle rect 2
+                            arrayOf(0.7f, dp2px(40f), 0.8f, 0f), // Middle rect 3
+                            arrayOf(0.8f, dp2px(55f), 0.9f, 0f), // Middle rect 4
+                            arrayOf(0.13f, 0f, 0.45f, 0f)           // Top rect
                         ),
                         //35f, 60f, width, height, ppm, width + 20f, height*0.2f, speed
-                        35f, 60f, width, height, ppm, world_width + 3f, height*0.2f, speed
+                        25f, 60f, width, height, ppm, world_width + 3f, height*0.2f, speed
                     ),
                     Building(
                         "building_06",
                         ResourcesCompat.getDrawable(resources, R.drawable.building_night_06, null)?.toBitmap(width, height)!!,
                         arrayOf(
-                            arrayOf(0f, dp2px(301f), 1f, 0f),       // Bottom rect
-                            arrayOf(0f, dp2px(75f), 0.37f, 0f),     // Middle left rect
-                            arrayOf(0.53f, dp2px(175f), 0.87f, 0f), // Middle right rect
-                            arrayOf(0.07f, 0f, 0.29f, 0f)           // Top rect
+                            arrayOf(0f, dp2px(150f), 1f, 0f),        // Bottom rect
+                            arrayOf(0.05f, dp2px(122f), 0.95f, 0f),  // Middle rect 1
+                            arrayOf(0.1f, dp2px(98f), 0.9f, 0f),     // Middle rect 2
+                            arrayOf(0.15f, dp2px(80f), 0.86f, 0f),   // Middle rect 3
+                            arrayOf(0.18f, dp2px(67f), 0.82f, 0f),   // Middle rect 4
+                            arrayOf(0.23f, dp2px(57f), 0.76f, 0f),   // Middle rect 5
+                            arrayOf(0.28f, dp2px(46f), 0.72f, 0f),   // Middle rect 6
+                            arrayOf(0.33f, dp2px(36f), 0.68f, 0f),   // Middle rect 7
+                            arrayOf(0.37f, dp2px(26f), 0.65f, 0f),   // Middle rect 8
+                            arrayOf(0.41f, dp2px(16f), 0.6f, 0f),    // Middle rect 9
+                            arrayOf(0.47f, 0f, 0.52f, 0f)            // Top rect
                         ),
                         //35f, 40f, width, height, ppm, width + 20f, height*0.2f, speed
-                        35f, 40f, width, height, ppm, world_width + 3f, height*0.2f, speed // Measures in meters except pos_y
+                        25f, 100f, width, height, ppm, world_width + 3f, height*0.2f, speed // Measures in meters except pos_y
                     ),
                     Building(
                         "building_07",
                         ResourcesCompat.getDrawable(resources, R.drawable.building_night_07, null)?.toBitmap(width, height)!!,
                         arrayOf(
-                            arrayOf(0f, dp2px(319f), 1f, 0f),       // Bottom rect
-                            arrayOf(0f, dp2px(164f), 0.91f, 0f),    // Middle rect
-                            arrayOf(0f, dp2px(140f), 0.22f, 0f),    // Left "triangle"
-                            arrayOf(0.7f, dp2px(140f), 0.91f, 0f),  // Right "triangle"
-                            arrayOf(0.31f, 0f, 0.4f, 0f)            // Top rect
+                            arrayOf(0f, dp2px(102f), 0.93f, 0f),    // Bottom rect
+                            arrayOf(0.06f, dp2px(60f), 0.87f, 0f),  // Middle rect
+                            arrayOf(0.19f, dp2px(10f), 0.74f, 0f),  // Middle rect
+                            arrayOf(0.26f, 0f, 0.67f, 0f)              // Top rect
                         ),
                         //15f, 80f, width, height, ppm, width + 20f, height/5f, speed
                         //15f, 80f, width, height, ppm, width + 3f*ppm, height/5f, speed
-                        15f, 80f, width, height, ppm, world_width + 3f, height*0.2f, speed // Measures in meters except pos_y
+                        18f, 80f, width, height, ppm, world_width + 3f, height*0.2f, speed // Measures in meters except pos_y
                     ),
                     Building(
                         "building_08",
@@ -462,26 +493,47 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
                             arrayOf(0.1f, dp2px(15f), 0.95f, 0f), // Middle rect 1
                             arrayOf(0.27f, dp2px(10f), 0.9f, 0f), // Middle rect 2
                             arrayOf(0.47f, dp2px(5f), 0.8f, 0f),  // Middle rect 3
-                            arrayOf(0.65f, 0f, 0.75f, 0f)            // Top rect
+                            arrayOf(0.65f, 0f, 0.75f, 0f)         // Top rect
                         ),
                         //10f, 70f, width, height, ppm, width + 20f, height*0.2f, speed
-                        10f, 70f, width, height, ppm, world_width + 3f, height*0.2f, speed
+                        17f, 70f, width, height, ppm, world_width + 3f, height*0.2f, speed
                     ),
                     Building(
                         "building_09",
                         ResourcesCompat.getDrawable(resources, R.drawable.building_night_09, null)?.toBitmap(width, height)!!,
-                        17f, 70f, width, height, ppm, width + 20f, height/5f, speed
+                        arrayOf(
+                            arrayOf(0f, dp2px(22f), 1f, 0f),       // Bottom rect
+                            arrayOf(0.08f, dp2px(15f), 0.93f, 0f), // Middle rect 1
+                            arrayOf(0.15f, dp2px(8f), 0.87f, 0f),  // Middle rect 2
+                            arrayOf(0.23f, 0f, 0.77f, 0f)          // Top rect
+                        ),
+                        //17f, 70f, width, height, ppm, width + 20f, height/5f, speed
+                        25f, 70f, width, height, ppm, world_width + 3f, height/5f, speed
                     ),
                     Building(
                         "building_10",
                         ResourcesCompat.getDrawable(resources, R.drawable.building_night_10, null)?.toBitmap(width, height)!!,
-                        10f, 65f, width, height, ppm, width + 20f, height/5f, speed
+                        arrayOf(
+                            arrayOf(0.25f, dp2px(29f), 1f, 0f),    // Bottom rect
+                            arrayOf(0.33f, dp2px(20f), 0.87f, 0f)  // Top rect
+                        ),
+                        //10f, 65f, width, height, ppm, width + 20f, height/5f, speed
+                        13f, 65f, width, height, ppm, world_width + 3f, height/5f, speed
                     ),
                     Building(
                         "building_11",
                         ResourcesCompat.getDrawable(resources, R.drawable.building_night_11, null)?.toBitmap(width, height)!!,
-                        17f, 55f, width, height, ppm, width + 20f, height/5f, speed
-                    )*/
+                        arrayOf(
+                            arrayOf(0f, dp2px(203f), 1f, 0f),       // Bottom rect
+                            arrayOf(0.1f, dp2px(182f), 0.9f, 0f),  // Middle rect
+                            arrayOf(0.2f, dp2px(162f), 0.8f, 0f),  // Middle rect
+                            arrayOf(0.3f, dp2px(140f), 0.7f, 0f),  // Middle rect
+                            arrayOf(0.4f, dp2px(100f), 0.54f, 0f),  // Middle rect
+                            arrayOf(0.46f, 0f, 0.5f, 0f)               // Top rect
+                        ),
+                        //17f, 55f, width, height, ppm, width + 20f, height/5f, speed
+                        13f, 80f, width, height, ppm, world_width + 3f, height/5f, speed
+                    )
                 )
             }
 
@@ -1035,6 +1087,8 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
 
         canvas?.drawText("SCORE " + score.toLong(), 20f, 60f, painter_fill)
 
+        speed += 0.003f // max about 36-43 m/s. 50 m/s very difficult!
+
         invalidate()
 
 
@@ -1089,12 +1143,12 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
 
         // Height range height*0.2 .. height*0.76 = from 20% to 76% of the screen height
         // Remember that 0% = top and 100% = bottom
-        //val r = (20..76).random() / 100f
+        val r = (20..76).random() / 100f
 
         // For debug
-        val r = 0.2f
+        //val r = 0.2f
         //building.setX(width*0.35f)
-        building.setX(width*0.1f)
+        //building.setX(width*0.1f)
 
 
         building.setY(height*r)
@@ -1103,6 +1157,9 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
         // the building is greater than a threshold
         //if (r > 3.5f && building.getX() - vehicle.getX() < heli_width_scaled * 2f)
         //    building.setX(width + vehicle.getBitmapScaledWidth() + heli_width_scaled * 2f)
+
+        // Update speed
+        building.setSpeed(speed)
     }
 
     // Pick a random vehicle and set a random height for it
@@ -1118,10 +1175,13 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
         // the building is greater than a threshold
         if (building.getY() > height/3.5f && vehicle.getX() - building.getX() < heli_width_scaled * 2f)
             vehicle.setX(width + building.getBitmapScaledWidth() + heli_width_scaled * 2f)
+
+        // Update speed
+        vehicle.setSpeed(speed)
     }
 
     // Check if the user collides with an obstacle
-    private fun checkCollision(): Boolean { //return false
+    private fun checkCollision(): Boolean { return false
         //user_rect.set( user_dx, user_dy, user_dx + heli_width_scaled, user_dy + heli_height_scaled )
 
         val rects = building.getBounds()

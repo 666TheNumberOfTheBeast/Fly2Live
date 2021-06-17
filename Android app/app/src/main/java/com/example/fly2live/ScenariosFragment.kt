@@ -30,6 +30,7 @@ import io.realm.mongodb.App
 import io.realm.mongodb.AppConfiguration
 import io.realm.mongodb.sync.SyncConfiguration
 import org.bson.types.ObjectId
+import java.lang.Math.abs
 
 
 class ScenariosFragment : Fragment() {
@@ -134,7 +135,7 @@ class ScenariosFragment : Fragment() {
         //val xp          = 3500
         //val playerLevel = 2
 
-        /*
+
         // ======================================================
         // Calculate current level progress where each level is from 0 to 1000
         // Level 0 -> Level 1 = 0    -> 1000 => 1000 - 0    = 1000
@@ -172,7 +173,7 @@ class ScenariosFragment : Fragment() {
         // ======================================================
 
         // ======================================================
-        Log.d("progress", "Print xp when each level is from 0 to 1000*playerLevel starting from level 1")
+        /*Log.d("progress", "Print xp when each level is from 0 to 1000*playerLevel starting from level 1")
         var xpCurrent = 0
         for (i in 1..10) {
             val j = i+1
@@ -209,42 +210,53 @@ class ScenariosFragment : Fragment() {
         val playerLevelNextView     = view!!.findViewById<TextView>(R.id.player_level_next)
         val playerLevelProgressView = view!!.findViewById<ProgressBar>(R.id.progress_player_level)
 
-        // Set button listeners
-        btnScenario1.setOnClickListener {
-            SCENARIO = SCENARIO_CITY_DAY
-            navigate()
-        }
-
-        // Check if the player has unlocked the 2nd scenario
-        if (playerLevel >= 5) {
-            btnScenario2.setTextColor(ContextCompat.getColor(context!!, android.R.color.white))
-
-            btnScenario2.setOnClickListener {
-                SCENARIO = SCENARIO_CITY_NIGHT
+        // updateUI must be run on the UI thread when is called in the MongoDB Realm transaction
+        activity?.runOnUiThread(kotlinx.coroutines.Runnable {
+            // Set button listeners
+            btnScenario1.setOnClickListener {
+                SCENARIO = SCENARIO_CITY_DAY
                 navigate()
             }
-        } else {
-            btnScenario2.setOnClickListener {
-                Toast.makeText(context, "You have not unlocked this scenario yet", Toast.LENGTH_SHORT).show()
+
+            // Check if the player has unlocked the 2nd scenario
+            if (playerLevel >= 5) {
+                btnScenario2.setTextColor(ContextCompat.getColor(context!!, android.R.color.white))
+
+                btnScenario2.setOnClickListener {
+                    SCENARIO = SCENARIO_CITY_NIGHT
+                    navigate()
+                }
+            } else {
+                btnScenario2.setOnClickListener {
+                    Toast.makeText(
+                        context,
+                        "You have not unlocked this scenario yet",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             }
-        }
 
-        // Set text for levels surrounding the progress bar
-        playerLevelCurrentView.text = playerLevel.toString()
-        playerLevelNextView.text    = (playerLevel + 1).toString()
+            // Set text for levels surrounding the progress bar
+            playerLevelCurrentView.text = playerLevel.toString()
+            playerLevelNextView.text = (playerLevel + 1).toString()
 
-        val playerLevelMaxXp = getCurrentLevelMaxXp(playerLevel)
+            val playerLevelMaxXp = getCurrentLevelMaxXp(playerLevel)
 
-        //val progress = (((xp - xpPlayerLevelMax) / (1000f * (playerLevel+1))) * 100).toInt()
-        val progress = ((playerXp - playerLevelMaxXp) / (10f * (playerLevel + 1))).toInt()
-        // ======================================================
+            // RAGIONANDO IN TERMINI DI XP ASSOLUTI (SOMMO TUTTE LE XP DI OGNI LIVELLO RAGGIUNTO)
+            //val progress = (((xp - xpPlayerLevelMax) / (1000f * (playerLevel+1))) * 100).toInt()
+            //val progress = ((playerXp - playerLevelMaxXp) / (10f * (playerLevel + 1))).toInt()
 
-        Log.d("progress", "xp: $playerXp")
-        Log.d("progress", "playerLevel: $playerLevel")
-        Log.d("progress", "progress: $progress")
+            // RAGIONANDO IN TERMINI DI XP RELATIVI (OGNI VOLTA CHE SALGO DI LIVELLO SOTTRAGGO MAX XP LIVELLO PRECEDENTE)
+            val progress = (playerXp / playerLevelMaxXp).toInt()
 
-        // Set progress bar value smoothly
-        Handler(Looper.getMainLooper()).post { playerLevelProgressView.smoothProgress(progress) }
+            Log.d("progress", "playerLevel: $playerLevel")
+            Log.d("progress", "playerXp: $playerXp")
+            Log.d("progress", "progress: $progress")
+
+            // Set progress bar value smoothly
+            playerLevelProgressView.smoothProgress(progress)
+            //Handler(Looper.getMainLooper()).post { playerLevelProgressView.smoothProgress(progress) }
+        })
     }
 
     private fun ProgressBar.smoothProgress(percent: Int){

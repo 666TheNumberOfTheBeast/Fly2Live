@@ -16,6 +16,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.fly2live.configuration.Configuration.Companion.MULTIPLAYER
+import com.example.fly2live.configuration.Configuration.Companion.PLAYER_ID
 import com.example.fly2live.configuration.Configuration.Companion.PLAYER_LEVEL
 import com.example.fly2live.configuration.Configuration.Companion.PLAYER_XP
 import com.example.fly2live.configuration.Configuration.Companion.SCENARIO
@@ -74,7 +75,8 @@ class ScenariosFragment : Fragment() {
             val user = app.currentUser()
 
             // Open the Realm
-            val partitionValue = account!!.id
+            //val partitionValue = account!!.id
+            val partitionValue = PLAYER_ID
             val config = SyncConfiguration.Builder(user, partitionValue)
                 .build()
             val realm = Realm.getInstance(config)
@@ -82,7 +84,8 @@ class ScenariosFragment : Fragment() {
             realm.executeTransactionAsync { transactionRealm ->
                 // Get player level and xp by querying the DB
                 var player = transactionRealm.where(PlayersLevelsCollection::class.java)
-                    .equalTo("player_id", account!!.id)
+                    //.equalTo("player_id", account!!.id)
+                    .equalTo("player_id", PLAYER_ID)
                     .findFirst()
 
                 // Check if a record about the player has been found
@@ -107,7 +110,8 @@ class ScenariosFragment : Fragment() {
                     )
 
                     // Configure the instance
-                    player.player_id = account!!.id!!
+                    //player.player_id = account!!.id!!
+                    player.player_id    = PLAYER_ID
                     player.player_level = PLAYER_LEVEL
                     player.player_xp    = PLAYER_XP
                 }

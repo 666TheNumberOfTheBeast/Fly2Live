@@ -16,6 +16,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.widget.TextView
+import com.example.fly2live.utils.createScaleAnimation
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.example.fly2live.configuration.Configuration as myConfiguration
 
@@ -59,9 +60,9 @@ class MainFragment : Fragment() {
         if (savedInstanceState == null) {
             val animZoomOut =
                 if (orientation == Configuration.ORIENTATION_LANDSCAPE)
-                    createScaleAnimation(1f, 0.4f, 1f, 0.4f)
+                    createScaleAnimation(1f, 0.4f, 1f, 0.4f, 0.5f, 0.3f)
                 else
-                    createScaleAnimation(1f, 0.5f, 1f, 0.5f)
+                    createScaleAnimation(1f, 0.5f, 1f, 0.5f, 0.5f, 0.3f)
 
             animZoomOut.setAnimationListener(object : Animation.AnimationListener {
                 override fun onAnimationStart(animation: Animation) {}
@@ -146,18 +147,6 @@ class MainFragment : Fragment() {
         btnSettings.setOnClickListener{
             findNavController().navigate(R.id.action_mainFragment_to_settingsFragment)
         }
-    }
-
-    private fun createScaleAnimation(fromX: Float, toX: Float, fromY: Float, toY: Float): ScaleAnimation {
-        val anim = ScaleAnimation(fromX, toX,
-            fromY, toY,
-            Animation.RELATIVE_TO_SELF, 0.5f,
-            Animation.RELATIVE_TO_SELF, 0.3f)
-
-        anim.fillAfter = true
-        anim.duration  = 2500
-
-        return anim
     }
 
     // Start main soundtrack (if stopped coming back from game or game over fragments or renabled in settings) based on audio preference

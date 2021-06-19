@@ -16,6 +16,7 @@ import com.example.fly2live.vehicle.Vehicle
 import com.example.fly2live.building.Building
 import com.example.fly2live.configuration.Configuration.Companion.SCENARIO
 import com.example.fly2live.configuration.Configuration.Companion.SCENARIO_CITY_DAY
+import kotlinx.coroutines.*
 import kotlin.math.max
 import kotlin.math.min
 
@@ -153,8 +154,9 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
 
-        // Check if game ended and stop drawing
+        // Check if game ended
         if (gameEnd)
+            // Stop drawing
             return
 
         // Convert the images into bitmaps once
@@ -169,7 +171,7 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
             Log.d("ppm", height.toString())
             Log.d("ppm", ppm.toString())
 
-            // Convert the correct scenario images
+            // Convert the correct scenario images into bitmaps
             if (SCENARIO == SCENARIO_CITY_DAY) {
                 bg = ResourcesCompat.getDrawable(resources, R.drawable.city_bg_day, null)?.toBitmap(width, height)!!
 
@@ -467,7 +469,7 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
                             arrayOf(0.33f, dp2px(36f), 0.68f, 0f),   // Middle rect 7
                             arrayOf(0.37f, dp2px(26f), 0.65f, 0f),   // Middle rect 8
                             arrayOf(0.41f, dp2px(16f), 0.6f, 0f),    // Middle rect 9
-                            arrayOf(0.47f, 0f, 0.52f, 0f)            // Top rect
+                            arrayOf(0.47f, 0f, 0.52f, 0f)               // Top rect
                         ),
                         //35f, 40f, width, height, ppm, width + 20f, height*0.2f, speed
                         25f, 100f, width, height, ppm, world_width + 3f, height*0.2f, speed // Measures in meters except pos_y
@@ -493,7 +495,7 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
                             arrayOf(0.1f, dp2px(15f), 0.95f, 0f), // Middle rect 1
                             arrayOf(0.27f, dp2px(10f), 0.9f, 0f), // Middle rect 2
                             arrayOf(0.47f, dp2px(5f), 0.8f, 0f),  // Middle rect 3
-                            arrayOf(0.65f, 0f, 0.75f, 0f)         // Top rect
+                            arrayOf(0.65f, 0f, 0.75f, 0f)            // Top rect
                         ),
                         //10f, 70f, width, height, ppm, width + 20f, height*0.2f, speed
                         17f, 70f, width, height, ppm, world_width + 3f, height*0.2f, speed
@@ -505,7 +507,7 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
                             arrayOf(0f, dp2px(22f), 1f, 0f),       // Bottom rect
                             arrayOf(0.08f, dp2px(15f), 0.93f, 0f), // Middle rect 1
                             arrayOf(0.15f, dp2px(8f), 0.87f, 0f),  // Middle rect 2
-                            arrayOf(0.23f, 0f, 0.77f, 0f)          // Top rect
+                            arrayOf(0.23f, 0f, 0.77f, 0f)             // Top rect
                         ),
                         //17f, 70f, width, height, ppm, width + 20f, height/5f, speed
                         25f, 70f, width, height, ppm, world_width + 3f, height/5f, speed
@@ -807,8 +809,8 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
 
             // USO SOLO ppm E NON ANCHE ppm_y PERCHÈ ALTRIMENTI DISTORCE L'IMMAGINE
             // From heli.width * heli_scale = heli_width * ppm
-            heli_scale_x      = heli_width * ppm / heli.width
-            heli_scale_y      = heli_height * ppm / heli.height
+            heli_scale_x = heli_width * ppm / heli.width
+            heli_scale_y = heli_height * ppm / heli.height
             heli_width_scaled  = heli.width * heli_scale_x
             heli_height_scaled = heli.height * heli_scale_y
 
@@ -840,7 +842,7 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
 
 
         // Compute time difference
-        val now = System.currentTimeMillis()
+        /*val now = System.currentTimeMillis()
         val dt: Float
 
         // Check if this is the first call to onDraw (i.e. first frame)
@@ -1058,9 +1060,7 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
         //building.setX(10f)
         canvas?.drawBitmap(building.getBitmap(), building.getMatrix(), null)
 
-        //canvas?.drawRect(building.getX(), building.getY(),
-        //    building.getX() + building.getBitmapScaledWidth(), height.toFloat(), painter_stroke)
-
+        // Debug (draw building bounds)
         val bounds = building.getBounds()
         for (rect in bounds)
             canvas?.drawRect(rect, painter_stroke)
@@ -1069,6 +1069,7 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
         if (building.isRespawn())
             pickBuilding()
 
+        // Check if a collision has been occurred
         if (checkCollision()) {
             gameEnd = true
 
@@ -1077,7 +1078,7 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
         }
 
 
-
+        // Update the score
         // s = v * dt  in m/s
         score += speed * dt
 
@@ -1087,14 +1088,140 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
 
         canvas?.drawText("SCORE " + score.toLong(), 20f, 60f, painter_fill)
 
+        // Update the speed
         speed += 0.003f // max about 36-43 m/s. 50 m/s very difficult!
 
-        invalidate()
+        // Draw the next frame
+        invalidate()*/
 
 
 
 
 
+
+
+        // VERSIONE USANDO COROUTINES
+
+        // The issue is that the event loop that calls onDraw all runs on the same thread so this wouldn't really make any significant difference in performance.
+        // Quindi dovrei lasciare qui solo le draw sulla canvas e spostare la logica in GameFragment
+
+        // Dispatchers.Default — is used by all standard builders if no dispatcher or any other ContinuationInterceptor is specified in their context.
+        // It uses a common pool of shared background threads.
+        // This is an appropriate choice for compute-intensive coroutines that consume CPU resources
+        GlobalScope.launch(Dispatchers.Default) {
+            // Compute time difference
+            val now = System.currentTimeMillis()
+            val dt: Float
+
+            // Check if this is the first call to onDraw (i.e. first frame)
+            if (previous == 0L)  dt = 0f
+            else                 dt = (now - previous) / 1000f
+
+            Log.d("TIME", "************")
+            Log.d("TIME", "previous: $previous")
+            Log.d("TIME", "now: $now")
+            Log.d("TIME", "dt: $dt")
+            Log.d("TIME", "speed (m/s): $speed")
+            Log.d("TIME", "speed (px/s): " + speed*ppm*dt)
+
+            previous = now
+
+            val updateHeli = async {
+                // Helicopter animation frame
+                heli = heli_animation[heli_animation_index]
+                heli_animation_index = (heli_animation_index + 1) % heli_animation.size
+
+                user_dy += last_gyroscope_input * ppm
+
+                // Constrain the bitmap in the screen
+                if (user_dy < 0)
+                    user_dy = 0f
+                else if (user_dy + heli_height_scaled > height)
+                    user_dy = height.toFloat() - heli_height_scaled
+
+                // Constrain the rotation of the bitmap
+                if (last_gyroscope_input > 0 && heli_rotation <= 10f)
+                    heli_rotation += 0.5f
+                else if (last_gyroscope_input < 0 && heli_rotation >= -8f)
+                    heli_rotation -= 0.5f
+
+                // Scale the bitmap
+                heli_matrix.setScale(heli_scale_x, heli_scale_y)
+
+                // Rotate the bitmap
+                heli_matrix.postRotate(heli_rotation)
+
+                // Put the bitmap on the left-center of the screen
+                heli_matrix.postTranslate(user_dx, user_dy)
+
+                user_rect.set( user_dx, user_dy, user_dx + heli_width_scaled, user_dy + heli_height_scaled )
+            }
+            val updateVehicle  = async {
+                vehicle.update(dt)
+
+                // Check if the vehicle has been respawn
+                if (vehicle.isRespawn())
+                    pickVehicle()
+            }
+            val updateBuilding = async {
+                building.update(dt)
+
+                // Check if the building has been respawn
+                if (building.isRespawn())
+                    pickBuilding()
+            }
+
+            updateHeli.await()
+            updateVehicle.await()
+            updateBuilding.await()
+
+            val finalUpdate = async {
+                // Check if a collision has been occurred
+                if (checkCollision()) {
+                    gameEnd = true
+
+                    val fragment = findFragment<GameFragment>()
+                    fragment.gameEnd(score.toLong(), false)
+                }
+
+                // Update the score
+                // s = v * dt  in m/s
+                score += speed * dt
+
+                // Update the speed
+                speed += 0.003f // max about 36-43 m/s. 50 m/s very difficult!
+            }
+
+            // Rendering
+            // crasha
+            /*withContext(Dispatchers.Main) {
+                // Draw background
+                canvas?.drawBitmap(bg, 0f, 0f, null)
+
+                canvas?.drawBitmap(heli, heli_matrix, null)
+                canvas?.drawBitmap(vehicle.getBitmap(), vehicle.getMatrix(), null)
+                canvas?.drawBitmap(building.getBitmap(), building.getMatrix(), null)
+            }*/
+
+            val fragment = findFragment<GameFragment>()
+            fragment.activity?.runOnUiThread(Runnable {
+                // Draw background
+                canvas?.drawBitmap(bg, 0f, 0f, null)
+
+                canvas?.drawBitmap(heli, heli_matrix, null)
+                canvas?.drawBitmap(vehicle.getBitmap(), vehicle.getMatrix(), null)
+                canvas?.drawBitmap(building.getBitmap(), building.getMatrix(), null)
+
+                canvas?.drawText("SCORE " + score.toLong(), 20f, 60f, painter_fill)
+
+                invalidate()
+            })
+
+            finalUpdate.await()
+
+            // Draw the next frame
+            invalidate()
+        }
 
 
         // Check if the cannon has fired
@@ -1132,7 +1259,7 @@ class GameView(context: Context?) : View(context), View.OnTouchListener, SensorE
         invalidate()*/
     }
 
-    // Convert density indipendent pixels into screen pixels
+    // Convert density independent pixels into screen pixels
     private fun dp2px(dp: Float): Float {
         return resources.displayMetrics.density * dp
     }

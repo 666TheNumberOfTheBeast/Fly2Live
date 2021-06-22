@@ -28,10 +28,10 @@ class MainFragment : Fragment() {
 
         // Access control
         val account = GoogleSignIn.getLastSignedInAccount(activity)
-        if (account == null) {
+        /*if (account == null) {
             findNavController().navigate(R.id.action_mainFragment_to_loginFragment)
             return
-        }
+        }*/ // TEMP DISABLED TO SAVE API CALLS
     }
 
     override fun onCreateView(
@@ -60,9 +60,9 @@ class MainFragment : Fragment() {
         if (savedInstanceState == null) {
             val animZoomOut =
                 if (orientation == Configuration.ORIENTATION_LANDSCAPE)
-                    createScaleAnimation(1f, 0.4f, 1f, 0.4f, 0.5f, 0.3f)
+                    createScaleAnimation(1f, 0.4f, 1f, 0.4f, 0.5f, 0.3f, 2500)
                 else
-                    createScaleAnimation(1f, 0.5f, 1f, 0.5f, 0.5f, 0.3f)
+                    createScaleAnimation(1f, 0.5f, 1f, 0.5f, 0.5f, 0.3f, 2500)
 
             animZoomOut.setAnimationListener(object : Animation.AnimationListener {
                 override fun onAnimationStart(animation: Animation) {}

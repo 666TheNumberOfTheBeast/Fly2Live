@@ -58,6 +58,9 @@ abstract class Obstacle(name: String,
         this.speed = speed * ppm
 
         respawn_pos_x = screen_width + ppm
+
+        // Init matrix transformations
+        transform()
     }
 
     // Getters
@@ -98,7 +101,7 @@ abstract class Obstacle(name: String,
     }
 
     fun getX(): Float {
-        return pos_x
+        return pos_x // Return pixels
     }
 
     fun getY(): Float {
@@ -106,13 +109,13 @@ abstract class Obstacle(name: String,
     }
 
     fun getSpeed(): Float {
-        return speed
+        return speed // Return pixels/s
     }
 
 
     // Setters
     fun setX(pos_x: Float) {
-        this.pos_x = pos_x
+        this.pos_x = pos_x // * ppm // Requires pixels
     }
 
     fun setY(pos_y: Float) {
@@ -135,13 +138,16 @@ abstract class Obstacle(name: String,
         pos_x -= speed * dt
 
         if (pos_x + bitmap_width_scaled < 0) {
-            //pos_x = screen_width + bitmap_width_scaled
-            //pos_x = screen_width + 20f
             pos_x = respawn_pos_x
             respawn = true
         }
         else
             respawn = false
+    }
+
+    fun transform() {
+        matrix.setScale(bitmap_scale_x, bitmap_scale_y)
+        matrix.postTranslate(pos_x, pos_y)
     }
 
     // Return true if the vehicle has been respawn in the current UI update

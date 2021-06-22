@@ -5,6 +5,7 @@ import android.content.Context
 import android.media.MediaPlayer
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.WindowManager
 import io.realm.Realm
 
@@ -30,9 +31,12 @@ class MainActivity : AppCompatActivity() {
             mp.isLooping = true
         }
 
-        // Initialize the Realm library.
-        // Your application should initialize Realm just once each time the application runs
-        Realm.init(this)
+        // Run this code only once (when the activity is created)
+        if (savedInstanceState == null) {
+            // Initialize the Realm library.
+            // Your application should initialize Realm just once each time the application runs
+            Realm.init(this)
+        }
     }
 
     /*override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -86,10 +90,36 @@ class MainActivity : AppCompatActivity() {
             play()
     }
 
+    // Stop main soundtrack
     override fun onStop() {
         stop()
 
         super.onStop()
+    }
+
+    // Save main soundtrack current position and pause it
+    override fun onSaveInstanceState(outState: Bundle) {
+        Log.d("save", "save state main activity")
+        if (soundtrack != null) {
+            outState.putInt("mainSoundtrackPosition", soundtrack!!.currentPosition)
+
+            stopMainSoundtrack()
+        }
+
+        super.onSaveInstanceState(outState)
+    }
+
+    // Restore main soundtrack position and play it
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        Log.d("save", "restore state main activity")
+        if (soundtrack != null) {
+            val pos = savedInstanceState.getInt("mainSoundtrackPosition")
+
+            soundtrack!!.seekTo(pos)
+            startMainSoundtrack()
+        }
+
+        super.onRestoreInstanceState(savedInstanceState)
     }
 
 }

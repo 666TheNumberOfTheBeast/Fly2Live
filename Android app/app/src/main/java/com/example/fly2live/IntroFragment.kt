@@ -13,7 +13,6 @@ import com.example.fly2live.utils.createScaleAnimation
 import com.example.fly2live.utils.logIn
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.games.Games
-import kotlinx.coroutines.delay
 
 class IntroFragment : Fragment() {
 
@@ -30,7 +29,7 @@ class IntroFragment : Fragment() {
 
         val bg = view.findViewById<ImageView>(R.id.bg)
 
-        val animZoomIn = createScaleAnimation(1f, 1.5f, 1f, 1.5f, 0.5f, 0.5f)
+        val animZoomIn = createScaleAnimation(1f, 1.5f, 1f, 1.5f, 0.5f, 0.5f, 7000)
         bg.startAnimation(animZoomIn)
     }
 
@@ -38,9 +37,12 @@ class IntroFragment : Fragment() {
     override fun onStart() {
         super.onStart()
 
+        // TEMP BYPASS LOGIN TO SAVE API CALLS
+        findNavController().navigate(R.id.action_introFragment_to_mainFragment)
+
         // Check for existing Google Sign In account.
         // If the user is already signed in the GoogleSignInAccount will be non-null.
-        val account = GoogleSignIn.getLastSignedInAccount(context)
+        /*val account = GoogleSignIn.getLastSignedInAccount(context)
 
         // Check if the user is already logged in
         logIn(account, context!!) { isLoggedIn ->
@@ -59,7 +61,7 @@ class IntroFragment : Fragment() {
                     findNavController().navigate(R.id.action_introFragment_to_loginFragment)
 
             }, 1000)
-        }
+        }*/
     }
 
 }

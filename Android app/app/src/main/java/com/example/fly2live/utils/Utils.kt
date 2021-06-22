@@ -399,7 +399,7 @@ fun isNewLevel(playerLevel: Int, newPlayerXp: Long): Boolean {
 
 
 
-fun createScaleAnimation(fromX: Float, toX: Float, fromY: Float, toY: Float, pivotX: Float, pivotY: Float): ScaleAnimation {
+fun createScaleAnimation(fromX: Float, toX: Float, fromY: Float, toY: Float, pivotX: Float, pivotY: Float, duration: Long): ScaleAnimation {
     val anim = ScaleAnimation(
         fromX, toX,
         fromY, toY,
@@ -407,7 +407,7 @@ fun createScaleAnimation(fromX: Float, toX: Float, fromY: Float, toY: Float, piv
         Animation.RELATIVE_TO_SELF, pivotY)
 
     anim.fillAfter = true
-    anim.duration  = 2500
+    anim.duration  = duration
 
     return anim
 }

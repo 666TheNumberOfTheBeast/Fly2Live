@@ -57,6 +57,9 @@
     <string name="msg_game_end">Game ended</string>-->
     <string name="msg_server_busy">Server busy, wait…</string>
 
+    <!-- Game fragment -->
+    <string name="loading">LOADING…</string>
+
     <!-- Game End fragment -->
     <string name="game_over">GAME OVER</string>
     <string name="you_win">YOU WIN</string>

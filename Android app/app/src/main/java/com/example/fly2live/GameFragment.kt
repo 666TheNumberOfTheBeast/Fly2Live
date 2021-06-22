@@ -8,18 +8,17 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.fragment.findNavController
 import android.media.MediaPlayer
+import android.util.Log
+import androidx.lifecycle.lifecycleScope
 import com.example.fly2live.configuration.Configuration.Companion.MULTIPLAYER
 
 class GameFragment : Fragment() {
-    private lateinit var gameView: View
     private var soundtrack: MediaPlayer? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        gameView = GameView(context)
-
         val sharedPref = context?.getSharedPreferences(getString(R.string.shared_preferences_name), Context.MODE_PRIVATE)
         val isAudioEnabled = sharedPref?.getBoolean(getString(R.string.shared_preference_audio), true)!!
 
@@ -31,8 +30,16 @@ class GameFragment : Fragment() {
                 // Stop main soundtrack
                 (activity as MainActivity).stopMainSoundtrack()
 
-                // Start gameplay soundtrack
+                // Set looping gameplay soundtrack
                 mp.isLooping = true
+
+                // Check if a state has to be restored
+                if (savedInstanceState != null) {
+                    // Restore gameplay soundtrack position
+                    val pos = savedInstanceState.getInt("gameplaySoundtrackPosition")
+                    mp.seekTo(pos)
+                }
+
                 mp.start()
             }
         }
@@ -41,15 +48,17 @@ class GameFragment : Fragment() {
         if (MULTIPLAYER)
             findNavController().popBackStack(R.id.loadingFragment, true)
 
+        val view = GameView(context, lifecycleScope)
+        view.id = R.id.game_view
+
         // Inflate the layout for this fragment
-        return GameView(context)
+        return view
     }
 
     // GameView call this function when the game ends
     // (single player -> game over, multiplayer -> game winner or loser)
     fun gameEnd(score: Long, winner: Boolean) {
-        if (soundtrack != null && soundtrack!!.isPlaying)
-            soundtrack!!.pause()
+        stopSoundtrack()
 
         val bundle = Bundle()
         bundle.putLong("score", score)
@@ -58,18 +67,38 @@ class GameFragment : Fragment() {
         findNavController().navigate(R.id.action_gameFragment_to_gameEndFragment, bundle)
     }
 
-
-    override fun onStart() {
-        super.onStart()
+    private fun playSoundtrack() {
         if (soundtrack != null && !soundtrack!!.isPlaying)
             soundtrack!!.start()
     }
 
-    override fun onStop() {
+    private fun stopSoundtrack() {
         if (soundtrack != null && soundtrack!!.isPlaying)
             soundtrack!!.pause()
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        playSoundtrack()
+    }
+
+    override fun onStop() {
+        stopSoundtrack()
 
         super.onStop()
+    }
+
+    // Save gameplay soundtrack current position and pause it
+    override fun onSaveInstanceState(outState: Bundle) {
+        Log.d("save", "save state game fragment")
+        if (soundtrack != null) {
+            outState.putInt("gameplaySoundtrackPosition", soundtrack!!.currentPosition)
+
+            stopSoundtrack()
+        }
+
+        super.onSaveInstanceState(outState)
     }
 
 }

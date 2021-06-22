@@ -41,13 +41,12 @@ class ScenariosFragment : Fragment() {
         super.onCreate(savedInstanceState)
 
         // Access control
-        account = GoogleSignIn.getLastSignedInAccount(activity)
+        /*account = GoogleSignIn.getLastSignedInAccount(activity)
         if (account == null) {
             // Attempt to pop the controller's back stack back to a specific destination
             findNavController().popBackStack(R.id.mainFragment, false)
             return
-        }
-
+        }*/ // TEMP DISABLED TO SAVE API CALLS
     }
 
     override fun onCreateView(
@@ -60,6 +59,10 @@ class ScenariosFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        // TEMP TO SAVE API CALLS
+        findNavController().navigate(R.id.action_scenariosFragment_to_gameFragment)
+        return
 
         // Check if local configuration has been initialized
         if (PLAYER_LEVEL <= 0) {

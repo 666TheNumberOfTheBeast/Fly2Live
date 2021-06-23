@@ -1,6 +1,5 @@
 package com.example.fly2live
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.*
 import android.hardware.Sensor
@@ -14,8 +13,6 @@ import android.view.View
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.findFragment
-import com.example.fly2live.vehicle.Vehicle
-import com.example.fly2live.building.Building
 import com.example.fly2live.configuration.Configuration.Companion.SCENARIO
 import com.example.fly2live.configuration.Configuration.Companion.SCENARIO_CITY_DAY
 import kotlinx.coroutines.*
@@ -23,6 +20,8 @@ import java.lang.Thread.sleep
 import kotlin.math.max
 import kotlin.math.min
 import android.os.Bundle
+import com.example.fly2live.game_object_cpu.GameObjectCpu
+import com.example.fly2live.game_object_player.GameObjectPlayer
 
 
 class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context), View.OnTouchListener, SensorEventListener2 {
@@ -34,85 +33,62 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
         this.lifecycleScope = lifecycleScope
     }*/
 
-    // Bitmaps for user's helicopter animation
-    private lateinit var heli_animation: Array<Bitmap>
-    private lateinit var heli: Bitmap
-    private var heli_animation_index = 0
-
-    // Other bitmaps
+    // Background bitmap
     private lateinit var bg: Bitmap
-    private lateinit var buildings: Array<Building>
-    private lateinit var building: Building
-    private lateinit var vehicles: Array<Vehicle>
-    private lateinit var vehicle: Vehicle
 
+    // Player's game object
+    private lateinit var playerVehicle: GameObjectPlayer
 
-    // Helicopter size
-    private val heli_width  = 10f // meters
-    private val heli_height = 3f // meters
-    private var heli_scale_x = 0f
-    private var heli_scale_y = 0f
-    private var heli_width_scaled  = 0f
-    private var heli_height_scaled = 0f
-
-
-    // Graphics helicopter bitmap matrix
-    private var heli_matrix      = Matrix()
-
-
-    // Helicopter position
-    private var user_dx = 1f  // meters
-    private var user_dy = 25f // meters
-
-
-    // Helicopter rotation (inclination)
-    private var heli_rotation = 8f // Degrees
-
-
-    // Bitmap rect
-    private val user_rect = RectF()
-    private val user_rect_matrix = Matrix()
+    // CPU's game objects
+    private lateinit var buildings: Array<GameObjectCpu>
+    private lateinit var building: GameObjectCpu
+    private lateinit var vehicles: Array<GameObjectCpu>
+    private lateinit var vehicle: GameObjectCpu
 
 
     // Sensors values
     private var lastAcceleration = FloatArray(3)
     private var lastGyroscope    = FloatArray(3)
+    private var lastGyroscopeInput = 0f // meters
+
+
+    // World constants
+    private val worldWidth  = 40f //30f  // meters
+    private var worldHeight = 60f //40f (ok horizontal) //65f o 60f (ok vertical)  // meters
+
+    // Pixel per meter
+    private var ppm = 1f
+
+    //private var speed = 0.2f // m/s (max 0.5) VERSIONE CON UPDATE SENZA L'USO DI dt
+    private var speed = 10f // m/s
+    private var score = 0f  // meters traveled
+
+
+    // Variable to stop drawing when game ends
+    private var gameEnd = false
+
+    // Variable to start drawing when game has been initialized
+    private var startDrawing = false
+
+    // Variables for text to show when game is loading
+    private val textRect    = Rect()
+    private val loadingText = resources.getString(R.string.loading)
 
 
     // Painter for text
-    private val painter_fill = Paint().apply {
+    private val painterFill = Paint().apply {
         style       = Paint.Style.FILL
         color       = Color.BLACK
         textSize    = 50f
     }
 
-    // Painter for the debug of bitmap rects
-    private val painter_stroke = Paint().apply {
+    // Painter for the debug of bitmaps' physics bounds
+    private val painterStroke = Paint().apply {
         style       = Paint.Style.STROKE
         color       = Color.BLACK
         strokeWidth = 3f
     }
 
-    private var score   = 0f // meters
-    private var gameEnd = false
-
-    //private var speed = 0.2f // m/s (max 0.5) VERSIONE CON UPDATE SENZA L'USO DI dt
-    private var speed = 10f // m/s
-
-    private var last_gyroscope_input = 0f // meters
-
-
-
-    // World constants
-    private val world_width  = 40f //30f  // meters
-    private var world_height = 65f //40f (ok horizontal) //65f (ok vertical)  // meters
-
-    // Pixel per meter
-    private var ppm = 1f
-
-    private var startDrawing = false
-    private val textRect = Rect()
-    private val loadingText = resources.getString(R.string.loading)
 
     init {
         setOnTouchListener(this)
@@ -157,7 +133,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
         // It uses a common pool of shared background threads.
         // This is an appropriate choice for compute-intensive coroutines that consume CPU resources
         lifecycleScope.launch(Dispatchers.Default) {
-            // Set the scale factor based on device orientation in order to have similar world_width in both modes
+            // Set the scale factor based on device orientation in order to have similar worldWidth in both modes
             val scaleFactor = if (width < height) 1f else 0.4f
 
             // Calculate ppm
@@ -165,262 +141,404 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
             // OPTION 1
             // keep a fixed scale factor for drawing the bitmaps when rotating the screen.
 
-            // I divide both to world_width because I'm interested in width for obstacles respawn
-            //ppm = min(width / world_width, height / world_width)
+            // I divide both to worldWidth because I'm interested in width for obstacles respawn
+            //ppm = min(width / worldWidth, height / worldWidth)
 
-            // I divide both to world_height because I'm interested in height for avoiding obstacles
-            //ppm = min(width / world_height, height / world_height)
+            // I divide both to worldHeight because I'm interested in height for avoiding obstacles
+            //ppm = min(width / worldHeight, height / worldHeight)
 
             // OPTION 2
             // use variable scale factor for drawing the bitmaps when rotating the screen.
 
             // based on the width of the screen to have the same proportion horizontally
-            //ppm = width / world_width
+            //ppm = width / worldWidth
 
             // based on the height of the screen to have the same proportion vertically
-            //ppm = height / world_height
+            //ppm = height / worldHeight
 
             // based on the height of the screen to have the same proportion vertically
-            ppm = height / (world_height * scaleFactor)
+            ppm = height / (worldHeight * scaleFactor)
             Log.d("ppm", "ppm: $ppm")
 
             // If orientation is landscape, current world width is larger than portrait mode
             // because when:
-            // - portrait  => min = width / world_width  => currentWorldWidth = world_width
-            // - landscape => min = height / world_width => currentWorldWidth > world_width
+            // - portrait  => min = width / worldWidth  => currentWorldWidth = worldWidth
+            // - landscape => min = height / worldWidth => currentWorldWidth > worldWidth
             val currentWorldWidth = width / ppm
 
-            Log.d("ppm", "world_width: $world_width")
+            Log.d("ppm", "worldWidth: $worldWidth")
             Log.d("ppm", "currentWorldWidth = width / ppm: $currentWorldWidth")
 
 
             // Otherwise, use variable ppm but fixed currentWorldWidth.
-            // It's difficult to find a world_width that is ok for both portrait and landscape orientations
+            // It's difficult to find a worldWidth that is ok for both portrait and landscape orientations
             // because no constraint on y
-            /*ppm = width / world_width
+            /*ppm = width / worldWidth
             Log.d("ppm", "ppm variable: $ppm")
 
             val currentWorldWidth = width / ppm
 
-            Log.d("ppm", "world_width: $world_width")
+            Log.d("ppm", "worldWidth: $worldWidth")
             Log.d("ppm", "currentWorldWidth = width / ppm: $currentWorldWidth")
-            Log.d("ppm", "(world_width + 3f) * ppm: " + (world_width +3f) * ppm)*/
+            Log.d("ppm", "(worldWidth + 3f) * ppm: " + (worldWidth +3f) * ppm)*/
 
             // Calculate current world height and corresponding ppm_y
             val currentWorldHeight = height / ppm
             // But if I use different ppm for x and y, then images are distorted
-            //val ppm_y = height / world_height
+            //val ppm_y = height / worldHeight
 
-            Log.d("ppm", "world_height: $world_height")
+            Log.d("ppm", "worldHeight: $worldHeight")
             Log.d("ppm", "currentWorldHeight = height / ppm: $currentWorldHeight")
-            //Log.d("ppm", "ppm_y = height / world_height: $ppm_y")
+            //Log.d("ppm", "ppm_y = height / worldHeight: $ppm_y")
 
 
             // Initial position of obstacles
-            val posX = (currentWorldWidth + 3f) * scaleFactor
+            val posX = currentWorldWidth + 3f
 
             val loadBuildings = async {
                 Log.d("COROUTINE", "Load buildings")
                 // Convert the correct scenario images into bitmaps once
                 if (SCENARIO == SCENARIO_CITY_DAY) {
                     bg = ResourcesCompat.getDrawable(resources, R.drawable.city_bg_day, null)?.toBitmap(width, height)!!
-                    Log.d("COROUTINE", "Loaded bg")
 
+                    // GameObjectCpu uses bounds offset based on bitmap's width and height in order to be consistent with any value of the world's width and height
                     buildings = arrayOf(
-                        Building(
+                        GameObjectCpu(
                             "building_01",
-                            ResourcesCompat.getDrawable(resources, R.drawable.building_day_01, null)?.toBitmap(width, height)!!,
+                            arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_day_01, null)?.toBitmap(width, height)!!),
                             arrayOf(
-                                arrayOf(0f, dp2px(64f), 1f, 0f),       // Bottom rect
-                                arrayOf(0.07f, dp2px(43f), 0.38f, 0f), // Middle left rect
-                                arrayOf(0.47f, dp2px(44f), 0.8f, 0f),  // Middle right rect
-                                arrayOf(0.1f, 0f, 0.18f, 0f),          // Top left rect
-                                arrayOf(0.47f, dp2px(32f), 0.63f, 0f)  // Top right rect
+                                arrayOf(0f, 0.048f, 1f, 1f),       // Bottom rect
+                                arrayOf(0.07f, 0.031f, 0.38f, 1f), // Middle left rect
+                                arrayOf(0.47f, 0.031f, 0.8f, 1f),  // Middle right rect
+                                arrayOf(0.1f, 0f, 0.18f, 1f),      // Top left rect
+                                arrayOf(0.47f, 0.023f, 0.63f, 1f)  // Top right rect
                             ),
-                            15f * scaleFactor, 100f * scaleFactor, width, height, ppm, posX, height*0.2f, speed // Measures in meters except pos_y in screen %
-                        )/*,
-                        Building(
+                            25f * scaleFactor, 70f * scaleFactor, width, height, ppm, posX, height*0.2f, speed // Measures in meters except pos_y in screen %
+                        ),
+                        GameObjectCpu(
                             "building_02",
-                            ResourcesCompat.getDrawable(resources, R.drawable.building_day_02, null)?.toBitmap(width, height)!!,
+                            arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_day_02, null)?.toBitmap(width, height)!!),
                             arrayOf(
-                                arrayOf(0.22f, dp2px(450f), 0.81f, 0f),  // Bottom rect
-                                arrayOf(0.33f, dp2px(232f), 0.7f, 0f),   // Middle rect
-                                arrayOf(0.47f, 0f, 0.56f, 0f)            // Top rect
+                                arrayOf(0.18f, 0.365f, 0.82f, 1f),  // Bottom rect
+                                arrayOf(0.33f, 0.187f, 0.7f, 1f),   // Middle rect
+                                arrayOf(0.47f, 0f, 0.56f, 1f)       // Top rect
                             ),
-                            10f, 90f, width, height, ppm, currentWorldWidth + 3f, height*0.2f, speed
+                            10f * scaleFactor, 80f * scaleFactor, width, height, ppm, posX, height*0.2f, speed
                         ),
-                        Building(
+                        GameObjectCpu(
                             "building_03",
-                            ResourcesCompat.getDrawable(resources, R.drawable.building_day_03, null)?.toBitmap(width, height)!!,
+                            arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_day_03, null)?.toBitmap(width, height)!!),
                             arrayOf(
-                                arrayOf(0f, dp2px(230f), 1f, 0f),       // Bottom rect
-                                arrayOf(0.14f, dp2px(160f), 0.87f, 0f), // Middle rect
-                                arrayOf(0.29f, dp2px(70f), 0.68f, 0f),  // Middle rect
-                                arrayOf(0.45f, 0f, 0.6f, 0f)               // Top rect
+                                arrayOf(0f, 0.16f, 1f, 1f),         // Bottom rect
+                                arrayOf(0.13f, 0.105f, 0.86f, 1f),  // Middle rect 1
+                                arrayOf(0.28f, 0.045f, 0.68f, 1f),  // Middle rect 2
+                                arrayOf(0.45f, 0f, 0.6f, 1f)        // Top rect
                             ),
-                            25f, 110f, width, height, ppm, currentWorldWidth + 3f, height*0.2f, speed
+                            25f * scaleFactor, 110f * scaleFactor, width, height, ppm, posX, height*0.2f, speed
                         ),
-                        Building(
+                        GameObjectCpu(
                             "building_04",
-                            ResourcesCompat.getDrawable(resources, R.drawable.building_day_04, null)?.toBitmap(width, height)!!,
+                            arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_day_04, null)?.toBitmap(width, height)!!),
                             arrayOf(
-                                arrayOf(0.14f, dp2px(348f), 0.87f, 0f), // Bottom rect
-                                arrayOf(0.21f, dp2px(212f), 0.79f, 0f), // Middle rect
-                                arrayOf(0.24f, dp2px(88f), 0.76f, 0f),  // Middle rect
-                                arrayOf(0.32f, 0f, 0.68f, 0f)              // Top rect
+                                arrayOf(0.13f, 0.28f, 0.86f, 1f),  // Bottom rect
+                                arrayOf(0.21f, 0.173f, 0.79f, 1f), // Middle rect 1
+                                arrayOf(0.23f, 0.07f, 0.76f, 1f),  // Middle rect 2
+                                arrayOf(0.31f, 0.003f, 0.67f, 1f)  // Top rect
                             ),
-                            30f, 90f, width, height, ppm, currentWorldWidth + 3f, height*0.2f, speed
+                            35f * scaleFactor, 90f * scaleFactor, width, height, ppm, posX, height*0.2f, speed
                         ),
-                        Building(
+                        GameObjectCpu(
                             "building_05",
-                            ResourcesCompat.getDrawable(resources, R.drawable.building_day_05, null)?.toBitmap(width, height)!!,
+                            arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_day_05, null)?.toBitmap(width, height)!!),
                             arrayOf(
-                                arrayOf(0f, dp2px(154f), 1f, 0f),       // Bottom rect
-                                arrayOf(0f, dp2px(74f), 0.24f, 0f),     // Middle left rect
-                                arrayOf(0.27f, dp2px(112f), 0.75f, 0f), // Middle center rect
-                                arrayOf(0.78f, dp2px(112f), 0.9f, 0f),  // Middle right rect
-                                arrayOf(0.34f, 0f, 0.75f, 0f)              // Top rect
+                                arrayOf(0f, 0.185f, 1f, 1f),       // Bottom rect
+                                arrayOf(0f, 0.1f, 0.23f, 1f),      // Middle left rect
+                                arrayOf(0.27f, 0.136f, 0.75f, 1f), // Middle center rect
+                                arrayOf(0.77f, 0.136f, 0.9f, 1f),  // Middle right rect
+                                arrayOf(0.33f, 0f, 0.75f, 1f)      // Top rect
                             ),
-                            35f, 60f, width, height, ppm, currentWorldWidth + 3f, height*0.2f, speed
+                            35f * scaleFactor, 50f * scaleFactor, width, height, ppm, posX, height*0.2f, speed
                         ),
-                        Building(
+                        GameObjectCpu(
                             "building_06",
-                            ResourcesCompat.getDrawable(resources, R.drawable.building_day_06, null)?.toBitmap(width, height)!!,
+                            arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_day_06, null)?.toBitmap(width, height)!!),
                             arrayOf(
-                                arrayOf(0f, dp2px(301f), 1f, 0f),       // Bottom rect
-                                arrayOf(0f, dp2px(75f), 0.37f, 0f),     // Middle left rect
-                                arrayOf(0.53f, dp2px(175f), 0.87f, 0f), // Middle right rect
-                                arrayOf(0.07f, 0f, 0.29f, 0f)           // Top rect
+                                arrayOf(0f, 0.55f, 1f, 1f),       // Bottom rect
+                                arrayOf(0f, 0.14f, 0.36f, 1f),    // Middle left rect
+                                arrayOf(0.53f, 0.32f, 0.86f, 1f), // Middle right rect
+                                arrayOf(0.07f, 0f, 0.29f, 1f)     // Top rect
                             ),
-                            35f, 40f, width, height, ppm, currentWorldWidth + 3f, height*0.2f, speed // Measures in meters except pos_y
+                            45f * scaleFactor, 50f * scaleFactor, width, height, ppm, posX, height*0.2f, speed // Measures in meters except pos_y
                         ),
-                        Building(
+                        GameObjectCpu(
                             "building_07",
-                            ResourcesCompat.getDrawable(resources, R.drawable.building_day_07, null)?.toBitmap(width, height)!!,
+                            arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_day_07, null)?.toBitmap(width, height)!!),
                             arrayOf(
-                                arrayOf(0f, dp2px(319f), 1f, 0f),       // Bottom rect
-                                arrayOf(0f, dp2px(164f), 0.91f, 0f),    // Middle rect
-                                arrayOf(0f, dp2px(140f), 0.22f, 0f),    // Left "triangle"
-                                arrayOf(0.7f, dp2px(140f), 0.91f, 0f),  // Right "triangle"
-                                arrayOf(0.31f, 0f, 0.4f, 0f)            // Top rect
+                                arrayOf(0f, 0.291f, 1f, 1f),      // Bottom rect
+                                arrayOf(0f, 0.15f, 0.91f, 1f),    // Middle rect
+                                arrayOf(0f, 0.13f, 0.22f, 1f),    // Left "triangle"
+                                arrayOf(0.7f, 0.13f, 0.91f, 1f),  // Right "triangle"
+                                arrayOf(0.31f, 0.06f, 0.39f, 1f), // Top rect 1
+                                arrayOf(0.31f, 0f, 0.33f, 1f)     // Top rect 2
                             ),
-                            15f, 80f, width, height, ppm, currentWorldWidth + 3f, height*0.2f, speed // Measures in meters except pos_y
+                            15f * scaleFactor, 80f * scaleFactor, width, height, ppm, posX, height*0.2f, speed // Measures in meters except pos_y
                         ),
-                        Building(
+                        GameObjectCpu(
                             "building_08",
-                            ResourcesCompat.getDrawable(resources, R.drawable.building_day_08, null)?.toBitmap(width, height)!!,
+                            arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_day_08, null)?.toBitmap(width, height)!!),
                             arrayOf(
-                                arrayOf(0f, dp2px(120f), 1f, 0f),  // Bottom rect
-                                arrayOf(0.1f, 0f, 0.9f, 0f)        // Top rect
+                                arrayOf(0f, 0.123f, 1f, 1f),  // Bottom rect
+                                arrayOf(0.1f, 0f, 0.9f, 1f)   // Top rect
                             ),
-                            10f, 70f, width, height, ppm, currentWorldWidth + 3f, height*0.2f, speed
+                            13f * scaleFactor, 70f * scaleFactor, width, height, ppm, posX, height*0.2f, speed
                         ),
-                        Building(
+                        GameObjectCpu(
                             "building_09",
-                            ResourcesCompat.getDrawable(resources, R.drawable.building_day_09, null)?.toBitmap(width, height)!!,
+                            arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_day_09, null)?.toBitmap(width, height)!!),
                             arrayOf(
-                                arrayOf(0f, dp2px(110f), 1f, 0f),     // Bottom rect
-                                arrayOf(0.28f, dp2px(90f), 0.7f, 0f), // Middle rect 1
-                                arrayOf(0.4f, dp2px(23f), 0.5f, 0f),  // Middle rect 2
-                                arrayOf(0.43f, 0f, 0.48f, 0f)         // Top rect
+                                arrayOf(0f, 0.115f, 1f, 1f),       // Bottom rect
+                                arrayOf(0.28f, 0.095f, 0.7f, 1f),  // Middle rect 1
+                                arrayOf(0.4f, 0.026f, 0.5f, 1f),   // Middle rect 2
+                                arrayOf(0.43f, 0.003f, 0.48f, 1f)  // Top rect
                             ),
-                            17f, 70f, width, height, ppm, currentWorldWidth + 3f, height/5f, speed
+                            17f * scaleFactor, 70f * scaleFactor, width, height, ppm, posX, height/5f, speed
                         ),
-                        Building(
+                        GameObjectCpu(
                             "building_10",
-                            ResourcesCompat.getDrawable(resources, R.drawable.building_day_10, null)?.toBitmap(width, height)!!,
+                            arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_day_10, null)?.toBitmap(width, height)!!),
                             arrayOf(
-                                arrayOf(0f, dp2px(85f), 1f, 0f),        // Bottom rect
-                                arrayOf(0.09f, dp2px(75f), 0.96f, 0f),  // Middle rect 1
-                                arrayOf(0.13f, dp2px(15f), 0.29f, 0f),  // Top rect left
-                                arrayOf(0.4f, 0f, 0.7f, 0f),               // Top rect middle
-                                arrayOf(0.75f, dp2px(24f), 0.92f, 0f)  // Top rect right
+                                arrayOf(0f, 0.094f, 1f, 1f),        // Bottom rect
+                                arrayOf(0.09f, 0.087f, 0.96f, 1f),  // Middle rect 1
+                                arrayOf(0.13f, 0.015f, 0.29f, 1f),  // Top rect left
+                                arrayOf(0.4f, 0f, 0.7f, 1f),        // Top rect middle
+                                arrayOf(0.75f, 0.026f, 0.92f, 1f)   // Top rect right
                             ),
-                            10f, 65f, width, height, ppm, currentWorldWidth + 3f, height/5f, speed
+                            13f * scaleFactor, 60f * scaleFactor, width, height, ppm, posX, height/5f, speed
                         ),
-                        Building(
+                        GameObjectCpu(
                             "building_11",
-                            ResourcesCompat.getDrawable(resources, R.drawable.building_day_11, null)?.toBitmap(width, height)!!,
+                            arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_day_11, null)?.toBitmap(width, height)!!),
                             arrayOf(
-                                arrayOf(0f, dp2px(24f), 1f, 0f), // Bottom rect
-                                arrayOf(0.15f, 0f, 0.57f, 0f)    // Top rect
+                                arrayOf(0f, 0.03f, 1f, 1f),    // Bottom rect
+                                arrayOf(0.15f, 0f, 0.57f, 1f)  // Top rect
                             ),
-                            17f, 55f, width, height, ppm, currentWorldWidth + 3f, height/5f, speed
+                            17f * scaleFactor, 55f * scaleFactor, width, height, ppm, posX, height/5f, speed
                         ),
-                        Building(
+                        GameObjectCpu(
                             "building_12",
-                            ResourcesCompat.getDrawable(resources, R.drawable.building_day_12, null)?.toBitmap(width, height)!!,
+                            arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_day_12, null)?.toBitmap(width, height)!!),
                             arrayOf(
-                                arrayOf(0f, dp2px(24f), 1f, 0f),       // Bottom rect
-                                arrayOf(0.06f, 0f, 0.9f, 0f)  // Top rect
+                                arrayOf(0f, 0.042f, 1f, 1f),  // Bottom rect
+                                arrayOf(0.06f, 0f, 0.9f, 1f)  // Top rect
                             ),
-                            15f, 40f, width, height, ppm, currentWorldWidth + 3f, height/5f, speed
+                            15f * scaleFactor, 50f * scaleFactor, width, height, ppm, posX, height/5f, speed
                         ),
-                        Building(
+                        GameObjectCpu(
                             "building_13",
-                            ResourcesCompat.getDrawable(resources, R.drawable.building_day_13, null)?.toBitmap(width, height)!!,
+                            arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_day_13, null)?.toBitmap(width, height)!!),
                             arrayOf(
-                                arrayOf(0f, dp2px(74f), 1f, 0f),       // Bottom rect
-                                arrayOf(0.05f, dp2px(9f), 0.15f, 0f),  // Top rect left
-                                arrayOf(0.15f, 0f, 0.82f, 0f),            // Top rect middle
-                                arrayOf(0.83f, dp2px(40f), 1f, 0f),   // Top rect right 1
-                                arrayOf(0.86f, 0f, 0.94f, 0f)            // Top rect right 2
+                                arrayOf(0f, 0.11f, 1f, 1f),        // Bottom rect
+                                arrayOf(0.05f, 0.01f, 0.15f, 1f),  // Top rect left
+                                arrayOf(0.15f, 0f, 0.82f, 1f),     // Top rect middle
+                                arrayOf(0.83f, 0.04f, 1f, 1f),     // Top rect right 1
+                                arrayOf(0.86f, 0f, 0.94f, 1f)      // Top rect right 2
                             ),
-                            15f, 50f, width, height, ppm, currentWorldWidth + 3f, height/5f, speed
+                            20f * scaleFactor, 50f * scaleFactor, width, height, ppm, posX, height/5f, speed
                         ),
-                        Building(
+                        GameObjectCpu(
                             "building_14",
-                            ResourcesCompat.getDrawable(resources, R.drawable.building_day_14, null)?.toBitmap(width, height)!!,
+                            arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_day_14, null)?.toBitmap(width, height)!!),
                             arrayOf(
-                                arrayOf(0f, dp2px(180f), 1f, 0f),      // Bottom rect
-                                arrayOf(0.29f, dp2px(63f), 0.68f, 0f), // Top rect
-                                arrayOf(0.53f, dp2px(32f), 0.59f, 0f), // Top rect
-                                arrayOf(0.34f, 0f, 0.35f, 0f)             // Top rect
+                                arrayOf(0f, 0.185f, 1f, 1f),        // Bottom rect
+                                arrayOf(0.29f, 0.065f, 0.68f, 1f),  // Middle rect
+                                arrayOf(0.53f, 0.035f, 0.59f, 1f),  // Top rect left
+                                arrayOf(0.34f, 0f, 0.35f, 1f)       // Top rect right
                             ),
-                            23f, 70f, width, height, ppm, currentWorldWidth + 3f, height/5f, speed
+                            30f * scaleFactor, 55f * scaleFactor, width, height, ppm, posX, height/5f, speed
                         ),
-                        Building(
+                        GameObjectCpu(
                             "building_15",
-                            ResourcesCompat.getDrawable(resources, R.drawable.building_day_15, null)?.toBitmap(width, height)!!,
+                            arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_day_15, null)?.toBitmap(width, height)!!),
                             arrayOf(
-                                arrayOf(0f, dp2px(355f), 1f, 0f),       // Bottom rect
-                                arrayOf(0.1f, dp2px(246f), 0.86f, 0f),  // Middle rect 1
-                                arrayOf(0.25f, dp2px(207f), 0.71f, 0f), // Middle rect 2
-                                arrayOf(0.4f, dp2px(148f), 0.57f, 0f),  // Top rect 1
-                                arrayOf(0.53f, 0f, 0.57f, 0f)           // Top rect 2
+                                arrayOf(0f, 0.43f, 1f, 1f),         // Bottom rect
+                                arrayOf(0.1f, 0.3f, 0.86f, 1f),     // Middle rect 1
+                                arrayOf(0.25f, 0.256f, 0.71f, 1f),  // Middle rect 2
+                                arrayOf(0.28f, 0.236f, 0.68f, 1f),  // Middle rect 2
+                                arrayOf(0.4f, 0.18f, 0.57f, 1f),    // Top rect 1
+                                arrayOf(0.53f, 0f, 0.57f, 1f)       // Top rect 2
                             ),
-                            10f, 60f, width, height, ppm, currentWorldWidth + 3f, height/5f, speed
+                            13f * scaleFactor, 55f * scaleFactor, width, height, ppm, posX, height/5f, speed
                         ),
-                        Building(
+                        GameObjectCpu(
                             "building_16",
-                            ResourcesCompat.getDrawable(resources, R.drawable.building_day_16, null)?.toBitmap(width, height)!!,
+                            arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_day_16, null)?.toBitmap(width, height)!!),
                             arrayOf(
-                                arrayOf(0f, dp2px(137f), 1f, 0f),        // Bottom rect
-                                arrayOf(0.13f, dp2px(120f), 0.87f, 0f),  // Middle rect 1
-                                arrayOf(0.24f, dp2px(103f), 0.76f, 0f),  // Middle rect 2
-                                arrayOf(0.28f, dp2px(84f), 0.49f, 0f),   // Middle rect 3
-                                arrayOf(0.6f, dp2px(26f), 0.62f, 0f),    // Top rect 1
-                                arrayOf(0.68f, dp2px(21f), 0.71f, 0f),   // Top rect 2
-                                arrayOf(0.53f, 0f, 0.55f, 0f)               // Top rect 3
+                                arrayOf(0f, 0.2f, 1f, 1f),          // Bottom rect
+                                arrayOf(0.13f, 0.175f, 0.87f, 1f),  // Middle rect 1
+                                arrayOf(0.24f, 0.147f, 0.76f, 1f),  // Middle rect 2
+                                arrayOf(0.28f, 0.122f, 0.49f, 1f),  // Middle rect 3
+                                arrayOf(0.53f, 0f, 0.55f, 1f),      // Top rect left
+                                arrayOf(0.6f, 0.039f, 0.62f, 1f),   // Top rect middle
+                                arrayOf(0.68f, 0.03f, 0.71f, 1f)    // Top rect right
                             ),
-                            18f, 50f, width, height, ppm, currentWorldWidth + 3f, height/5f, speed
+                            20f * scaleFactor, 50f * scaleFactor, width, height, ppm, posX, height/5f, speed
                         ),
-                        Building(
+                        GameObjectCpu(
                             "building_17",
-                            ResourcesCompat.getDrawable(resources, R.drawable.building_day_17, null)?.toBitmap(width, height)!!,
+                            arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_day_17, null)?.toBitmap(width, height)!!),
                             arrayOf(
-                                arrayOf(0f, dp2px(78f), 1f, 0f),        // Bottom rect
-                                arrayOf(0.15f, dp2px(50f), 0.88f, 0f),  // Middle rect
-                                arrayOf(0.41f, 0f, 0.63f, 0f)              // Top rect
+                                arrayOf(0f, 0.094f, 1f, 1f),       // Bottom rect
+                                arrayOf(0.15f, 0.06f, 0.88f, 1f),  // Middle rect
+                                arrayOf(0.41f, 0f, 0.63f, 1f)      // Top rect
                             ),
-                            25f, 60f, width, height, ppm, currentWorldWidth + 3f, height/5f, speed
-                        )*/
+                            28f * scaleFactor, 60f * scaleFactor, width, height, ppm, posX, height/5f, speed
+                        )
                     )
                 }
                 else {
                     bg = ResourcesCompat.getDrawable(resources, R.drawable.city_bg_night, null)?.toBitmap(width, height)!!
 
                     buildings = arrayOf(
+                        GameObjectCpu(
+                            "building_01",
+                            arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_night_01, null)?.toBitmap(width, height)!!),
+                            arrayOf(
+                                arrayOf(0f, dp2px(260f), 1f, 0f),       // Bottom rect
+                                arrayOf(0.05f, dp2px(210f), 0.92f, 0f), // Middle rect 1
+                                arrayOf(0.85f, dp2px(185f), 0.92f, 0f), // Middle rect 1
+                                arrayOf(0.1f, dp2px(165f), 0.86f, 0f),  // Middle rect 2
+                                arrayOf(0.78f, dp2px(145f), 0.86f, 0f), // Middle rect 2
+                                arrayOf(0.18f, dp2px(135f), 0.78f, 0f), // Middle rect 3
+                                arrayOf(0.2f, dp2px(118f), 0.75f, 0f),  // Top rect
+                                arrayOf(0.25f, dp2px(100f), 0.7f, 0f),  // Top rect
+                                arrayOf(0.3f, dp2px(90f), 0.65f, 0f),   // Top rect
+                                arrayOf(0.35f, dp2px(82f), 0.6f, 0f)    // Top rect
+                            ),
+                            15f, 100f, width, height, ppm, posX, height*0.2f, speed
+                        ),
+                        GameObjectCpu(
+                            "building_02",
+                            arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_night_02, null)?.toBitmap(width, height)!!),
+                            arrayOf(
+                                arrayOf(0.26f, dp2px(345f), 0.72f, 0f),  // Bottom rect
+                                arrayOf(0.4f, dp2px(153f), 0.6f, 0f),    // Middle rect
+                                arrayOf(0.45f, 0f, 0.54f, 0f)               // Top rect
+                            ),
+                            10f, 110f, width, height, ppm, posX, height*0.2f, speed
+                        ),
+                        GameObjectCpu(
+                            "building_03",
+                            arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_night_03, null)?.toBitmap(width, height)!!),
+                            arrayOf(
+                                arrayOf(0.75f, dp2px(75f), 1f, 0f),    // Bottom rect
+                                arrayOf(0f, dp2px(43f), 0.75f, 0f),    // Bottom rect
+                                arrayOf(0.68f, dp2px(19f), 0.82f, 0f), // Top rect
+                                arrayOf(0.16f, 0f, 0.68f, 0f)             // Top rect
+                            ),
+                            18f, 70f, width, height, ppm, posX, height*0.2f, speed
+                        ),
+                        GameObjectCpu(
+                            "building_04",
+                            arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_night_04, null)?.toBitmap(width, height)!!),
+                            arrayOf(
+                                arrayOf(0f, dp2px(112f), 0.24f, 0f),  // Bottom rect
+                                arrayOf(0.24f, dp2px(85f), 1f, 0f),   // Bottom rect
+                                arrayOf(0.16f, dp2px(18f), 0.3f, 0f), // Top rect
+                                arrayOf(0.3f, 0f, 0.82f, 0f)             // Top rect
+                            ),
+                            //30f, 90f, width, height, ppm, width + 20f, height*0.2f, speed
+                            20f, 70f, width, height, ppm, posX, height*0.2f, speed
+                        ),
+                        GameObjectCpu(
+                            "building_05",
+                            arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_night_05, null)?.toBitmap(width, height)!!),
+                            arrayOf(
+                                arrayOf(0f, dp2px(72f), 1f, 0f),      // Bottom rect
+                                arrayOf(0f, dp2px(28f), 0.7f, 0f),    // Middle rect 1
+                                arrayOf(0.45f, dp2px(10f), 0.6f, 0f), // Middle rect 2
+                                arrayOf(0.7f, dp2px(40f), 0.8f, 0f), // Middle rect 3
+                                arrayOf(0.8f, dp2px(55f), 0.9f, 0f), // Middle rect 4
+                                arrayOf(0.13f, 0f, 0.45f, 0f)           // Top rect
+                            ),
+                            25f, 60f, width, height, ppm, posX, height*0.2f, speed
+                        ),
+                        GameObjectCpu(
+                            "building_06",
+                            arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_night_06, null)?.toBitmap(width, height)!!),
+                            arrayOf(
+                                arrayOf(0f, dp2px(150f), 1f, 0f),        // Bottom rect
+                                arrayOf(0.05f, dp2px(122f), 0.95f, 0f),  // Middle rect 1
+                                arrayOf(0.1f, dp2px(98f), 0.9f, 0f),     // Middle rect 2
+                                arrayOf(0.15f, dp2px(80f), 0.86f, 0f),   // Middle rect 3
+                                arrayOf(0.18f, dp2px(67f), 0.82f, 0f),   // Middle rect 4
+                                arrayOf(0.23f, dp2px(57f), 0.76f, 0f),   // Middle rect 5
+                                arrayOf(0.28f, dp2px(46f), 0.72f, 0f),   // Middle rect 6
+                                arrayOf(0.33f, dp2px(36f), 0.68f, 0f),   // Middle rect 7
+                                arrayOf(0.37f, dp2px(26f), 0.65f, 0f),   // Middle rect 8
+                                arrayOf(0.41f, dp2px(16f), 0.6f, 0f),    // Middle rect 9
+                                arrayOf(0.47f, 0f, 0.52f, 0f)               // Top rect
+                            ),
+                            25f, 100f, width, height, ppm, posX, height*0.2f, speed // Measures in meters except pos_y
+                        ),
+                        GameObjectCpu(
+                            "building_07",
+                            arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_night_07, null)?.toBitmap(width, height)!!),
+                            arrayOf(
+                                arrayOf(0f, dp2px(102f), 0.93f, 0f),    // Bottom rect
+                                arrayOf(0.06f, dp2px(60f), 0.87f, 0f),  // Middle rect
+                                arrayOf(0.19f, dp2px(10f), 0.74f, 0f),  // Middle rect
+                                arrayOf(0.26f, 0f, 0.67f, 0f)              // Top rect
+                            ),
+                            18f, 80f, width, height, ppm, posX, height*0.2f, speed // Measures in meters except pos_y
+                        ),
+                        GameObjectCpu(
+                            "building_08",
+                            arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_night_08, null)?.toBitmap(width, height)!!),
+                            arrayOf(
+                                arrayOf(0f, dp2px(20f), 1f, 0f),      // Bottom rect
+                                arrayOf(0.1f, dp2px(15f), 0.95f, 0f), // Middle rect 1
+                                arrayOf(0.27f, dp2px(10f), 0.9f, 0f), // Middle rect 2
+                                arrayOf(0.47f, dp2px(5f), 0.8f, 0f),  // Middle rect 3
+                                arrayOf(0.65f, 0f, 0.75f, 0f)            // Top rect
+                            ),
+                            17f, 70f, width, height, ppm, posX, height*0.2f, speed
+                        ),
+                        GameObjectCpu(
+                            "building_09",
+                            arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_night_09, null)?.toBitmap(width, height)!!),
+                            arrayOf(
+                                arrayOf(0f, dp2px(22f), 1f, 0f),       // Bottom rect
+                                arrayOf(0.08f, dp2px(15f), 0.93f, 0f), // Middle rect 1
+                                arrayOf(0.15f, dp2px(8f), 0.87f, 0f),  // Middle rect 2
+                                arrayOf(0.23f, 0f, 0.77f, 0f)             // Top rect
+                            ),
+                            25f, 70f, width, height, ppm, posX, height/5f, speed
+                        ),
+                        GameObjectCpu(
+                            "building_10",
+                            arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_night_10, null)?.toBitmap(width, height)!!),
+                            arrayOf(
+                                arrayOf(0.25f, dp2px(29f), 1f, 0f),    // Bottom rect
+                                arrayOf(0.33f, dp2px(20f), 0.87f, 0f)  // Top rect
+                            ),
+                            13f, 65f, width, height, ppm, posX, height/5f, speed
+                        ),
+                        GameObjectCpu(
+                            "building_11",
+                            arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_night_11, null)?.toBitmap(width, height)!!),
+                            arrayOf(
+                                arrayOf(0f, dp2px(203f), 1f, 0f),       // Bottom rect
+                                arrayOf(0.1f, dp2px(182f), 0.9f, 0f),  // Middle rect
+                                arrayOf(0.2f, dp2px(162f), 0.8f, 0f),  // Middle rect
+                                arrayOf(0.3f, dp2px(140f), 0.7f, 0f),  // Middle rect
+                                arrayOf(0.4f, dp2px(100f), 0.54f, 0f),  // Middle rect
+                                arrayOf(0.46f, 0f, 0.5f, 0f)               // Top rect
+                            ),
+                            13f, 80f, width, height, ppm, posX, height/5f, speed
+                        )
+                    )
+
+                    /*buildings = arrayOf(
                         Building(
                             "building_01",
                             ResourcesCompat.getDrawable(resources, R.drawable.building_night_01, null)?.toBitmap(width, height)!!,
@@ -558,7 +676,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                             ),
                             13f, 80f, width, height, ppm, currentWorldWidth + 3f, height/5f, speed
                         )
-                    )
+                    )*/
                 }
 
                 pickBuilding(width, height)
@@ -566,7 +684,68 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
 
             val loadVehicles = async {
                 Log.d("COROUTINE", "Load vehicles")
+
                 vehicles = arrayOf(
+                    GameObjectCpu(
+                        "vehicle_01",
+                        arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.biplane, null)?.toBitmap(width, height)!!),
+                        arrayOf(arrayOf(0f, 0f, 1f, 1f)),
+                        6f * scaleFactor, 2.5f * scaleFactor, width, height, ppm, posX, height*0.05f, speed // Measures in meters except pos_y
+                    ),
+
+                    GameObjectCpu(
+                        "vehicle_02",
+                        arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.dirigible_1, null)?.toBitmap(width, height)!!),
+                        arrayOf(arrayOf(0f, 0f, 1f, 1f)),
+                        20f * scaleFactor, 8f * scaleFactor, width, height, ppm, posX, height*0.05f, speed
+                    ),
+                    GameObjectCpu(
+                        "vehicle_03",
+                        arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.dirigible_2, null)?.toBitmap(width, height)!!),
+                        arrayOf(arrayOf(0f, 0f, 1f, 1f)),
+                        20f * scaleFactor, 8f * scaleFactor, width, height, ppm, posX, height*0.05f, speed
+                    ),
+                    GameObjectCpu(
+                        "vehicle_04",
+                        arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.dirigible_3, null)?.toBitmap(width, height)!!),
+                        arrayOf(arrayOf(0f, 0f, 1f, 1f)),
+                        20f * scaleFactor, 8f * scaleFactor, width, height, ppm, posX, height*0.05f, speed
+                    ),
+                    GameObjectCpu(
+                        "vehicle_05",
+                        arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.dirigible_4, null)?.toBitmap(width, height)!!),
+                        arrayOf(arrayOf(0f, 0f, 1f, 1f)),
+                        20f * scaleFactor, 8f * scaleFactor, width, height, ppm, posX, height*0.05f, speed
+                    ),
+                    GameObjectCpu(
+                        "vehicle_06",
+                        arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.dirigible_5, null)?.toBitmap(width, height)!!),
+                        arrayOf(arrayOf(0f, 0f, 1f, 1f)),
+                        20f * scaleFactor, 8f * scaleFactor, width, height, ppm, posX, height*0.05f, speed
+                    ),
+                    GameObjectCpu(
+                        "vehicle_07",
+                        arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.dirigible_6, null)?.toBitmap(width, height)!!),
+                        arrayOf(arrayOf(0f, 0f, 1f, 1f)),
+                        20f * scaleFactor, 8f * scaleFactor, width, height, ppm, posX, height*0.05f, speed
+                    ),
+                    GameObjectCpu(
+                        "vehicle_08",
+                        arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.dirigible_7, null)?.toBitmap(width, height)!!),
+                        arrayOf(arrayOf(0f, 0f, 1f, 1f)),
+                        20f * scaleFactor, 8f * scaleFactor, width, height, ppm, posX, height*0.05f, speed
+                    ),
+
+
+                    GameObjectCpu(
+                        "vehicle_09",
+                        arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.ufo, null)?.toBitmap(width, height)!!),
+                        arrayOf(arrayOf(0f, 0f, 1f, 1f)),
+                        4f * scaleFactor, 2f * scaleFactor, width, height, ppm, posX, height*0.05f, speed
+                    )
+                )
+
+                /*vehicles = arrayOf(
                     Vehicle(
                         //"biplane",
                         "vehicle_01",
@@ -627,11 +806,17 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                         arrayOf(arrayOf(0f, 0f, 1f, 1f)),
                         4f, 2f, width, height, ppm, width + 420f, 20f, speed
                     )*/
-                )
+                )*/
 
                 pickVehicle(width, height)
             }
 
+
+
+
+
+
+            // ===================================================================================================
 
             // ALTERNATIVA USANDO DIMENSIONI ORIGINALI BITMAP, NON MI SEMBRA CAMBI MOLTO,
             // RICHIEDE SOLO 2 VARIABILI IN PIÙ PER LE DIMENSIONI DELLO SCHERMO PER IL RESPAWN OLTRE A QUELLE GIÀ PRESENTI IN VEHICLE
@@ -819,72 +1004,34 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                 )
             )*/
 
-            val loadUser = async {
-                // Convert the user's helicopter images for the animation and store them in an array
-                /*heli_animation = arrayOf(
-                    ResourcesCompat.getDrawable(resources, R.drawable.heli_1_1, null)?.toBitmap(width, height)!!,
-                    ResourcesCompat.getDrawable(resources, R.drawable.heli_1_2, null)?.toBitmap(width, height)!!,
-                    ResourcesCompat.getDrawable(resources, R.drawable.heli_1_3, null)?.toBitmap(width, height)!!,
-                    ResourcesCompat.getDrawable(resources, R.drawable.heli_1_4, null)?.toBitmap(width, height)!!
-                )*/
-
-                heli_animation = arrayOf(
-                    ResourcesCompat.getDrawable(resources, R.drawable.heli_green_0, null)?.toBitmap(width, height)!!,
-                    ResourcesCompat.getDrawable(resources, R.drawable.heli_green_1, null)?.toBitmap(width, height)!!,
-                    ResourcesCompat.getDrawable(resources, R.drawable.heli_green_2, null)?.toBitmap(width, height)!!,
-                    ResourcesCompat.getDrawable(resources, R.drawable.heli_green_3, null)?.toBitmap(width, height)!!
-                )
-
-                // Init the helicopter bitmap with the first bitmap in the animation array
-                heli = heli_animation[0]
-
-                // USO SOLO ppm E NON ANCHE ppm_y PERCHÈ ALTRIMENTI DISTORCE L'IMMAGINE
-                // From heli.width * heli_scale = heli_width * ppm
-                //heli_scale_x = heli_width * ppm / heli.width
-                //heli_scale_y = heli_height * ppm / heli.height
-                heli_scale_x = heli_width * scaleFactor * ppm / heli.width
-                heli_scale_y = heli_height * scaleFactor * ppm / heli.height
-                heli_width_scaled  = heli.width * heli_scale_x
-                heli_height_scaled = heli.height * heli_scale_y
+            // ===================================================================================================
 
 
-                // PER L'UTENTE SERVIREBBE UNA CLASSE A PARTE PERCHÈ IN QUESTO MOMENTO VEHICLE È UNA SOTTOCLASSE DI OBSTACLE.
-                // POTREI NON FARE 2 CLASSI SE IMPOSTO LA VELOCITÀ A ZERO.
-                // SOLO IL VEICOLO DELL'UTENTE HA UN'ANIMAZIONE IN QUESTO MOMENTO E QUINDI NELLA CLASSE NON È PREVISTA
-                /*Vehicle(
-                    "user",
-                    ResourcesCompat.getDrawable(resources, R.drawable.heli_green_0, null)?.toBitmap(width, height)!!,
+
+
+
+
+
+
+
+
+            val loadPlayer = async {
+                playerVehicle = GameObjectPlayer(
+                    "player_vehicle",
+                    arrayOf(
+                        ResourcesCompat.getDrawable(resources, R.drawable.heli_green_0, null)?.toBitmap(width, height)!!,
+                        ResourcesCompat.getDrawable(resources, R.drawable.heli_green_1, null)?.toBitmap(width, height)!!,
+                        ResourcesCompat.getDrawable(resources, R.drawable.heli_green_2, null)?.toBitmap(width, height)!!,
+                        ResourcesCompat.getDrawable(resources, R.drawable.heli_green_3, null)?.toBitmap(width, height)!!
+                    ),
                     arrayOf(arrayOf(0f, 0f, 1f, 1f)),
-                    8f, 3f, width, height, ppm, 1f, height*0.4f, 0f // Measures in meters except pos_y
-                )*/
-
-
-                /*radius *= ppm
-                speed  *= ppm
-                g      *= ppm*/
-
-
-                /*Log.d("ppm", "ppm: " + ppm)
-                Log.d("ppm", "heli_scale: " + heli_scale)
-                Log.d("ppm", "cannon width in px: " + cannon.width*heli_scale)
-                Log.d("ppm", "cannon height in px: " + cannon.height*heli_scale)
-                Log.d("ppm", "radius: " + radius)
-                Log.d("ppm", "speed: " + speed)
-                Log.d("ppm", "gravity: " + g)*/
-
-
-                // Set translation values
-                //user_dx = 30f
-                user_dy = height * 0.4f
-
-                // Set translation values converting from meters
-                user_dx *= ppm
-                //user_dy *= ppm_y
+                    10f * scaleFactor, 3f * scaleFactor, width, height, ppm, 1f, height*0.4f, speed // Measures in meters except pos_y
+                )
             }
 
             loadBuildings.await()
             loadVehicles.await()
-            loadUser.await()
+            loadPlayer.await()
 
             start(width, height)
         }
@@ -917,28 +1064,11 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
 
                 timePreviousFrame = timeCurrentFrame
 
-                val updateHeli = async {
+                val updatePlayer = async {
                     //Log.d("COROUTINE", "ASYNC UPDATE USER - I'm working in thread ${Thread.currentThread().name}")
                     //Log.d("COROUTINE", "ASYNC UPDATE USER - dt $dt")
 
-                    // Helicopter animation frame
-                    heli = heli_animation[heli_animation_index]
-                    heli_animation_index = (heli_animation_index + 1) % heli_animation.size
-
-                    //user_dy += last_gyroscope_input * ppm
-                    user_dy += last_gyroscope_input * ppm
-
-                    // Constrain the bitmap in the screen
-                    if (user_dy < 0)
-                        user_dy = 0f
-                    else if (user_dy + heli_height_scaled > height)
-                        user_dy = height.toFloat() - heli_height_scaled
-
-                    // Constrain the rotation of the bitmap
-                    if (last_gyroscope_input > 0 && heli_rotation <= 10f)
-                        heli_rotation += 0.5f
-                    else if (last_gyroscope_input < 0 && heli_rotation >= -8f)
-                        heli_rotation -= 0.5f
+                    playerVehicle.update(dt, lastGyroscopeInput)
 
                     // Scale the bitmap
                     /*heli_matrix.setScale(heli_scale_x, heli_scale_y)
@@ -960,13 +1090,6 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                         // Put the bitmap on the left-center of the screen
                         heli_matrix.postTranslate(user_dx, user_dy)
                     }*/
-
-                    user_rect.set(
-                        user_dx,
-                        user_dy,
-                        user_dx + heli_width_scaled,
-                        user_dy + heli_height_scaled
-                    )
                 }
                 val updateVehicle = async {
                     //Log.d("COROUTINE", "ASYNC UPDATE VEHICLE - I'm working in thread ${Thread.currentThread().name}")
@@ -999,7 +1122,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                         pickBuilding(width, height)
                 }
 
-                updateHeli.await()
+                updatePlayer.await()
                 updateVehicle.await()
                 updateBuilding.await()
 
@@ -1064,12 +1187,12 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
         // Check if game has been initialized
         if (!startDrawing) {
             // Show loading
-            painter_fill.getTextBounds(loadingText, 0, loadingText.length, textRect)
+            painterFill.getTextBounds(loadingText, 0, loadingText.length, textRect)
             canvas?.drawText(
                 loadingText,
                 width/2f - textRect.width()/2f - textRect.left,
                 height/2f + textRect.height()/2f - textRect.bottom,
-                painter_fill
+                painterFill
             )
 
             return
@@ -1078,45 +1201,34 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
         // Draw background
         canvas?.drawBitmap(bg, 0f, 0f, null)
 
-
-        // Init heli matrix transformations
-        /*Log.d("COROUTINE", "onDraw - heli_scale_x: $heli_scale_x")
-        Log.d("COROUTINE", "onDraw - heli_scale_y: $heli_scale_y")
-        Log.d("COROUTINE", "onDraw - heli_rotation: $heli_rotation")
-        Log.d("COROUTINE", "onDraw - user_dx: $user_dx")
-        Log.d("COROUTINE", "onDraw - user_dy: $user_dy")*/
-        //Log.d("COROUTINE", "onDraw - heli_matrix from coroutine: $heli_matrix")
-
         // Perform matrix transformations here because
-        // since onDraw is continuosly called (calls to onDraw > loops in game logic) even if I don't call invalidate,
+        // since onDraw is continuosly called (# calls to onDraw > # loops in game logic) even if I don't call invalidate,
         // it could happen that if I edit a global variable outside (e.g. matrices), then is not synchronized
-        heli_matrix.setScale(heli_scale_x, heli_scale_y)
-        heli_matrix.postRotate(heli_rotation)
-        heli_matrix.postTranslate(user_dx, user_dy)
-        //Log.d("COROUTINE", "onDraw - heli_matrix after operations: $heli_matrix")
-
+        playerVehicle.transform()
         vehicle.transform()
-        building.transform()//*/
+        building.transform()
 
-
-        canvas?.drawBitmap(heli, heli_matrix, null)
+        // Draw bitmaps
+        canvas?.drawBitmap(playerVehicle.getBitmap(), playerVehicle.getMatrix(), null)
         canvas?.drawBitmap(vehicle.getBitmap(), vehicle.getMatrix(), null)
         canvas?.drawBitmap(building.getBitmap(), building.getMatrix(), null)
 
-        canvas?.drawText("SCORE " + score.toLong(), 20f, 60f, painter_fill)
+        canvas?.drawText("SCORE " + score.toLong(), 20f, 60f, painterFill)
 
-        // Debug (draw user bounds)
-        canvas?.drawRect(user_rect, painter_stroke)
-
-        // Debug (draw vehicle bounds)
-        val bound = vehicle.getBounds()
-        for (rect in bound)
-            canvas?.drawRect(rect, painter_stroke)
-
-        // Debug (draw building bounds)
-        val bounds = building.getBounds()
+        // Debug (draw player's bounds)
+        var bounds = playerVehicle.getBounds()
         for (rect in bounds)
-            canvas?.drawRect(rect, painter_stroke)
+            canvas?.drawRect(rect, painterStroke)
+
+        // Debug (draw vehicle's bounds)
+        bounds = vehicle.getBounds()
+        for (rect in bounds)
+            canvas?.drawRect(rect, painterStroke)
+
+        // Debug (draw building's bounds)
+        bounds = building.getBounds()
+        for (rect in bounds)
+            canvas?.drawRect(rect, painterStroke)
     }
 
     // Convert density independent pixels into screen pixels
@@ -1139,8 +1251,21 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
 
     // Pick a random building and set a random height for it
     private fun pickBuilding(screenWidth: Int, screenHeight: Int, name: String? = null) {
-        if (name == null || name.isEmpty())
-            building = buildings.random()
+        if (name == null || name.isEmpty()) {
+            var b = buildings.random()
+
+            // Check if building variable has been initialized
+            if (startDrawing)
+                // It has been init, try to pick a different building than the current one
+                for (i in 0..2) {
+                    if (b.getName() != building.getName())
+                        break
+
+                    b = buildings.random()
+                }
+
+            building = b
+        }
         else {
             val i = getGameObjectIndexByName(name)
 
@@ -1175,10 +1300,21 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
 
     // Pick a random vehicle and set a random height for it
     private fun pickVehicle(screenWidth: Int, screenHeight: Int, name: String? = null) {
-        //vehicle = vehicles.random()
+        if (name == null || name.isEmpty()) {
+            var v = vehicles.random()
 
-        if (name == null || name.isEmpty())
-            vehicle = vehicles.random()
+            // Check if vehicle variable has been initialized
+            if (startDrawing)
+            // It has been init, try to pick a different vehicle than the current one
+                for (i in 0..2) {
+                    if (v.getName() != vehicle.getName())
+                        break
+
+                    v = vehicles.random()
+                }
+
+            vehicle = v
+        }
         else {
             val i = getGameObjectIndexByName(name)
 
@@ -1217,8 +1353,10 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
         val rects = building.getBounds()
         rects.addAll(vehicle.getBounds())
 
+        val playerRect = playerVehicle.getBounds()[0]
+
         for (r in rects)
-            if (RectF.intersects(user_rect, r))
+            if (RectF.intersects(playerRect, r))
                 return true
 
         return false
@@ -1291,13 +1429,13 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
         val value = if (width < height) lastGyroscope[0] else lastGyroscope[1]
 
         if (value > 0)
-            last_gyroscope_input = max(1f, min(value * 1, 15f))
+            lastGyroscopeInput = max(1f, min(value * 1, 15f))
         else if (value < 0)
-            last_gyroscope_input = min(-1f, max(value * 1, -15f))
+            lastGyroscopeInput = min(-1f, max(value * 1, -15f))
 
         /*Log.d("SENSOR", "****************")
         Log.d("SENSOR", "value: " + lastGyroscope[0])
-        Log.d("SENSOR", "last_gyroscope_input: $last_gyroscope_input")
+        Log.d("SENSOR", "lastGyroscopeInput: $lastGyroscopeInput")
         Log.d("SENSOR", "lastGyroscope[1]: ${lastGyroscope[1]}")*/
 
         invalidate()
@@ -1305,27 +1443,51 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
 
     // Save game variables
     override fun onSaveInstanceState(): Parcelable? {
-        Log.d("save", "save state game view")
-
         val bundle = Bundle()
         bundle.putParcelable("superState", super.onSaveInstanceState())
 
         bundle.putFloat("score", score)
         bundle.putFloat("speed", speed)
 
-        //Log.d("save", "save state game view - user_dx: $user_dx")
-        Log.d("save", "save state game view - user_dy: $user_dy")
 
-        //bundle.putFloat("userPosX", user_dx)
-        bundle.putFloat("userPosY", user_dy)
+        // NON USARE PIXEL O METRI PERCHÈ UNA DELLE 2 DIMENSIONI NON È VINCOLATA E
+        // DAL MOMENTO CHE STO USANDO IL FATTORE DI SCALA, NEANCHE L'ALTRA È LA STESSA MA È IN PROPORZIONE
+        Log.d("save", "Save state game view - player X: ${playerVehicle.getX()} px")
+        Log.d("save", "Save state game view - player Y: ${playerVehicle.getY()} px")
+
+        Log.d("save", "Save state game view - player X: ${playerVehicle.getX() / ppm} m")
+        Log.d("save", "Save state game view - player Y: ${playerVehicle.getY() / ppm} m")
+
+        // USA LA PERCENTUALE DELLO SCHERMO PER ENTRAMBE LE DIMENSIONI!
+        // Get screen width and height (don't use directly getWidth() and getHeight() because here return 0) ?
+        val width = resources.displayMetrics.widthPixels
+        val height = resources.displayMetrics.heightPixels
+
+        Log.d("save", "Save state game view - player X: ${playerVehicle.getX() / width} => ${playerVehicle.getX() / width * 100} %")
+        Log.d("save", "Save state game view - player Y: ${playerVehicle.getY() / height} => ${playerVehicle.getY() / height * 100} %")
+
+
+        // VERSIONE CON METRI
+        /*bundle.putFloat("playerPosY", playerVehicle.getY() / ppm)
 
         bundle.putString("vehicleName", vehicle.getName())
         bundle.putFloat("vehiclePosX", vehicle.getX() / ppm)
-        bundle.putFloat("vehiclePosY", vehicle.getY())
+        bundle.putFloat("vehiclePosY", vehicle.getY() / ppm)
 
         bundle.putString("buildingName", building.getName())
         bundle.putFloat("buildingPosX", building.getX() / ppm)
-        bundle.putFloat("buildingPosY", building.getY())
+        bundle.putFloat("buildingPosY", building.getY() / ppm)*/
+
+        // VERSIONE CON PERCENTUALE SCHERMO
+        bundle.putFloat("playerPosY", playerVehicle.getY() / height)
+
+        bundle.putString("vehicleName", vehicle.getName())
+        bundle.putFloat("vehiclePosX", vehicle.getX() / width)
+        bundle.putFloat("vehiclePosY", vehicle.getY() / height)
+
+        bundle.putString("buildingName", building.getName())
+        bundle.putFloat("buildingPosX", building.getX() / width)
+        bundle.putFloat("buildingPosY", building.getY() / height)
 
         return bundle
     }
@@ -1333,45 +1495,43 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
     // Restore game variables
     override fun onRestoreInstanceState(state: Parcelable?) {
         if (state is Bundle) {
-            Log.d("save", "restore state game view")
-
             val s = state.getParcelable<Parcelable>("superState")
 
             score = state.getFloat("score")
             speed = state.getFloat("speed")
 
-            //user_dx = state.getFloat("userPosX")
-            user_dy = state.getFloat("userPosY")
-
-            //Log.d("save", "restore state game view - user_dx: $user_dx")
-            Log.d("save", "restore state game view - user_dy: $user_dy")
-
-            // Get screen width and height (don't use directly getWidth() and getHeight() because here return 0)
+            // Get screen width and height (don't use directly getWidth() and getHeight() because here return 0) ?
             val width = resources.displayMetrics.widthPixels
             val height = resources.displayMetrics.heightPixels
-
-            /*val vn = state.getString("vehicleName")
-            val vx = state.getFloat("vehiclePosX")
-            val vy = state.getFloat("vehiclePosY")
-
-            pickVehicle(width, height, vn)
-            vehicle.setX(vx)
-            vehicle.setY(vy)
-            vehicle.setSpeed(speed)
-
-            val bn = state.getString("buildingName")
-            val bx = state.getFloat("buildingPosX")
-            val by = state.getFloat("buildingPosY")
-
-            pickBuilding(width, height, bn)
-            building.setX(bx)
-            building.setY(by)
-            building.setSpeed(speed)*/
-
 
             // Dispatchers.Default — is used by all standard builders if no dispatcher or any other ContinuationInterceptor is specified in their context.
             // It uses a common pool of shared background threads.
             // This is an appropriate choice for compute-intensive coroutines that consume CPU resources
+            lifecycleScope.launch(Dispatchers.Default) {
+                val py = state.getFloat("playerPosY")
+
+                // VERSIONE CON METRI
+                /*vLog.d("save", "Restore state game view - player Y: $py m")
+                Log.d("save", "Restore state game view - player Y: ${py * ppm} px")*/
+
+                // VERSIONE CON PERCENTUALE SCHERMO
+                Log.d("save", "Restore state game view - player Y: $py => ${py * 100} %")
+                Log.d("save", "Restore state game view - player Y: ${py * height} px")
+                Log.d("save", "Save state game view - player Y: ${py * height / ppm} m")
+
+                while (true) {
+                    try {
+                        //playerVehicle.setY(py)
+                        playerVehicle.setY(py * height)
+
+                        break
+                    }catch (e: UninitializedPropertyAccessException) {
+                        //e.printStackTrace()
+                        sleep(100)
+                    }
+                }
+            }
+
             lifecycleScope.launch(Dispatchers.Default) {
                 val vn = state.getString("vehicleName")
                 val vx = state.getFloat("vehiclePosX")
@@ -1382,9 +1542,11 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                         Log.d("save","restore state game view - Try to pick vehicle")
 
                         pickVehicle(width, height, vn)
-                        vehicle.setX(vx * ppm)
-                        vehicle.setY(vy)
-                        vehicle.setSpeed(speed)
+                        //vehicle.setX(vx * ppm)
+                        //vehicle.setY(vy)
+                        vehicle.setX(vx * width)
+                        vehicle.setY(vy * height)
+                        vehicle.setSpeed(speed + 5f)
 
                         break
                     } catch (e: UninitializedPropertyAccessException) {
@@ -1404,8 +1566,10 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                         Log.d("save","restore state game view - Try to pick building")
 
                         pickBuilding(width, height, bn)
-                        building.setX(bx * ppm)
-                        building.setY(by)
+                        //building.setX(bx * ppm)
+                        //building.setY(by)
+                        building.setX(bx * width)
+                        building.setY(by * height)
                         building.setSpeed(speed)
 
                         break

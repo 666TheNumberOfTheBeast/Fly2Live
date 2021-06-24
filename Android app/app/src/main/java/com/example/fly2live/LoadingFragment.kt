@@ -16,19 +16,12 @@ import androidx.navigation.fragment.findNavController
 
 
 // VERSIONE CON VOLLEY E POLLING
-import com.android.volley.Request
-import com.android.volley.RequestQueue
-import com.android.volley.toolbox.JsonObjectRequest
-import com.android.volley.toolbox.Volley
 
 import com.example.fly2live.configuration.Configuration.Companion.PLAYER_ID
-import com.example.fly2live.configuration.Configuration.Companion.NEW_GAME
-import com.example.fly2live.configuration.Configuration.Companion.POLLING
+import com.example.fly2live.configuration.Configuration.Companion.REQ_CODE_NEW_GAME
 import com.example.fly2live.configuration.Configuration.Companion.URL
 import io.socket.client.IO
 import io.socket.client.Socket
-import io.socket.emitter.Emitter
-import kotlinx.android.synthetic.main.fragment_loading.*
 import org.json.JSONObject
 import java.net.URISyntaxException
 import org.json.JSONException
@@ -37,8 +30,6 @@ import androidx.activity.addCallback
 import androidx.lifecycle.lifecycleScope
 import com.example.fly2live.configuration.Configuration.Companion.MSG_CODE_BAD_REQ
 import com.example.fly2live.configuration.Configuration.Companion.MSG_CODE_FOUND_ADV
-import com.example.fly2live.configuration.Configuration.Companion.MSG_CODE_GAMEPLAY
-import com.example.fly2live.configuration.Configuration.Companion.MSG_CODE_GAME_END
 import com.example.fly2live.configuration.Configuration.Companion.MSG_CODE_GAME_START
 import com.example.fly2live.configuration.Configuration.Companion.MSG_CODE_PREPARE
 import com.example.fly2live.configuration.Configuration.Companion.MSG_CODE_SEARCHING_ADV
@@ -55,6 +46,18 @@ class LoadingFragment : Fragment() {
     private var found = false
 
     private lateinit var mSocket: Socket
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        // Access control
+        /*account = GoogleSignIn.getLastSignedInAccount(activity)
+        if (account == null) {
+            // Attempt to pop the controller's back stack back to a specific destination
+            findNavController().popBackStack(R.id.mainFragment, false)
+            return
+        }*/ // TEMP DISABLED TO SAVE API CALLS
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -99,33 +102,32 @@ class LoadingFragment : Fragment() {
 
         mSocket.connect()
 
-        mSocket.on(Socket.EVENT_CONNECT, Emitter.Listener() { args ->
+        mSocket.on(Socket.EVENT_CONNECT) { args ->
             Log.d("json", "connected to the server")
             Log.d("json", "socket ID: " + mSocket.id()) // sid (e.g. x8WIv7-mJelg7on_ALbx)
 
-            searching = true
             activity?.runOnUiThread(Runnable {
                 // Get screen width and height
                 val displayMetrics = Resources.getSystem().displayMetrics
-                val screen_width  = displayMetrics.widthPixels
-                val screen_height = displayMetrics.heightPixels
+                // val displayMetrics = resources.displayMetrics
+                val screenWidth  = displayMetrics.widthPixels
+                val screenHeight = displayMetrics.heightPixels
 
-                //textView.text = getString(R.string.searching)
+                Log.d("ppm", "w: $screenWidth")
+                Log.d("ppm", "h: $screenHeight")
 
-                searchGame(screen_width, screen_height)
+                textView.text = getString(R.string.msg_searching_adv)
+
+                searching = true
+                searchGame(screenWidth, screenHeight)
             })
 
             requireActivity().onBackPressedDispatcher.addCallback(this) {
                 goBack()
             }
-        })
+        }
 
-        mSocket.on(Socket.EVENT_CONNECT_ERROR, Emitter.Listener() { args ->
-            /*activity?.runOnUiThread(Runnable {
-                Toast.makeText(context, "Error in connecting to the server", Toast.LENGTH_SHORT).show()
-            })
-            goBack()*/
-
+        mSocket.on(Socket.EVENT_CONNECT_ERROR) { args ->
             activity?.runOnUiThread(Runnable {
                 // Create Toast outside the looper to avoid crashes due to bad context
                 val toast = Toast.makeText(context, "Error in connecting to the server", Toast.LENGTH_SHORT)
@@ -136,49 +138,51 @@ class LoadingFragment : Fragment() {
                     goBack()
                 }, 1000)
             })
-        })
+        }
 
-        mSocket.on(Socket.EVENT_DISCONNECT, Emitter.Listener() { args ->
+        mSocket.on(Socket.EVENT_DISCONNECT) { args ->
             Log.d("json", "disconnected from the server")
-        })
+        }
     }
 
     private fun searchGame(screen_width: Int, screen_height: Int) {
         val json = JSONObject()
         json.put("who", PLAYER_ID)
-        json.put("req", NEW_GAME)
+        json.put("req", REQ_CODE_NEW_GAME)
         json.put("screen_width", screen_width)
         json.put("screen_height", screen_height)
+
         mSocket.emit("new game request", json)
         Log.d("json", "request sent")
 
 
-        mSocket.on("new game response", Emitter.Listener { args ->
+        mSocket.on("new game response") { args ->
+            Log.d("json", "response arrived")
+            val data = args[0] as JSONObject
+            val error: Boolean
+            val messageCode: Int
+
+            try {
+                error       = data.getBoolean("error")
+                messageCode = data.getInt("msg_code")
+            } catch (e: JSONException) {
+                return@on
+            }
+
             activity?.runOnUiThread(Runnable {
-                Log.d("json", "response arrived")
-                val data = args[0] as JSONObject
-                val error: Boolean
-                val message_code: Int
-
-                try {
-                    error        = data.getBoolean("error")
-                    message_code = data.getInt("msg_code")
-                } catch (e: JSONException) {
-                    return@Runnable
-                }
-
                 if (error) {
                     Toast.makeText(context, "Invalid request to the server", Toast.LENGTH_SHORT).show()
                     goBack()
                 }
-                else
-                    textView.text = toMessage(message_code)
+                else {
+                    textView.text = toMessage(messageCode)
 
-                /*if (message_code == MSG_CODE_GAME_START) {
-                    findNavController().navigate(R.id.action_loadingFragment_to_gameFragment)
-                }*/
+                    if (messageCode == MSG_CODE_GAME_START) {
+                        findNavController().navigate(R.id.action_loadingFragment_to_gameFragment)
+                    }
+                }
             })
-        })
+        }
     }
 
     private fun goBack() {
@@ -261,7 +265,7 @@ class LoadingFragment : Fragment() {
     // Request a JSON response from the provided URL
     val req = JsonObjectRequest(
         Request.Method.GET,
-        URL + "req=" + NEW_GAME + "&who=-1",
+        URL + "req=" + REQ_CODE_NEW_GAME + "&who=-1",
         null,
         { response ->
             Log.d("getNewGame", response.toString())

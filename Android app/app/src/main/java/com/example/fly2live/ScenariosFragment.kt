@@ -61,7 +61,7 @@ class ScenariosFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         // TEMP TO SAVE API CALLS
-        findNavController().navigate(R.id.action_scenariosFragment_to_gameFragment)
+        updateUI(1, 500)
         return
 
         // Check if local configuration has been initialized

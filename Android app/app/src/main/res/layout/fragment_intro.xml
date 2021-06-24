@@ -13,7 +13,7 @@
         android:layout_height="match_parent"
         android:scaleType="fitXY"
         android:contentDescription="@string/logo"
-        android:src="@drawable/intro_bg"
+        android:src="@drawable/bg_intro"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

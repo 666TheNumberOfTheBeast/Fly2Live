@@ -51,12 +51,12 @@ class GameEndFragment : Fragment() {
         super.onCreate(savedInstanceState)
 
         // Access control
-        account = GoogleSignIn.getLastSignedInAccount(activity)
+        /*account = GoogleSignIn.getLastSignedInAccount(activity)
         if (account == null) {
             // Attempt to pop the controller's back stack back to a specific destination
             findNavController().popBackStack(R.id.mainFragment, false)
             return
-        }
+        }*/ // TEMP DISABLED TO SAVE API CALLS
 
         // Get passed arguments the first time the fragment is created
         if (savedInstanceState == null) {
@@ -64,7 +64,7 @@ class GameEndFragment : Fragment() {
             winner = arguments!!.getBoolean("winner")
 
             // Get events and leaderboards clients
-            val mEventsClient  = Games.getEventsClient(context!!, account!!)
+            /*val mEventsClient  = Games.getEventsClient(context!!, account!!)
             mLeaderboardClient = Games.getLeaderboardsClient(context!!, account!!)
 
             // Increment the correct event for the currently signed-in player.
@@ -79,9 +79,9 @@ class GameEndFragment : Fragment() {
 
                 submitScore(getString(R.string.leaderboard_best_score_multiplayer_id))
             }
+            else
+                submitScore(getString(R.string.leaderboard_best_score_single_player_id))*/
             // TEMP DISABLED TO SAVE API CALLS
-            //else
-                //submitScore(getString(R.string.leaderboard_best_score_single_player_id))
         }
 
         val sharedPref = context?.getSharedPreferences(getString(R.string.shared_preferences_name), Context.MODE_PRIVATE)
@@ -121,6 +121,9 @@ class GameEndFragment : Fragment() {
         //val xp = (score * 1.1).toInt()
         val earnedXp = (score * 0.3).toInt()
         xpView.text = xpView.text.toString() + " " + earnedXp.toString()
+
+        // TEMP TO SAVE API CALLS
+        return
 
         // Check if local configuration has been initialized (it should be)
         if (PLAYER_LEVEL <= 0) {

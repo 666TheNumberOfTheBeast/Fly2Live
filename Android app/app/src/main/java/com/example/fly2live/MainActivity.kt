@@ -99,7 +99,7 @@ class MainActivity : AppCompatActivity() {
 
     // Save main soundtrack current position and pause it
     override fun onSaveInstanceState(outState: Bundle) {
-        Log.d("save", "save state main activity")
+        //Log.d("save", "save state main activity")
         if (soundtrack != null) {
             outState.putInt("mainSoundtrackPosition", soundtrack!!.currentPosition)
 
@@ -111,7 +111,7 @@ class MainActivity : AppCompatActivity() {
 
     // Restore main soundtrack position and play it
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        Log.d("save", "restore state main activity")
+        //Log.d("save", "restore state main activity")
         if (soundtrack != null) {
             val pos = savedInstanceState.getInt("mainSoundtrackPosition")
 

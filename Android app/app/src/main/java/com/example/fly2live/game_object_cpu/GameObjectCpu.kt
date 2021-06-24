@@ -9,7 +9,7 @@ class GameObjectCpu(name: String,
               width: Float, height: Float,
               screen_width: Int, screen_height: Int, ppm: Float,
               pos_x: Float, pos_y: Float, speed: Float) :
-    GameObject(name, bitmaps, bounds_offsets, width, height, screen_width, screen_height, ppm, pos_x, pos_y, speed) {
+    GameObject(name, bitmaps, bounds_offsets, width, height, screen_width, screen_height, ppm, pos_x, pos_y/*, speed*/) {
 
     private var speed: Float
 
@@ -42,12 +42,12 @@ class GameObjectCpu(name: String,
     override fun update(dt: Float) {
         super.update(dt)
 
-        // CON QUESTA VERSIONE NON LAGGA MAI PERCHÈ NON USO dt
-        //setX( getX() - speed )
-        // CON QUESTA VERSIONE POTREBBE LAGGARE UN PO' PERCHÈ dt NON È COSTANTE
-        setX( getX() - speed * dt )
+        // Move object to left
+        //setX( getX() - speed * dt )
 
-        if (getX() + getBitmapScaledWidth() < 0) {
+        // Check if the bitmap is outside the screen
+        // (left part of the screen because movement from right to left)
+        if (getX() + getBitmapScaledWidth() < 0f) {
             setX(respawnPosX)
             respawn = true
         }

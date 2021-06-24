@@ -3,7 +3,8 @@ package com.example.fly2live.configuration
 class Configuration {
     companion object {
         // Google Games player ID
-        var PLAYER_ID = ""
+        //var PLAYER_ID = "" // TEMP DISABLED TO SAVE API CALLS
+        var PLAYER_ID = (0..30).random().toString()
         // Player JWT for MongoDB Realm
         var PLAYER_JWT = "" // MESSO QUI E NON IN SHARED PREFERENCES, VIENE ELIMINATO OGNI VOLTA CHE L'APP VIENE CHIUSA
         // Player levels and xp (retrieve the first time and then handle them locally)
@@ -24,7 +25,7 @@ class Configuration {
         const val URL = "http://192.168.1.110:5000/"
 
         // Constants for the client requests
-        const val NEW_GAME = 0
+        const val REQ_CODE_NEW_GAME = 0
         const val POLLING  = 1
         const val NEW_MOVE = 2
 

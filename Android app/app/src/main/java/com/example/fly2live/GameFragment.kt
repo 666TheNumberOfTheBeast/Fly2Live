@@ -49,6 +49,8 @@ class GameFragment : Fragment() {
             findNavController().popBackStack(R.id.loadingFragment, true)
 
         val view = GameView(context, lifecycleScope)
+
+        // Set view ID to override onSaveInstanceState and onRestoreInstanceState of the view
         view.id = R.id.game_view
 
         // Inflate the layout for this fragment
@@ -91,7 +93,7 @@ class GameFragment : Fragment() {
 
     // Save gameplay soundtrack current position and pause it
     override fun onSaveInstanceState(outState: Bundle) {
-        Log.d("save", "save state game fragment")
+        //Log.d("save", "save state game fragment")
         if (soundtrack != null) {
             outState.putInt("gameplaySoundtrackPosition", soundtrack!!.currentPosition)
 

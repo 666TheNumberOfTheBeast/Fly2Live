@@ -10,7 +10,7 @@ abstract class GameObject(
     bounds_offsets: Array<Array<Float>>,
     width: Float, height: Float,
     screen_width: Int, screen_height: Int, ppm: Float,
-    pos_x: Float, pos_y: Float, speed: Float) {
+    pos_x: Float, pos_y: Float/*, speed: Float*/) {
 
     private val name: String
 
@@ -67,9 +67,8 @@ abstract class GameObject(
         bitmapWidthScaled  = screen_width * bitmapScaleX
         bitmapHeightScaled = screen_height * bitmapScaleY
 
-        // Convert meters into pixels to convert them once and not continuosly in update()
-        this.posX = pos_x * ppm  // Convert meters into pixels
-        this.posY = pos_y        // Received as pixels (screen %)
+        this.posX = pos_x * ppm  // Convert meters into pixels (once and not continuosly in update())
+        this.posY = pos_y        // Received as pixels
         //this.speed = speed * ppm // Convert m/s into pixels/s
 
         // Init matrix transformations

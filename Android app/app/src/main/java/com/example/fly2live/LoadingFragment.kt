@@ -98,6 +98,7 @@ class LoadingFragment : Fragment() {
         } catch (e: URISyntaxException) {
             Toast.makeText(context, "Error in connecting to the server: bad URL", Toast.LENGTH_SHORT).show()
             goBack()
+            return
         }
 
         mSocket.connect()

@@ -20,8 +20,18 @@ import java.lang.Thread.sleep
 import kotlin.math.max
 import kotlin.math.min
 import android.os.Bundle
+import android.widget.Toast
+import androidx.navigation.fragment.findNavController
+import com.example.fly2live.configuration.Configuration
+import com.example.fly2live.configuration.Configuration.Companion.MULTIPLAYER
 import com.example.fly2live.game_object_cpu.GameObjectCpu
 import com.example.fly2live.game_object_player.GameObjectPlayer
+import io.socket.client.IO
+import io.socket.client.Socket
+import io.socket.engineio.client.transports.WebSocket
+import org.json.JSONException
+import org.json.JSONObject
+import java.net.URISyntaxException
 
 
 class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context), View.OnTouchListener, SensorEventListener2 {
@@ -54,7 +64,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
 
     // World constants
     private val worldWidth  = 50f // meters
-    private var worldHeight = 60f //40f (ok horizontal) //65f o 60f (ok vertical)  // meters
+    //private var worldHeight = 60f // meters
 
     // Pixel per meter
     private var ppm = 1f
@@ -93,6 +103,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
 
 
     // Variables for multiplayer mode
+    private var mSocket: Socket? = null
     private var adversaryVehicle: GameObjectPlayer? = null
     private var winner = false
 
@@ -141,6 +152,60 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
         // It uses a common pool of shared background threads.
         // This is an appropriate choice for compute-intensive coroutines that consume CPU resources
         lifecycleScope.launch(Dispatchers.Default) {
+            if (MULTIPLAYER) {
+                // Force websocket
+                val options = IO.Options.builder()
+                    .setTransports(arrayOf(WebSocket.NAME))
+                    .build()
+
+                try {
+                    mSocket = IO.socket(Configuration.URL, options)
+                } catch (e: URISyntaxException) {
+                    Toast.makeText(context, "Error in connecting to the server: bad URL", Toast.LENGTH_SHORT).show()
+                    //goBack()
+                    return@launch
+                }
+
+                mSocket!!.on("new game response") { args ->
+                    Log.d("json", "message from server arrived")
+
+                    val data = args[0] as JSONObject
+                    val error: Boolean
+                    val messageCode: Int
+                    val cpuBuildingJson: JSONObject
+                    val cpuVehicleJson: JSONObject
+                    val player0: JSONObject
+                    val player1: JSONObject
+
+                    try {
+                        error           = data.getBoolean("error")
+                        messageCode     = data.getInt("msg_code")
+                        cpuBuildingJson = data.getJSONObject("cpu_building")
+                        cpuVehicleJson  = data.getJSONObject("cpu_vehicle")
+                        player0         = data.getJSONObject("player_0")
+                        player1         = data.getJSONObject("player_1")
+                        score           = data.getDouble("score").toFloat()
+                        winner          = data.getBoolean("winner")
+                    } catch (e: JSONException) {
+                        return@on
+                    }
+
+                    // It should never happen as it only receives messages from server
+                    if (error) {
+                        Log.d("json", "Invalid request to the server")
+                        return@on
+                    }
+
+                    val cpuBuildingId = cpuBuildingJson.getInt("id")
+                    cpuBuildingJson.getDouble("pos_x")
+                    cpuBuildingJson.getDouble("pos_y")
+                    cpuBuildingJson.getDouble("width")
+                    cpuBuildingJson.getDouble("height")
+
+                    //pickBuilding(screenWidth, screenHeight, cpuBuildingId)
+                }
+            }
+
 
             // Calculate scale factor
 
@@ -265,17 +330,24 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
 
             Log.d("ppm", "worldWidth: $worldWidth")
             Log.d("ppm", "currentWorldWidth = screenWidth / ppm: $currentWorldWidth")
-            Log.d("ppm", "worldHeight: $worldHeight")
+            //Log.d("ppm", "worldHeight: $worldHeight")
             Log.d("ppm", "currentWorldHeight = screenHeight / ppm: $currentWorldHeight")
 
             // Initial position of obstacles
-            val initialObstaclePosX = currentWorldWidth + 3f
+            val initialObstaclePosX = currentWorldWidth + 3f  // In meters
 
             val loadBuildings = async {
                 Log.d("COROUTINE", "Load buildings")
+
+                val initialObstaclePosY = 40f  // In meters
+
                 // Convert the correct scenario images into bitmaps once
                 if (SCENARIO == SCENARIO_CITY_DAY) {
                     bg = ResourcesCompat.getDrawable(resources, R.drawable.city_bg_day, null)?.toBitmap(screenWidth, screenHeight)!!
+
+
+                    // Consider that with a fixed width of 50 m,
+                    // current device resolutions produces an height of 20 - 30 m if lanscape and 80 - 100 m if portrait.
 
                     // GameObjectCpu uses bounds offset based on bitmap's screenWidth and screenHeight in order to be consistent with any value of the world's width and height
                     buildings = arrayOf(
@@ -289,7 +361,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                                 arrayOf(0.1f, 0f, 0.18f, 1f),      // Top left rect
                                 arrayOf(0.47f, 0.023f, 0.63f, 1f)  // Top right rect
                             ),
-                            25f * scaleFactor, 70f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, screenHeight*0.2f, speed // Measures in meters except pos_y in pixels
+                            25f * scaleFactor, 70f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed // Measures in meters except pos_y in pixels
                         ),
                         GameObjectCpu(
                             "building_02",
@@ -299,7 +371,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                                 arrayOf(0.33f, 0.187f, 0.7f, 1f),   // Middle rect
                                 arrayOf(0.47f, 0f, 0.56f, 1f)       // Top rect
                             ),
-                            10f * scaleFactor, 80f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, screenHeight*0.2f, speed
+                            10f * scaleFactor, 80f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
                         ),
                         GameObjectCpu(
                             "building_03",
@@ -310,7 +382,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                                 arrayOf(0.28f, 0.045f, 0.68f, 1f),  // Middle rect 2
                                 arrayOf(0.45f, 0f, 0.6f, 1f)        // Top rect
                             ),
-                            25f * scaleFactor, 110f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, screenHeight*0.2f, speed
+                            25f * scaleFactor, 110f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
                         ),
                         GameObjectCpu(
                             "building_04",
@@ -321,11 +393,12 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                                 arrayOf(0.23f, 0.07f, 0.76f, 1f),  // Middle rect 2
                                 arrayOf(0.31f, 0.003f, 0.67f, 1f)  // Top rect
                             ),
-                            35f * scaleFactor, 90f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, screenHeight*0.2f, speed
+                            35f * scaleFactor, 90f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
                         ),
                         GameObjectCpu(
                             "building_05",
                             arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_day_05, null)?.toBitmap(screenWidth, screenHeight)!!),
+                            //arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_day_05, null)?.toBitmap()!!),
                             arrayOf(
                                 arrayOf(0f, 0.185f, 1f, 1f),       // Bottom rect
                                 arrayOf(0f, 0.1f, 0.23f, 1f),      // Middle left rect
@@ -333,7 +406,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                                 arrayOf(0.77f, 0.136f, 0.9f, 1f),  // Middle right rect
                                 arrayOf(0.33f, 0f, 0.75f, 1f)      // Top rect
                             ),
-                            35f * scaleFactor, 50f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, screenHeight*0.2f, speed
+                            35f * scaleFactor, 70f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
                         ),
                         GameObjectCpu(
                             "building_06",
@@ -344,7 +417,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                                 arrayOf(0.53f, 0.32f, 0.86f, 1f), // Middle right rect
                                 arrayOf(0.07f, 0f, 0.29f, 1f)     // Top rect
                             ),
-                            45f * scaleFactor, 50f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, screenHeight*0.2f, speed // Measures in meters except pos_y
+                            45f * scaleFactor, 50f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed // Measures in meters except pos_y
                         ),
                         GameObjectCpu(
                             "building_07",
@@ -357,7 +430,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                                 arrayOf(0.31f, 0.06f, 0.39f, 1f), // Top rect 1
                                 arrayOf(0.31f, 0f, 0.33f, 1f)     // Top rect 2
                             ),
-                            15f * scaleFactor, 80f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, screenHeight*0.2f, speed // Measures in meters except pos_y
+                            15f * scaleFactor, 80f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed // Measures in meters except pos_y
                         ),
                         GameObjectCpu(
                             "building_08",
@@ -366,7 +439,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                                 arrayOf(0f, 0.123f, 1f, 1f),  // Bottom rect
                                 arrayOf(0.1f, 0f, 0.9f, 1f)   // Top rect
                             ),
-                            13f * scaleFactor, 70f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, screenHeight*0.2f, speed
+                            13f * scaleFactor, 70f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
                         ),
                         GameObjectCpu(
                             "building_09",
@@ -377,7 +450,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                                 arrayOf(0.4f, 0.026f, 0.5f, 1f),   // Middle rect 2
                                 arrayOf(0.43f, 0.003f, 0.48f, 1f)  // Top rect
                             ),
-                            17f * scaleFactor, 70f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, screenHeight*0.2f, speed
+                            17f * scaleFactor, 70f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
                         ),
                         GameObjectCpu(
                             "building_10",
@@ -389,7 +462,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                                 arrayOf(0.4f, 0f, 0.7f, 1f),        // Top rect middle
                                 arrayOf(0.75f, 0.026f, 0.92f, 1f)   // Top rect right
                             ),
-                            13f * scaleFactor, 60f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, screenHeight*0.2f, speed
+                            13f * scaleFactor, 60f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
                         ),
                         GameObjectCpu(
                             "building_11",
@@ -398,7 +471,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                                 arrayOf(0f, 0.03f, 1f, 1f),    // Bottom rect
                                 arrayOf(0.15f, 0f, 0.57f, 1f)  // Top rect
                             ),
-                            17f * scaleFactor, 55f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, screenHeight*0.2f, speed
+                            17f * scaleFactor, 55f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
                         ),
                         GameObjectCpu(
                             "building_12",
@@ -407,7 +480,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                                 arrayOf(0f, 0.042f, 1f, 1f),  // Bottom rect
                                 arrayOf(0.06f, 0f, 0.9f, 1f)  // Top rect
                             ),
-                            15f * scaleFactor, 50f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, screenHeight*0.2f, speed
+                            15f * scaleFactor, 50f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
                         ),
                         GameObjectCpu(
                             "building_13",
@@ -419,7 +492,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                                 arrayOf(0.83f, 0.04f, 1f, 1f),     // Top rect right 1
                                 arrayOf(0.86f, 0f, 0.94f, 1f)      // Top rect right 2
                             ),
-                            20f * scaleFactor, 50f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, screenHeight*0.2f, speed
+                            20f * scaleFactor, 50f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
                         ),
                         GameObjectCpu(
                             "building_14",
@@ -430,7 +503,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                                 arrayOf(0.53f, 0.035f, 0.59f, 1f),  // Top rect left
                                 arrayOf(0.34f, 0f, 0.35f, 1f)       // Top rect right
                             ),
-                            30f * scaleFactor, 55f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, screenHeight*0.2f, speed
+                            30f * scaleFactor, 55f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
                         ),
                         GameObjectCpu(
                             "building_15",
@@ -443,7 +516,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                                 arrayOf(0.4f, 0.18f, 0.57f, 1f),    // Top rect 1
                                 arrayOf(0.53f, 0f, 0.57f, 1f)       // Top rect 2
                             ),
-                            13f * scaleFactor, 55f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, screenHeight*0.2f, speed
+                            13f * scaleFactor, 55f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
                         ),
                         GameObjectCpu(
                             "building_16",
@@ -457,7 +530,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                                 arrayOf(0.6f, 0.039f, 0.62f, 1f),   // Top rect middle
                                 arrayOf(0.68f, 0.03f, 0.71f, 1f)    // Top rect right
                             ),
-                            20f * scaleFactor, 50f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, screenHeight*0.2f, speed
+                            20f * scaleFactor, 50f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
                         ),
                         GameObjectCpu(
                             "building_17",
@@ -467,7 +540,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                                 arrayOf(0.15f, 0.06f, 0.88f, 1f),  // Middle rect
                                 arrayOf(0.41f, 0f, 0.63f, 1f)      // Top rect
                             ),
-                            28f * scaleFactor, 60f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, screenHeight*0.2f, speed
+                            28f * scaleFactor, 60f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
                         )
                     )
                 }
@@ -490,7 +563,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                                 arrayOf(0.3f, dp2px(90f), 0.65f, 0f),   // Top rect
                                 arrayOf(0.35f, dp2px(82f), 0.6f, 0f)    // Top rect
                             ),
-                            15f, 100f, screenWidth, screenHeight, ppm, initialObstaclePosX, screenHeight*0.2f, speed
+                            15f, 100f, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
                         ),
                         GameObjectCpu(
                             "building_02",
@@ -500,7 +573,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                                 arrayOf(0.4f, dp2px(153f), 0.6f, 0f),    // Middle rect
                                 arrayOf(0.45f, 0f, 0.54f, 0f)               // Top rect
                             ),
-                            10f, 110f, screenWidth, screenHeight, ppm, initialObstaclePosX, screenHeight*0.2f, speed
+                            10f, 110f, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
                         ),
                         GameObjectCpu(
                             "building_03",
@@ -511,7 +584,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                                 arrayOf(0.68f, dp2px(19f), 0.82f, 0f), // Top rect
                                 arrayOf(0.16f, 0f, 0.68f, 0f)             // Top rect
                             ),
-                            18f, 70f, screenWidth, screenHeight, ppm, initialObstaclePosX, screenHeight*0.2f, speed
+                            18f, 70f, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
                         ),
                         GameObjectCpu(
                             "building_04",
@@ -523,7 +596,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                                 arrayOf(0.3f, 0f, 0.82f, 0f)             // Top rect
                             ),
                             //30f, 90f, screenWidth, screenHeight, ppm, screenWidth + 20f, screenHeight*0.2f, speed
-                            20f, 70f, screenWidth, screenHeight, ppm, initialObstaclePosX, screenHeight*0.2f, speed
+                            20f, 70f, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
                         ),
                         GameObjectCpu(
                             "building_05",
@@ -536,7 +609,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                                 arrayOf(0.8f, dp2px(55f), 0.9f, 0f), // Middle rect 4
                                 arrayOf(0.13f, 0f, 0.45f, 0f)           // Top rect
                             ),
-                            25f, 60f, screenWidth, screenHeight, ppm, initialObstaclePosX, screenHeight*0.2f, speed
+                            25f, 60f, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
                         ),
                         GameObjectCpu(
                             "building_06",
@@ -554,7 +627,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                                 arrayOf(0.41f, dp2px(16f), 0.6f, 0f),    // Middle rect 9
                                 arrayOf(0.47f, 0f, 0.52f, 0f)               // Top rect
                             ),
-                            25f, 100f, screenWidth, screenHeight, ppm, initialObstaclePosX, screenHeight*0.2f, speed // Measures in meters except pos_y
+                            25f, 100f, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed // Measures in meters except pos_y
                         ),
                         GameObjectCpu(
                             "building_07",
@@ -565,7 +638,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                                 arrayOf(0.19f, dp2px(10f), 0.74f, 0f),  // Middle rect
                                 arrayOf(0.26f, 0f, 0.67f, 0f)              // Top rect
                             ),
-                            18f, 80f, screenWidth, screenHeight, ppm, initialObstaclePosX, screenHeight*0.2f, speed // Measures in meters except pos_y
+                            18f, 80f, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed // Measures in meters except pos_y
                         ),
                         GameObjectCpu(
                             "building_08",
@@ -577,7 +650,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                                 arrayOf(0.47f, dp2px(5f), 0.8f, 0f),  // Middle rect 3
                                 arrayOf(0.65f, 0f, 0.75f, 0f)            // Top rect
                             ),
-                            17f, 70f, screenWidth, screenHeight, ppm, initialObstaclePosX, screenHeight*0.2f, speed
+                            17f, 70f, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
                         ),
                         GameObjectCpu(
                             "building_09",
@@ -588,7 +661,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                                 arrayOf(0.15f, dp2px(8f), 0.87f, 0f),  // Middle rect 2
                                 arrayOf(0.23f, 0f, 0.77f, 0f)             // Top rect
                             ),
-                            25f, 70f, screenWidth, screenHeight, ppm, initialObstaclePosX, screenHeight*0.2f, speed
+                            25f, 70f, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
                         ),
                         GameObjectCpu(
                             "building_10",
@@ -597,7 +670,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                                 arrayOf(0.25f, dp2px(29f), 1f, 0f),    // Bottom rect
                                 arrayOf(0.33f, dp2px(20f), 0.87f, 0f)  // Top rect
                             ),
-                            13f, 65f, screenWidth, screenHeight, ppm, initialObstaclePosX, screenHeight*0.2f, speed
+                            13f, 65f, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
                         ),
                         GameObjectCpu(
                             "building_11",
@@ -610,7 +683,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                                 arrayOf(0.4f, dp2px(100f), 0.54f, 0f),  // Middle rect
                                 arrayOf(0.46f, 0f, 0.5f, 0f)               // Top rect
                             ),
-                            13f, 80f, screenWidth, screenHeight, ppm, initialObstaclePosX, screenHeight*0.2f, speed
+                            13f, 80f, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
                         )
                     )
                 }
@@ -621,6 +694,8 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
             val loadVehicles = async {
                 Log.d("COROUTINE", "Load vehicles")
 
+                val initialObstaclePosY = 5f  // In meters
+
                 vehicles = arrayOf(
                     GameObjectCpu(
                         "vehicle_01",
@@ -630,14 +705,14 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                             arrayOf(0f, 0.3f, 1f, 0.77f),   // Middle rect
                             arrayOf(0.1f, 0f, 0.4f, 0.6f)   // Top rect
                         ),
-                        6f * scaleFactor, 2.5f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, screenHeight*0.05f, speed // Measures in meters except pos_y
+                        6f * scaleFactor, 2.5f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed // Measures in meters except pos_y
                     ),
 
                     GameObjectCpu(
                         "vehicle_02",
                         arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.vehicle_dirigible_1, null)?.toBitmap(screenWidth, screenHeight)!!),
                         arrayOf(arrayOf(0f, 0f, 1f, 1f)),
-                        20f * scaleFactor, 8f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, screenHeight*0.05f, speed
+                        20f * scaleFactor, 8f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
                     ),
                     GameObjectCpu(
                         "vehicle_03",
@@ -647,7 +722,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                             arrayOf(0f, 0.05f, 1f, 0.85f),   // Middle rect
                             arrayOf(0.77f, 0f, 1f, 0.92f)    // Top rect
                         ),
-                        20f * scaleFactor, 8f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, screenHeight*0.05f, speed
+                        20f * scaleFactor, 8f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
                     ),
                     GameObjectCpu(
                         "vehicle_04",
@@ -659,7 +734,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                             arrayOf(0.15f, 0.06f, 0.77f, 0.85f),  // Middle rect 3
                             arrayOf(0.77f, 0f, 0.92f, 0.9f)       // Top rect
                         ),
-                        20f * scaleFactor, 8f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, screenHeight*0.05f, speed
+                        20f * scaleFactor, 8f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
                     ),
                     GameObjectCpu(
                         "vehicle_05",
@@ -671,7 +746,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                             arrayOf(0.12f, 0f, 0.77f, 0.85f),   // Middle rect 3
                             arrayOf(0.86f, 0f, 0.97f, 0.85f)    // Top rect
                         ),
-                        20f * scaleFactor, 8f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, screenHeight*0.05f, speed
+                        20f * scaleFactor, 8f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
                     ),
                     GameObjectCpu(
                         "vehicle_06",
@@ -683,7 +758,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                             arrayOf(0.12f, 0f, 0.77f, 0.85f),    // Middle rect 3
                             arrayOf(0.86f, 0.12f, 0.97f, 0.8f)   // Top rect
                         ),
-                        20f * scaleFactor, 8f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, screenHeight*0.05f, speed
+                        20f * scaleFactor, 8f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
                     ),
                     GameObjectCpu(
                         "vehicle_07",
@@ -695,7 +770,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                             arrayOf(0.12f, 0f, 0.6f, 0.85f),     // Middle rect 3
                             arrayOf(0.82f, 0.17f, 0.99f, 0.7f)   // Top rect
                         ),
-                        20f * scaleFactor, 8f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, screenHeight*0.05f, speed
+                        20f * scaleFactor, 8f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
                     ),
                     GameObjectCpu(
                         "vehicle_08",
@@ -706,7 +781,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                             arrayOf(0.1f, 0.04f, 0.82f, 0.82f),   // Middle rect 2
                             arrayOf(0.82f, 0.02f, 0.99f, 0.86f)   // Top rect
                         ),
-                        20f * scaleFactor, 8f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, screenHeight*0.05f, speed
+                        20f * scaleFactor, 8f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
                     ),
 
 
@@ -714,7 +789,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                         "vehicle_09",
                         arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.vehicle_ufo, null)?.toBitmap(screenWidth, screenHeight)!!),
                         arrayOf(arrayOf(0f, 0f, 1f, 1f)),
-                        4.2f * scaleFactor, 2.1f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, screenHeight*0.05f, speed
+                        4.2f * scaleFactor, 2.1f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
                     )
                 )
 
@@ -977,22 +1052,26 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                     ),*/
                     playerBitmaps,
                     arrayOf(arrayOf(0f, 0f, 1f, 1f)),
-                    10f * scaleFactor, 3f * scaleFactor, screenWidth, screenHeight, ppm, 1f, screenHeight*0.4f//, speed // Measures in meters except pos_y
+                    //10f * scaleFactor, 3f * scaleFactor, screenWidth, screenHeight, ppm, 1f, screenHeight*0.4f//, speed // Measures in meters except pos_y
+                    10f * scaleFactor, 3f * scaleFactor, screenWidth, screenHeight, ppm, 1f, 20f, 0f // Measures in meters
                 )
+
+                // I put the vehicle at 20 m from the top. See comment above about the height
             }
 
             loadBuildings.await()
             loadVehicles.await()
             loadPlayer.await()
 
-            start(screenWidth, screenHeight)
+            if (!MULTIPLAYER)
+                start(screenWidth, screenHeight)
         }
     }
 
-    private fun start(width: Int, height: Int) {
+    private fun start(screenWidth: Int, screenHeight: Int) {
         val fps = 90
-        val targetFrameTime = 1000L / fps
-        var timePreviousFrame = 0L
+        val targetFrameTime   = 1000L / fps  // In ms
+        var timePreviousFrame = 0L           // In ms
 
 
         // Dispatchers.Default — is used by all standard builders if no dispatcher or any other ContinuationInterceptor is specified in their context.
@@ -1010,8 +1089,8 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                 //Log.d("COROUTINE", "COROUTINE MAIN - I'm working in thread ${Thread.currentThread().name}")
 
                 // Compute time difference
-                val timeCurrentFrame = System.currentTimeMillis()
-                val dt = min(timeCurrentFrame - timePreviousFrame, targetFrameTime) / 1000f
+                val timeCurrentFrame = System.currentTimeMillis()  // In ms
+                val dt = min(timeCurrentFrame - timePreviousFrame, targetFrameTime) / 1000f  // In s
 
                 /*Log.d("TIME", "************")
                 Log.d("TIME", "timePreviousFrame: $timePreviousFrame ms")
@@ -1024,18 +1103,18 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
 
                 val updatePlayer = async {
                     //Log.d("COROUTINE", "ASYNC UPDATE USER - I'm working in thread ${Thread.currentThread().name}")
-                    //Log.d("COROUTINE", "ASYNC UPDATE USER - dt $dt")
 
-                    playerVehicle.update(dt, lastGyroscopeInput)
+                    playerVehicle.setSpeed(lastGyroscopeInput)
+                    playerVehicle.update(dt)
 
                     /*withContext(Dispatchers.Main) {
                         Log.d("COROUTINE", "ASYNC UPDATE USER MAIN CONTEXT - I'm working in thread ${Thread.currentThread().name}")
                         playerVehicle.transform()
                     }*/
                 }
+
                 val updateVehicle = async {
                     //Log.d("COROUTINE", "ASYNC UPDATE VEHICLE - I'm working in thread ${Thread.currentThread().name}")
-                    //Log.d("COROUTINE", "ASYNC UPDATE VEHICLE - dt: $dt")
 
                     cpuVehicle.update(dt)
 
@@ -1046,11 +1125,11 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
 
                     // Check if the cpuVehicle has been respawn
                     if (cpuVehicle.isRespawn())
-                        pickVehicle(width, height)
+                        pickVehicle(screenWidth, screenHeight)
                 }
+
                 val updateBuilding = async {
                     //Log.d("COROUTINE", "ASYNC UPDATE BUILDING - I'm working in thread ${Thread.currentThread().name}")
-                    //Log.d("COROUTINE", "ASYNC UPDATE BUILDING - dt: $dt")
 
                     cpuBuilding.update(dt)
 
@@ -1061,7 +1140,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
 
                     // Check if the cpuBuilding has been respawn
                     if (cpuBuilding.isRespawn())
-                        pickBuilding(width, height)
+                        pickBuilding(screenWidth, screenHeight)
                 }
 
                 updatePlayer.await()
@@ -1077,7 +1156,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                         gameEnd = true
 
                         val fragment = findFragment<GameFragment>()
-                        fragment.gameEnd(score.toLong(), false)
+                        fragment.gameEnd(score.toLong(), winner)
                     }
 
                     // Update the score
@@ -1148,7 +1227,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
         // Draw background
         canvas?.drawBitmap(bg, 0f, 0f, null)
 
-        // Perform matrix transformations here because
+        // Perform matrix transformations here because,
         // since onDraw is continuosly called (# calls to onDraw > # loops in game logic) even if I don't call invalidate,
         // it could happen that if I edit a global variable outside (e.g. matrices), then is not synchronized
         playerVehicle.transform()
@@ -1178,9 +1257,13 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
             canvas?.drawRect(rect, painterStroke)
 
         // Debug (Draw min e max cpuBuilding heights)
-        val h = max(width, height)
+        /*val h = max(width, height)
         canvas?.drawLine(0f, h*0.2f, width.toFloat(), h*0.2f, painterStroke)
-        canvas?.drawLine(0f, h*0.58f, width.toFloat(), h*0.58f, painterStroke)
+        canvas?.drawLine(0f, h*0.58f, width.toFloat(), h*0.58f, painterStroke)*/
+
+        // Measures from meters to pixels
+        /*canvas?.drawLine(0f, 17f * ppm, width.toFloat(), 17f * ppm, painterStroke)
+        canvas?.drawLine(0f, 48f * ppm, width.toFloat(), 48f * ppm, painterStroke)*/
     }
 
     // Convert density independent pixels into screen pixels
@@ -1233,17 +1316,33 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
         // Height range height*0.2 .. height*0.76 = from 20% to 76% of the screen height
         // Remember that 0% = top and 100% = bottom
         //val r = (20..76).random() / 100f
-        val r = (20..58).random() / 100f
+        //val r = (20..58).random() / 100f
 
+        // Building pos Y in meters
+        val buildingPosY = (17..48).random()
+
+        //=================
         // For debug
         //val r = 0.2f
+
+        // Set building pos X in pixels
         //cpuBuilding.setX(screenWidth*0.35f)
         //cpuBuilding.setX(screenWidth*0.1f)
 
+        // Set building pos X in pixel from meters (for efficiency of update calls)
+        //cpuBuilding.setX(worldWidth*0.35f * ppm)
+        //cpuBuilding.setX(worldWidth*0.1f * ppm)
+        cpuBuilding.setX(13f * ppm)
+        //=================
+
         // Set Y of the building relative to the height of the current screen orientation
         //cpuBuilding.setY(screenHeight*r)
+
         // Set Y of the building relative to the height of the screen in portrait orientation
-        cpuBuilding.setY( max(screenWidth, screenHeight) * r )
+        //cpuBuilding.setY( max(screenWidth, screenHeight) * r )
+
+        // Set Y of the building in pixels from meters (for efficiency of update calls)
+        cpuBuilding.setY(buildingPosY * ppm)
 
         // Increase the distance between obstacles if the height of
         // the cpuBuilding is greater than a threshold
@@ -1285,16 +1384,34 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
 
         // Height range height*0 .. height*0.2 = from 0% to 20% of the screen height
         // Remember that 0% = top and 100% = bottom
-        val r = (0..20).random() / 100f
+        //val r = (0..20).random() / 100f
 
+        // Vehicle pos Y in meters
+        val vehiclePosY = (0..17).random()
+
+
+        //=================
         // For debug
         //val r = 0f
-        cpuVehicle.setX(screenWidth*0.35f)
+
+        // Set vehicle pos X in pixels
+        //cpuVehicle.setX(screenWidth*0.35f)
+        //cpuVehicle.setX(screenWidth*0.1f)
+
+        // Set vehicle pos X in pixels from meters (for efficiency of update calls)
+        //cpuVehicle.setX(worldWidth*0.35f * ppm)
+        //cpuVehicle.setX(worldWidth*0.1f * ppm)
+        cpuVehicle.setX(13f * ppm)
+        //=================
 
         // Set Y of the vehicle relative to the height of the current screen orientation
         //cpuVehicle.setY(screenHeight*r)
+
         // Set Y of the vehicle relative to the height of the screen in portrait orientation
-        cpuVehicle.setY( max(screenWidth, screenHeight) * r )
+        //cpuVehicle.setY( max(screenWidth, screenHeight) * r )
+
+        // Set Y of the vehicle in pixels from meters (for efficiency of update calls)
+        cpuVehicle.setY(vehiclePosY * ppm)
 
         // Increase the distance between obstacles if the height of
         // the cpuBuilding is greater than a threshold
@@ -1387,17 +1504,14 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
         // Use X value if portrait mode, inversed Y value otherwise
         val value = if (width < height) lastGyroscope[0] else lastGyroscope[1] * -1f
 
-        if (value > 0)
-            lastGyroscopeInput = max(1f, min(value * 1, 15f))
-        else if (value < 0)
-            lastGyroscopeInput = min(-1f, max(value * 1, -15f))
+        if (value > 0f)
+            lastGyroscopeInput = max(1f, min(value * 10f, 20f))
+        else if (value < 0f)
+            lastGyroscopeInput = min(-1f, max(value * 10f, -20f))
 
-        /*Log.d("SENSOR", "****************")
-        Log.d("SENSOR", "value: " + lastGyroscope[0])
+        Log.d("SENSOR", "****************")
+        Log.d("SENSOR", "value: $value")
         Log.d("SENSOR", "lastGyroscopeInput: $lastGyroscopeInput")
-        Log.d("SENSOR", "lastGyroscope[1]: ${lastGyroscope[1]}")*/
-
-        //invalidate()
     }
 
     // Save game variables
@@ -1490,6 +1604,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                     while (true) {
                         try {
                             // VERSIONE CON METRI
+                            // Set Y in pixels (for efficiency of update calls)
                             playerVehicle.setY(py * ppm)
 
                             // VERSIONE CON PERCENTUALE SCHERMO
@@ -1533,6 +1648,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                             pickBuilding(width, height, bn)
 
                             // VERSIONE CON METRI
+                            // Set X and Y in pixels (for efficiency of update calls)
                             cpuBuilding.setX(bx * ppm)
                             cpuBuilding.setY(by * ppm)
 
@@ -1562,6 +1678,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                             pickVehicle(width, height, vn)
 
                             // VERSIONE CON METRI
+                            // Set X and Y in pixels (for efficiency of update calls)
                             cpuVehicle.setX(vx * ppm)
                             cpuVehicle.setY(vy * ppm)
 

@@ -9,23 +9,14 @@ class GameObjectCpu(name: String,
               width: Float, height: Float,
               screen_width: Int, screen_height: Int, ppm: Float,
               pos_x: Float, pos_y: Float, speed: Float) :
-    GameObject(name, bitmaps, bounds_offsets, width, height, screen_width, screen_height, ppm, pos_x, pos_y/*, speed*/) {
-
-    private var speed: Float
+    GameObject(name, bitmaps, bounds_offsets, width, height, screen_width, screen_height, ppm, pos_x, pos_y, speed) {
 
     private var respawn: Boolean
     private val respawnPosX: Float
 
     init {
-        this.speed = speed * ppm // Convert m/s into pixels/s
-
         respawn = false
         respawnPosX = screen_width + ppm // In pixels
-    }
-
-    // Getters
-    fun getSpeed(): Float {
-        return speed // Return pixels/s
     }
 
     // Return true if the game object has been respawn in the current UI update
@@ -33,20 +24,14 @@ class GameObjectCpu(name: String,
         return respawn
     }
 
-    // Setters
-    fun setSpeed(speed: Float) {
-        this.speed = speed * getPPM() // Convert m/s into pixels/s
-    }
-
     // Update UI
     override fun update(dt: Float) {
         super.update(dt)
 
         // Move object to left
-        //setX( getX() - speed * dt )
+        setX( getX() - getSpeed() * dt )
 
-        // Check if the bitmap is outside the screen
-        // (left part of the screen because movement from right to left)
+        // Check if the bitmap is outside the left margin of the screen
         if (getX() + getBitmapScaledWidth() < 0f) {
             setX(respawnPosX)
             respawn = true
@@ -54,7 +39,5 @@ class GameObjectCpu(name: String,
         else
             respawn = false
     }
-
-
 
 }

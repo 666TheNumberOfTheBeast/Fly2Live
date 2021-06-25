@@ -15,6 +15,18 @@ import com.example.fly2live.configuration.Configuration.Companion.MULTIPLAYER
 class GameFragment : Fragment() {
     private var soundtrack: MediaPlayer? = null
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        // Access control
+        /*account = GoogleSignIn.getLastSignedInAccount(activity)
+        if (account == null) {
+            // Attempt to pop the controller's back stack back to a specific destination
+            findNavController().popBackStack(R.id.mainFragment, false)
+            return
+        }*/ // TEMP DISABLED TO SAVE API CALLS
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?

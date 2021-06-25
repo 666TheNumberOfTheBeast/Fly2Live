@@ -10,7 +10,7 @@ abstract class GameObject(
     bounds_offsets: Array<Array<Float>>,
     width: Float, height: Float,
     screen_width: Int, screen_height: Int, ppm: Float,
-    pos_x: Float, pos_y: Float/*, speed: Float*/) {
+    pos_x: Float, pos_y: Float, speed: Float) {
 
     private val name: String
 
@@ -40,7 +40,7 @@ abstract class GameObject(
 
     private var posX: Float
     private var posY: Float
-    //private var speed: Float
+    private var speed: Float
 
     init {
         this.name = name
@@ -61,18 +61,18 @@ abstract class GameObject(
 
         this.ppm = ppm
 
-        bitmapScaleX = width * ppm / screen_width
-        bitmapScaleY = height * ppm / screen_height
+        // Convert meters into pixels
+        bitmapWidthScaled  = width * ppm
+        bitmapHeightScaled = height * ppm
 
-        bitmapWidthScaled  = screen_width * bitmapScaleX
-        bitmapHeightScaled = screen_height * bitmapScaleY
+        // Get bitmap scale
+        bitmapScaleX = bitmapWidthScaled / screen_width
+        bitmapScaleY = bitmapHeightScaled / screen_height
 
-        this.posX = pos_x * ppm  // Convert meters into pixels (once and not continuosly in update())
-        this.posY = pos_y        // Received as pixels
-        //this.speed = speed * ppm // Convert m/s into pixels/s
-
-        // Init matrix transformations
-        //transform()
+        // Convert meters into pixels (once and not continuosly in update() because matrix translation works with pixels)
+        this.posX = pos_x * ppm
+        this.posY = pos_y * ppm
+        this.speed = speed * ppm // Convert m/s into pixels/s (for efficiency of update calls)
     }
 
     // Getters
@@ -126,31 +126,30 @@ abstract class GameObject(
     }
 
     fun getX(): Float {
-        return posX // Return pixels
+        return posX  // In pixels (for efficiency of update calls)
     }
 
     fun getY(): Float {
-        return posY // Return pixels
+        return posY  // In pixels (for efficiency of update calls)
     }
 
-    /*fun getSpeed(): Float {
-        return speed // Return pixels/s
-    }*/
+    fun getSpeed(): Float {
+        return speed // In pixels/s (for efficiency of update calls)
+    }
 
 
     // Setters
     fun setX(pos_x: Float) {
-        this.posX = pos_x // In pixels
-        //this.posX = pos_x * ppm // Convert meters into pixels
+        this.posX = pos_x  // In pixels (both in input and output for efficiency of update calls)
     }
 
     fun setY(pos_y: Float) {
-        this.posY = pos_y // In pixels
+        this.posY = pos_y  // In pixels (both in input and output for efficiency of update calls)
     }
 
-    /*fun setSpeed(speed: Float) {
-        this.speed = speed * ppm // Convert m/s into pixels/s
-    }*/
+    fun setSpeed(speed: Float) {
+        this.speed = speed * ppm // Convert m/s into pixels/s (for efficiency of update calls. Unlike setX and setY, here the input can be useful in meters)
+    }
 
     // Update UI
     open fun update(dt: Float) {

@@ -10,8 +10,8 @@ class GameObjectPlayer(name: String,
                     bounds_offsets: Array<Array<Float>>,
                     width: Float, height: Float,
                     screen_width: Int, screen_height: Int, ppm: Float,
-                    pos_x: Float, pos_y: Float/*, speed: Float*/) :
-    GameObject(name, bitmaps, bounds_offsets, width, height, screen_width, screen_height, ppm, pos_x, pos_y/*, speed*/) {
+                    pos_x: Float, pos_y: Float, speed: Float) :
+    GameObject(name, bitmaps, bounds_offsets, width, height, screen_width, screen_height, ppm, pos_x, pos_y, speed) {
 
     private var bitmapRotation = 8f // Degrees
 
@@ -22,11 +22,11 @@ class GameObjectPlayer(name: String,
     private val screenHeightPortrait = max(screen_width, screen_height)
 
     // Update UI
-    fun update(dt: Float, last_gyroscope_input: Float) {
+    override fun update(dt: Float) {
         super.update(dt)
 
-        // Set player Y based on last gyroscope input
-        setY( getY() + last_gyroscope_input * getPPM() )
+        // Set player Y based on last gyroscope input (in pixels for efficiency of update calls)
+        setY( getY() + getSpeed() * dt )
 
         // Constrain the bitmap in the screen (based on the height of the current screen orientation)
         /*if (getY() < 0f)
@@ -40,12 +40,12 @@ class GameObjectPlayer(name: String,
         if (getY() < 0f)
             setY(0f)
         else if (getY() + getBitmapScaledHeight() > screenHeightPortrait)
-            setY( screenHeightPortrait - getBitmapScaledHeight() )
+            setY( screenHeightPortrait - getBitmapScaledHeight() ) // In pixels
 
         // Constrain the rotation of the bitmap
-        if (last_gyroscope_input > 0f && bitmapRotation <= maxRotation)
+        if (getSpeed() > 0f && bitmapRotation <= maxRotation)
             bitmapRotation += rotationIncrement
-        else if (last_gyroscope_input < 0f && bitmapRotation >= minRotation)
+        else if (getSpeed() < 0f && bitmapRotation >= minRotation)
             bitmapRotation -= rotationIncrement
     }
 

@@ -1,17 +1,59 @@
-class Obstacle:
-    def __init__(self, id, width, height, pos_x, pos_y, speed, respawn_pos_x):
+class Obstacle(GameObject):
+    def __init__(self, id, width, height, pos_x, pos_y, speed):
+        super().__init__(id, width, height, pos_x, pos_y, speed)
+
+        self.respawn = False
+        self.respawn_pos_x = pos_x  # In meters
+        #self.respawn_pos_x = 1.02 # In width ratio
+
+    # Update UI
+    def update(self, dt):
+        # Move object to left
+        setX( getX() - getSpeed() * dt )
+
+        # Check if it is outside the left margin of the screen
+        if getX() + getWidth() < 0.0:
+            setX(self.respawn_pos_x)
+            self.respawn = True
+        else:
+            self.respawn = False
+
+    # Return true if the vehicle has been respawn in the current UI update
+    def isRespawn(self):
+        return self.respawn
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+'''class Obstacle:
+    def __init__(self, id, width, height, pos_x, pos_y, speed):
         self.id = id
 
-        self.width  = width  # In meters
-        self.height = height # In meters
+        self.width  = width   # In meters
+        self.height = height  # In meters
 
-        self.pos_x = pos_x, # In meters
+        self.pos_x = pos_x  # In width ratio
         self.pos_y = pos_y  # In height ratio
 
         self.speed = speed  # In m/s
+        #self.speed = speed  # In %/s
 
         self.respawn = False
-        self.respawn_pos_x = respawn_pos_x
+        self.respawn_pos_x = obstacle_initial_pos_x
+        #self.respawn_pos_x = 1.02 # In width ratio
 
     # Getters
     def getId(self):
@@ -34,20 +76,20 @@ class Obstacle:
 
     # Setters
     def setX(self, pos_x):
-        self.pos_x = pos_x
+        self.pos_x = pos_x  # In meters
 
     def setY(self, pos_y):
-        self.pos_y = pos_y
+        self.pos_y = pos_y  # In meters
 
     def setSpeed(self, speed):
-        self.speed = speed
+        self.speed = speed  # In m/s
+        #self.speed = speed  # In %/s
 
     # Update UI
     def update(self, dt):
-        #self.pos_x -= self.speed
         self.pos_x -= self.speed * dt
 
-        if (self.pos_x + self.width < 0):
+        if (self.pos_x + self.width < 0.0):
             self.pos_x = self.respawn_pos_x
             self.respawn = True
         else:
@@ -55,4 +97,4 @@ class Obstacle:
 
     # Return true if the vehicle has been respawn in the current UI update
     def isRespawn(self):
-        return self.respawn
+        return self.respawn'''

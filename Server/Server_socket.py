@@ -3,9 +3,7 @@
 # (2 players play, the others wait the server resources are free)
 # *************** *********
 
-from flask         import Flask, request
-#from flask_restful import Api, Resource, reqparse
-
+from flask import Flask, request
 from flask_socketio import SocketIO, send, emit, join_room, leave_room
 
 #from pygame import Rect
@@ -19,7 +17,7 @@ import time
 
 # Constants for the server state
 STATE_INIT    = 0
-STATE_WAIT    = 1
+STATE_SEARCH  = 1
 STATE_PREPARE = 2
 STATE_PLAY    = 3
 STATE_END     = 4
@@ -31,9 +29,7 @@ NEW_MOVE = 2
 
 # Constants for the players IDs
 UNDEFINED  = -1
-#PLAYER_0   = 0
-#PLAYER_1   = 1
-DRAW = 2
+DRAW       = 0
 
 # Constants for the messages
 MSG_CODE_BAD_REQ       = 0
@@ -48,6 +44,7 @@ MSG_CODE_SERVER_BUSY   = 7
 # Variables of the server for keeping the game state
 state = STATE_INIT
 
+# Dictionary of players currently connected to the server
 players = {}
 # For using multiple rooms, I need multithread for properly handling below server variables
 #rooms   = []
@@ -55,64 +52,61 @@ room = "game"
 
 player_0 = None
 player_1 = None
-building = None
-vehicle  = None
+cpu_building = None
+cpu_vehicle  = None
 
-world_width = 30.0 # In meters
-# Versione senza dt in update
-#speed = 0.2        # In m/s
-# Versione con dt in update
-speed = 10.0        # In m/s
+world_width  = 50.0  # In meters
+world_height = 60.0  # In meters
+speed = 10.0         # In m/s
 
+player_bitmap_width  = 10.0  # In meters
+player_bitmap_height = 3.0   # In meters
+player_initial_pos_x = 1.0   # In meters
+player_initial_pos_y = 20.0  # In meters
+#player_initial_pos_x = 0.02  # In width ratio
+#player_initial_pos_y = 0.4   # In height ratio
+
+
+obstacle_initial_pos_x = world_width + 3.0  # In meters
+obstacle_initial_pos_y = 40.0               # In meters
+# Use Width and Height ratio to be universal
+#obstacle_initial_pos_x = 1.02  # In width ratio
+#obstacle_initial_pos_y = 0.5   # In height ratio
+
+score  = 0.0
 winner = UNDEFINED
 
-
-# ********* APIs *********
-# TODO: bind each user to a UID (with Google login maybe this is not necessary)
-#@app.route('/', methods=['GET'])
-#def home():
-#    return "<h1>Distant Reading Archive</h1><p>This site is a prototype API for distant reading of science fiction novels.</p>"
-# ************************
-
-
-respawn_pos_x = world_width + 3.0
-
-player_bitmap_width  = 8.0 # In meters
-player_bitmap_height = 3.0 # In meters
-player_initial_pos_x = 1.0 # In meters
-player_initial_pos_y = 0.5 # In height ratio
-
-now      = 0 # In ms
-previous = 0 # In ms
-score = 0.0
-
-# Height ratios normalized in [0,1]
-# NB: y goes from 0 to height = from top to bottom
+# Width and height ratios normalized in [0,1]
+# NB: x goes from 0 to width  = from left to right = from 0 to 1
+# NB: y goes from 0 to height = from top to bottom = from 0 to 1
 # 10/5 = 2 => 5/10 = 0.5
 
 buildings = [
-    Obstacle("building_01", 15.0, 100.0, respawn_pos_x, 0.5, speed, respawn_pos_x),
-    Obstacle("building_02", 10.0, 90.0, respawn_pos_x, 0.5, speed, respawn_pos_x),
-    Obstacle("building_03", 25.0, 110.0, respawn_pos_x, 0.5, speed, respawn_pos_x),
-    Obstacle("building_04", 30.0, 90.0, respawn_pos_x, 0.5, speed, respawn_pos_x),
-    Obstacle("building_05", 35.0, 60.0, respawn_pos_x, 0.5, speed, respawn_pos_x),
-    Obstacle("building_06", 35.0, 40.0, respawn_pos_x, 0.5, speed, respawn_pos_x),
-    Obstacle("building_07", 15.0, 80.0, respawn_pos_x, 0.5, speed, respawn_pos_x),
-    Obstacle("building_08", 10.0, 70.0, respawn_pos_x, 0.5, speed, respawn_pos_x),
-    Obstacle("building_09", 17.0, 70.0, respawn_pos_x, 0.5, speed, respawn_pos_x),
-    Obstacle("building_10", 10.0, 65.0, respawn_pos_x, 0.5, speed, respawn_pos_x)
+    Obstacle("building_01", 25.0, 70.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed),
+    Obstacle("building_02", 10.0, 80.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed),
+    Obstacle("building_03", 25.0, 110.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed),
+    Obstacle("building_04", 35.0, 90.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed),
+    Obstacle("building_05", 35.0, 50.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed),
+    Obstacle("building_06", 45.0, 50.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed),
+    Obstacle("building_07", 15.0, 80.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed),
+    Obstacle("building_08", 13.0, 70.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed),
+    Obstacle("building_09", 17.0, 70.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed),
+    Obstacle("building_10", 13.0, 60.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed)
 ]
 
+obstacle_initial_pos_y = 20.0  # In meters
+#obstacle_initial_pos_y = 0.05  # In height ratio
+
 vehicles = [
-    Obstacle("biplane", 7.0, 3.0, respawn_pos_x, 0.05, speed, respawn_pos_x),
-    Obstacle("dirigible_1", 20.0, 8.0, respawn_pos_x, 0.05, speed, respawn_pos_x),
-    Obstacle("dirigible_2", 20.0, 8.0, respawn_pos_x, 0.05, speed, respawn_pos_x),
-    Obstacle("dirigible_3", 20.0, 8.0, respawn_pos_x, 0.05, speed, respawn_pos_x),
-    Obstacle("dirigible_4", 20.0, 8.0, respawn_pos_x, 0.05, speed, respawn_pos_x),
-    Obstacle("dirigible_5", 20.0, 8.0, respawn_pos_x, 0.05, speed, respawn_pos_x),
-    Obstacle("dirigible_6", 20.0, 8.0, respawn_pos_x, 0.05, speed, respawn_pos_x),
-    Obstacle("dirigible_7", 20.0, 8.0, respawn_pos_x, 0.05, speed, respawn_pos_x),
-    Obstacle("ufo", 4.0, 2.0, respawn_pos_x, 0.05, speed, respawn_pos_x)
+    Obstacle("biplane", 6.0, 2.5, obstacle_initial_pos_x, obstacle_initial_pos_y, speed),
+    Obstacle("dirigible_1", 20.0, 8.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed),
+    Obstacle("dirigible_2", 20.0, 8.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed),
+    Obstacle("dirigible_3", 20.0, 8.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed),
+    Obstacle("dirigible_4", 20.0, 8.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed),
+    Obstacle("dirigible_5", 20.0, 8.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed),
+    Obstacle("dirigible_6", 20.0, 8.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed),
+    Obstacle("dirigible_7", 20.0, 8.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed),
+    Obstacle("ufo", 4.0, 2.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed)
 ]
 
 
@@ -121,8 +115,18 @@ app.config["SECRET_KEY"] = "my_secret_key"
 socketio = SocketIO(app)
 
 
+# ********* APIs *********
+# TODO: bind each user to a UID (with Google login is not necessary, use the Google one)
+#@app.route('/', methods=['GET'])
+#def home():
+#    return "<h1>Distant Reading Archive</h1><p>This site is a prototype API for distant reading of science fiction novels.</p>"
+# ************************
+
+
+# Event connection to the server
 @socketio.on("connect")
 def connect():
+    # No need global variables declaration to read but not modify them
     print("=========================")
     print("Client connected: " + request.sid)
 
@@ -136,15 +140,31 @@ def connect():
     else:
         room = rooms.pop(0)'''
 
+    # Check if the room is available (monothread version)
+    if (player_0 != None and player_1 != None):
+        # Room is busy
+        return
+
+    players[request.sid]["room"] = room
+
     # Add the player to an available room
     join_room(room, sid=request.sid)
+
+# Event join a room
+'''@socketio.on('join')
+def on_join(data):
+    username = data['username']
+    room = data['room']
+    join_room(room)
+    send(username + ' has entered the room.', to=room)'''
 
 
 @socketio.on("disconnect")
 def disconnect():
+    # Declare global variables that will be modified by this function
     global state, \
            player_0, player_1, \
-           building, vehicle, \
+           cpu_building, cpu_vehicle, \
            score, winner
 
     print("=========================")
@@ -156,18 +176,24 @@ def disconnect():
     print("Player ID: " + player_id)
     print("Server state: ", state)
 
-    # Check if player_0 quit while the server is in the STATE_WAIT
-    if state == STATE_WAIT and player_id == player_0.getId():
+    # Check if player quit before sending NEW_GAME request
+    if not player_id:
+        # Remove the player socket ID from the dictionary of players
+        players.pop(request.sid)
+        return
+
+    # Check if player_0 quit while the server is in the STATE_SEARCH
+    if state == STATE_SEARCH and player_id == player_0.getId():
         player_0 = None
         state = STATE_INIT
-    # Check if player_1 quit while the server is in the STATE_WAIT
-    elif state == STATE_WAIT and player_id == player_1.getId():
+    # Check if player_1 quit while the server is in the STATE_SEARCH
+    elif state == STATE_SEARCH and player_id == player_1.getId():
         player_1 = None
         state = STATE_INIT
     # Check if player_0 quit while the server is in the STATE_PREPARE
     elif state == STATE_PREPARE and player_id == player_0.getId():
         player_0 = None
-        state = STATE_WAIT
+        state = STATE_SEARCH
         emit("new game response",
             { "error": False,
               "msg_code": MSG_CODE_SEARCHING_ADV
@@ -175,7 +201,7 @@ def disconnect():
     # Check if player_1 quit while the server is in the STATE_PREPARE
     elif state == STATE_PREPARE and player_id == player_1.getId():
         player_1 = None
-        state = STATE_WAIT
+        state = STATE_SEARCH
         emit("new game response",
             { "error": False,
               "msg_code": MSG_CODE_SEARCHING_ADV
@@ -186,25 +212,25 @@ def disconnect():
         emit("new game response",
             { "error": False,
               "msg_code": MSG_CODE_GAME_END,
-              "building": { "id": building.getId(),
-                            "pos_x": building.getX(),
-                            "pos_y": building.getY(),
-                            "width": building.getWidth(),
-                            "height": building.getHeight()
-                          },
-              "vehicle": { "id": vehicle.getId(),
-                           "pos_x": vehicle.getX(),
-                           "pos_y": vehicle.getY(),
-                           "width": vehicle.getWidth(),
-                           "height": vehicle.getHeight()
-                         },
-              "player_0": { "id": player_0.getId(),
+              "cpu_building": { "id": cpu_building.getId(),
+                                "pos_x": cpu_building.getX(),
+                                "pos_y": cpu_building.getY(),
+                                "width": cpu_building.getWidth(),
+                                "height": cpu_building.getHeight()
+                              },
+              "cpu_vehicle": { "id": cpu_vehicle.getId(),
+                               "pos_x": cpu_vehicle.getX(),
+                               "pos_y": cpu_vehicle.getY(),
+                               "width": cpu_vehicle.getWidth(),
+                               "height": cpu_vehicle.getHeight()
+                             },
+              "player_0": { "player_id": player_0.getId(),
                             "pos_x": player_0.getX(),
                             "pos_y": player_0.getY(),
                             "width": player_0.getWidth(),
                             "height": player_0.getHeight()
                           },
-              "player_1": { "id": player_1.getId(),
+              "player_1": { "player_id": player_1.getId(),
                             "pos_x": player_1.getX(),
                             "pos_y": player_1.getY(),
                             "width": player_1.getWidth(),
@@ -220,25 +246,25 @@ def disconnect():
         emit("new game response",
             { "error": False,
               "msg_code": MSG_CODE_GAME_END,
-              "building": { "id": building.getId(),
-                            "pos_x": building.getX(),
-                            "pos_y": building.getY(),
-                            "width": building.getWidth(),
-                            "height": building.getHeight()
-                          },
-              "vehicle": { "id": vehicle.getId(),
-                           "pos_x": vehicle.getX(),
-                           "pos_y": vehicle.getY(),
-                           "width": vehicle.getWidth(),
-                           "height": vehicle.getHeight()
-                         },
-              "player_0": { "id": player_0.getId(),
+              "cpu_building": { "id": cpu_building.getId(),
+                                "pos_x": cpu_building.getX(),
+                                "pos_y": cpu_building.getY(),
+                                "width": cpu_building.getWidth(),
+                                "height": cpu_building.getHeight()
+                              },
+              "cpu_vehicle": { "id": cpu_vehicle.getId(),
+                               "pos_x": cpu_vehicle.getX(),
+                               "pos_y": cpu_vehicle.getY(),
+                               "width": cpu_vehicle.getWidth(),
+                               "height": cpu_vehicle.getHeight()
+                             },
+              "player_0": { "player_id": player_0.getId(),
                             "pos_x": player_0.getX(),
                             "pos_y": player_0.getY(),
                             "width": player_0.getWidth(),
                             "height": player_0.getHeight()
                           },
-              "player_1": { "id": player_1.getId(),
+              "player_1": { "player_id": player_1.getId(),
                             "pos_x": player_1.getX(),
                             "pos_y": player_1.getY(),
                             "width": player_1.getWidth(),
@@ -257,7 +283,7 @@ def disconnect():
 def new_game_event(json):
     global state, \
            player_0, player_1, \
-           building, vehicle, \
+           cpu_building, cpu_vehicle, \
            score, winner
 
     # Validate input and return True if it is ok
@@ -289,42 +315,58 @@ def new_game_event(json):
 
         # Reset last players IDs variables
         player_0 = Player(json["who"], json["screen_width"], json["screen_height"], world_width,
-                          player_bitmap_width, player_bitmap_height, player_initial_pos_x, player_initial_pos_y)
+                          0, player_bitmap_width, player_bitmap_height, player_initial_pos_x, player_initial_pos_y)
+        #player_0 = Player(json["who"], json["screen_width"], json["screen_height"], world_height,
+        #    0, player_bitmap_width, player_bitmap_height, player_initial_pos_x, player_initial_pos_y)
         player_1 = None
 
         # Reset obstacles variables
-        building = None
-        vehicle  = None
+        cpu_building = None
+        cpu_vehicle  = None
 
         # Reset winner
         winner = UNDEFINED
 
-        state = STATE_WAIT
+        # Go to next server state
+        state = STATE_SEARCH
         emit("new game response", { "error": False, "msg_code": MSG_CODE_SEARCHING_ADV })
 
-    # Check if NEW_GAME request while the server is in the STATE_WAIT
-    elif state == STATE_WAIT and json["req"] == NEW_GAME:
+    # Check if NEW_GAME request while the server is in the STATE_SEARCH
+    elif state == STATE_SEARCH and json["req"] == NEW_GAME:
+        # Check if the request is coming from the same player who is waiting for an adversary.
         # NEW_GAME request can come from player_1 if the previous player_0 quit during STATE_PREPARE
         if (player_0 and json["who"] == player_0.getId()) or (player_1 and json["who"] == player_1.getId()):
             emit("new game response", { "error": False, "msg_code": MSG_CODE_SEARCHING_ADV })
-        # Check if NEW_GAME request from a different user than before
+
+        # Otherwise NEW_GAME request is coming from a different player than before
         else:
             if not player_0:
                 player_0 = Player(json["who"], json["screen_width"], json["screen_height"], world_width,
-                    player_bitmap_width, player_bitmap_height, player_initial_pos_x, player_initial_pos_y)
+                    0, player_bitmap_width, player_bitmap_height, player_initial_pos_x, player_initial_pos_y)
+                #player_0 = Player(json["who"], json["screen_width"], json["screen_height"], world_height,
+                #    0, player_bitmap_width, player_bitmap_height, player_initial_pos_x, player_initial_pos_y)
             elif not player_1:
                 player_1 = Player(json["who"], json["screen_width"], json["screen_height"], world_width,
-                    player_bitmap_width, player_bitmap_height, player_initial_pos_x, player_initial_pos_y)
+                    1, player_bitmap_width, player_bitmap_height, player_initial_pos_x, player_initial_pos_y)
+                #player_1 = Player(json["who"], json["screen_width"], json["screen_height"], world_height,
+                #    1, player_bitmap_width, player_bitmap_height, player_initial_pos_x, player_initial_pos_y)
+            else:
+                # Just for super-safety but this condition should never be true
+                # because the server should be in STATE_PREPARE
+                emit("new game response", { "error": False, "msg_code": MSG_CODE_SERVER_BUSY })
+                return
 
+            # Go to next server state
             state = STATE_PREPARE
+
             # Send to the two players in game not to all (there could be also people waiting)
             emit("new game response", { "error": False, "msg_code": MSG_CODE_FOUND_ADV }, to=room)
 
-            building = __pickBuilding()
-            vehicle  = __pickVehicle()
+            cpu_building = __pickBuilding()
+            cpu_vehicle  = __pickVehicle()
 
-            print("Building ID: " + building.getId())
-            print("Vehicle ID: " + vehicle.getId())
+            print("cpu_building ID: " + cpu_building.getId())
+            print("cpu_vehicle ID: " + cpu_vehicle.getId())
 
             # Check if a player quit while server state was in STATE_PREPARE
             if (state != STATE_PREPARE):
@@ -332,6 +374,7 @@ def new_game_event(json):
                 emit("new game response", { "error": False, "msg_code": MSG_CODE_SEARCHING_ADV }, to=room)
                 return
 
+            # Go to next server state
             state = STATE_PLAY
 
             # Start game thread
@@ -340,91 +383,33 @@ def new_game_event(json):
             emit("new game response",
                  { "error": False,
                    "msg_code": MSG_CODE_GAME_START,
-                   "building": { "id": building.getId(),
-                                 "pos_x": building.getX(),
-                                 "pos_y": building.getY(),
-                                 "width": building.getWidth(),
-                                 "height": building.getHeight()
-                               },
-                   "vehicle": { "id": vehicle.getId(),
-                                "pos_x": vehicle.getX(),
-                                "pos_y": vehicle.getY(),
-                                "width": vehicle.getWidth(),
-                                "height": vehicle.getHeight()
-                              },
-                   "player_0": { "id": player_0.getId(),
+                   '''"cpu_building": { "id": cpu_building.getId(),
+                                     "pos_x": cpu_building.getX(),
+                                     "pos_y": cpu_building.getY(),
+                                     "width": cpu_building.getWidth(),
+                                     "height": cpu_building.getHeight()
+                                   },
+                   "cpu_vehicle": { "id": cpu_vehicle.getId(),
+                                    "pos_x": cpu_vehicle.getX(),
+                                    "pos_y": cpu_vehicle.getY(),
+                                    "width": cpu_vehicle.getWidth(),
+                                    "height": cpu_vehicle.getHeight()
+                                  },
+                   "player_0": { "player_id": player_0.getId(),
                                  "pos_x": player_0.getX(),
                                  "pos_y": player_0.getY(),
                                  "width": player_0.getBitmapWidth(),
                                  "height": player_0.getBitmapHeight()
                                },
-                   "player_1": { "id": player_1.getId(),
+                   "player_1": { "player_id": player_1.getId(),
                                  "pos_x": player_1.getX(),
                                  "pos_y": player_1.getY(),
                                  "width": player_1.getBitmapWidth(),
                                  "height": player_1.getBitmapHeight()
                                },
                    "score": score,
-                   "winner": winner
+                   "winner": winner'''
                  }, to=room )
-
-
-        # Check if NEW_GAME request from a different user than before
-        '''if json["who"] != player_0.getId():
-            player_1 = Player(json["who"], json["screen_width"], json["screen_height"], world_width,
-                              player_bitmap_width, player_bitmap_height, player_initial_pos_x, player_initial_pos_y)
-
-            state = STATE_PREPARE
-            # TODO: send to the two players in game not to all (there could be also people waiting)
-            emit("new game response", { "error": False, "message": "OPPONENT FOUND" }, broadcast=True)
-
-            __pickBuilding()
-            __pickVehicle()
-
-            # Check if a player quit while server state was in STATE_PREPARE
-            if (state != STATE_PREPARE)
-                # TODO: send to the correct player
-                emit("new game response", { "error": False, "message": "FINDING AN OPPONENT" })
-                return
-
-            state = STATE_PLAY
-
-            # Start game thread
-            thread = socketio.start_background_task(target=game_thread)
-
-            emit("new game response",
-                 { "error": False,
-                   "message": "GAME STARTED",
-                   "building": { "id": building.getId(),
-                                 "pos_x": building.getX(),
-                                 "pos_y": building.getY(),
-                                 "width": building.getWidth(),
-                                 "height": building.getHeight()
-                               },
-                   "vehicle": { "id": vehicle.getId(),
-                                "pos_x": vehicle.getX(),
-                                "pos_y": vehicle.getY(),
-                                "width": vehicle.getWidth(),
-                                "height": vehicle.getHeight()
-                              },
-                   "player_0": { "id": player_0.getId(),
-                                 "pos_x": player_0.getX(),
-                                 "pos_y": player_0.getY(),
-                                 "width": player_0.getWidth(),
-                                 "height": player_0.getHeight()
-                               },
-                   "player_1": { "id": player_1.getId(),
-                                 "pos_x": player_1.getX(),
-                                 "pos_y": player_1.getY(),
-                                 "width": player_1.getWidth(),
-                                 "height": player_1.getHeight()
-                               },
-                   "score": score,
-                   "winner": winner
-                 },
-                 broadcast=True )
-        else:
-            emit("new game response", { "error": False, "message": "FINDING AN OPPONENT" })'''
 
     # Check if NEW_GAME request while the server is in the STATE_PREPARE
     elif state == STATE_PREPARE and json["req"] == NEW_GAME:
@@ -437,6 +422,10 @@ def new_game_event(json):
     elif state == STATE_PLAY and json["req"] == NEW_GAME:
         emit("new game response", { "error": False, "msg_code": MSG_CODE_SERVER_BUSY })
 
+    # Check if NEW_GAME request while the server is in the STATE_END
+    #elif state == STATE_END and json["req"] == NEW_GAME:
+    #    emit("new game response", { "error": False, "msg_code": MSG_CODE_SERVER_BUSY })
+
     else:
         emit('new game response', { "error": True, "msg_code": MSG_CODE_BAD_REQ })
 
@@ -444,34 +433,62 @@ def new_game_event(json):
 def __pickBuilding():
     building = random.choice(buildings)
 
-    # Non normalized, used in height/height_ratio
-    #height_ratio = random.randrange(13, 50) / 10.0
+    # Check if cpu_building variable has been initialized
+    if cpu_building:
+        # It has been init, try to pick a different cpu_building than the current one
+        for i in range(3):
+            if building.getId() != cpu_building.getId():
+                break
 
-    # normalized between [0,1]
-    height_ratio = random.randrange(20, 75) / 100.0
+            building = random.choice(buildings)
 
-    building.setX(world_width + 3.0)
-    building.setY(height_ratio)
+    # Height ratio normalized between [0,1] = Screen percentage
+    #height_ratio = random.randrange(20, 58) / 100.0
+
+    # Building pos Y in meters
+    building_pos_y = random.randrange(17, 48)
+
+    #building.setX(obstacle_initial_pos_x)
+    #building.setY(height_ratio)
+    building.setY(building_pos_y)
+
+    # Update speed
+    building.setSpeed(speed)
 
     return building
 
 def __pickVehicle():
     vehicle = random.choice(vehicles)
 
-    # Non normalized, used in height/height_ratio
-    #height_ratio = random.randrange(80, 100) / 10.0
+    # Check if cpu_vehicle variable has been initialized
+    if cpu_vehicle:
+        # It has been init, try to pick a different cpu_vehicle than the current one
+        for i in range(3):
+            if vehicle.getId() != cpu_vehicle.getId():
+                break
 
-    # normalized between [0,1]
-    height_ratio = random.randrange(0, 20) / 100.0
+            vehicle = random.choice(vehicles)
 
-    vehicle.setX(world_width + 3.0)
-    vehicle.setY(height_ratio)
+    # Height ratio normalized between [0,1] = Screen percentage
+    #height_ratio = random.randrange(0, 20) / 100.0
+
+    # Vehicle pos Y in meters
+    vehicle_pos_y = random.randrange(0, 17)
+
+    #vehicle.setX(obstacle_initial_pos_x)
+    #vehicle.setY(height_ratio)
+    vehicle.setY(vehicle_pos_y)
+
+    # Update speed (cpu_vehicle speed different from cpu_building one for more realism)
+    vehicle.setSpeed(speed + 5.0)
 
     return vehicle
 
 # Check if the players experiences a collision.
 # Return a boolean tuple, true if a collision happened
 def __checkCollisions():
+    return (False, False) # TEMP DISABLE CHECK OF COLLISIONS
+
     def createRect(x, y, w, h):
         # Sum values here because it cannot be done inside dict definition
         x2 = w+h
@@ -508,11 +525,11 @@ def __checkCollisions():
            return True
         return False
 
-    # le X le verifico in metri mentre le Y con i rapporti delle altezze
+    # X verifications in meters while Y in height ratios
     player_0_rect = createRect(player_0.getX(), player_0.getY(), player_0.getBitmapWidth(), player_0.getBitmapHeightScale())
     player_1_rect = createRect(player_1.getX(), player_1.getY(), player_1.getBitmapWidth(), player_1.getBitmapHeightScale())
 
-    obstacles = [building, vehicle]
+    obstacles = [cpu_building, cpu_vehicle]
     obstacles_0_rects = createRects(obstacles, player_0)
     obstacles_1_rects = createRects(obstacles, player_1)
 
@@ -525,94 +542,97 @@ def __checkCollisions():
 def game_thread():
     global state, \
            player_0, player_1, \
-           building, vehicle, \
-           score, winner, \
-           previous
+           cpu_building, cpu_vehicle, \
+           score, winner
 
-    # Constrain the bitmap in the screen
-    def checkPlayerPosition(pos_y, bitmap_height_scale):
-        if pos_y < 0:
-            return 0.0
-        elif pos_y + bitmap_height_scale > 1.0:
-            return 1.0 - bitmap_height_scale
-        else:
-            return pos_y
+    fps = 90
+    target_frame_time   = 1000 / fps  # In ms
+    time_previous_frame = 0           # In ms
 
     while state == STATE_PLAY and winner == UNDEFINED:
         # Compute time difference
-        now = int(round(time.time() * 1000))
-        dt = 0.0 # In s
+        time_current_frame = int(round(time.time() * 1000))  # In ms
+        dt = min(time_current_frame - time_previous_frame, target_frame_time) / 1000.0  # In s
 
-        # Check if this is the first first frame to draw
-        if previous != 0:
-            dt = (now - previous) / 1000.0
-
-        previous = now
+        time_previous_frame = time_current_frame
 
         # Update players positions
-        player_0_y = player_0.getY() + player_0.getSpeedY()
-        player_1_y = player_1.getY() + player_1.getSpeedY()
+        player_0.update(dt)
+        player_1.update(dt)
 
-        player_0_y = checkPlayerPosition(player_0_y, player_0.getBitmapHeightScale())
-        player_1_y = checkPlayerPosition(player_1_y, player_1.getBitmapHeightScale())
+        # Update cpu_building position
+        cpu_building.update(dt)
 
-        player_0.setY(player_0_y)
-        player_1.setY(player_1_y)
+        # Check if the cpu_building has been respawn
+        if cpu_building.isRespawn():
+            cpu_building = __pickBuilding()
 
-        # Update obstacles positions
-        building.update(dt)
+        # Update cpu_vehicle position
+        cpu_vehicle.update(dt)
 
-        # Check if the building has been respawn
-        if building.isRespawn():
-            building = __pickBuilding()
-
-        vehicle.update(dt)
-
-        # Check if the vehicle has been respawn
-        if vehicle.isRespawn():
-            vehicle = __pickVehicle()
+        # Check if the cpu_vehicle has been respawn
+        if cpu_vehicle.isRespawn():
+            cpu_vehicle = __pickVehicle()
 
         # Check players collisions
-        player_0_is_collided, player_1_is_collided = __checkCollisions()
+        is_player_0_collided, is_player_1_collided = __checkCollisions()
 
-        if player_0_is_collided and player_1_is_collided:
-            winner = DRAW
-            state  = STATE_END
-        elif player_0_is_collided:
-            winner = player_1
-            state  = STATE_END
-        elif player_1_is_collided:
-            winner = player_0
-            state  = STATE_END
+        # Check if there is a winner in this frame
+        if is_player_0_collided and is_player_1_collided:
+            winner   = DRAW
+            state    = STATE_END
+            msg_code = MSG_CODE_GAME_END
+            # TODO: Select two players from the dictionary for a new game and repeat steps in new game request event
+        elif is_player_0_collided:
+            winner   = player_1
+            state    = STATE_END
+            msg_code = MSG_CODE_GAME_END
+        elif is_player_1_collided:
+            winner   = player_0
+            state    = STATE_END
+            msg_code = MSG_CODE_GAME_END
+        else:
+            # Update the score
+            score += speed * dt
 
-        # Since the score is updated to slowly using m/s,
-        # I speeded it up
-        #score += speed * 6 * dt
-        score += speed * dt
+            # Update the speed (bounded by 40 m/s)
+            if speed < 40.0:
+                speed += 0.001
+
+            msg_code = MSG_CODE_GAMEPLAY
+
+            #Compute time to wait to be consistent with the target frame time
+            time_current_frame_end = int(round(time.time() * 1000))
+            wait_time = target_frame_time - (time_current_frame_end - time_current_frame)
+
+            if wait_time > 0:
+                time.sleep(wait_time)
 
         with app.test_request_context("/"):
             emit("new game response",
                  { "error": False,
-                   "msg_code": MSG_CODE_GAMEPLAY,
-                   "building": { "id": building.getId(),
-                                 "pos_x": building.getX(),
-                                 "pos_y": building.getY(),
-                                 "width": building.getWidth(),
-                                 "height": building.getHeight()
-                               },
-                   "vehicle": { "id": vehicle.getId(),
-                                "pos_x": vehicle.getX(),
-                                "pos_y": vehicle.getY(),
-                                "width": vehicle.getWidth(),
-                                "height": vehicle.getHeight()
-                              },
-                   "player_0": { "id": player_0.getId(),
+                   "msg_code": msg_code,
+                   "cpu_building": { "id": cpu_building.getId(),
+                                     "pos_x": cpu_building.getX(),
+                                     "pos_y": cpu_building.getY(),
+                                     "width": cpu_building.getWidth(),
+                                     "height": cpu_building.getHeight()
+                                   },
+                   "cpu_vehicle": { "id": cpu_vehicle.getId(),
+                                    "pos_x": cpu_vehicle.getX(),
+                                    "pos_y": cpu_vehicle.getY(),
+                                    "width": cpu_vehicle.getWidth(),
+                                    "height": cpu_vehicle.getHeight()
+                                  },
+                   "player_0": { "player_id": player_0.getId(),
+                                 #"bitmap_id": player_0.getBitmapId(),
                                  "pos_x": player_0.getX(),
                                  "pos_y": player_0.getY(),
                                  "width": player_0.getBitmapWidth(),
                                  "height": player_0.getBitmapHeight()
                                },
-                   "player_1": { "id": player_1.getId(),
+                   "player_1": { "player_id": player_1.getId(),
+                                 #"bitmap_id": player_1.getBitmapId(),
                                  "pos_x": player_1.getX(),
                                  "pos_y": player_1.getY(),
                                  "width": player_1.getBitmapWidth(),
@@ -621,13 +641,9 @@ def game_thread():
                    "score": score,
                    "winner": winner
                  }, namespace=None, to=room )
-        #time.sleep(5)
 
 
-
-
-
-'''@socketio.on("new move request")
+@socketio.on("new move request")
 def new_move_event(json):
     # Validate input and return True if it is ok
     def __validate(input):
@@ -649,14 +665,14 @@ def new_move_event(json):
     if state == STATE_PLAY and json["req"] == NEW_MOVE:
         if json["who"] == player_0.getId():
             # Use the received value to change the y component of player_0 speed
-            player_0.setSpeedY(json.value)
+            player_0.setSpeedY(json["value"])
             emit("new move response", { "error": False, "message": "NEW MOVE ACCEPTED" })
         elif json["who"] == player_1.getId():
             # Use the received value to change the y component of player_1 speed
-            player_1.setSpeedY(json.value)
+            player_1.setSpeedY(json["value"])
             emit("new move response", { "error": False, "message": "NEW MOVE ACCEPTED" })
     else:
-        emit("new move response", { "error": True, "message": "INVALID REQUEST" })'''
+        emit("new move response", { "error": True, "message": "INVALID REQUEST" })
 
 
 if __name__ == "__main__":

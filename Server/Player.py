@@ -1,7 +1,8 @@
+from GameObject import *
+
 class Player:
     def __init__(self, player_id, screen_width, screen_height, world_width,
-                 bitmap_id, bitmap_width, bitmap_height, pos_x, pos_y, speed):
-    #def __init__(self, id, screen_width, screen_height, world_height, bitmap_width, bitmap_height, pos_x, pos_y):
+                 bitmap_width, bitmap_height, pos_x, pos_y, speed):
         self.id = player_id
 
         self.screen_width  = screen_width   # In pixels
@@ -21,7 +22,7 @@ class Player:
 
         # DEBUG
         print("player id: ", player_id)
-        print("ppm: ", ppm)
+        print("ppm: ", self.ppm)
 
         current_world_width  = screen_width / self.ppm
         current_world_height = screen_height / self.ppm
@@ -34,7 +35,7 @@ class Player:
 
         self.world_height = max(screen_width, screen_height) / self.ppm
 
-        self.game_object = GameObject(bitmap_id, bitmap_width, bitmap_height, pos_x, pos_y, speed)
+        self.game_object = GameObject(player_id, bitmap_width, bitmap_height, pos_x, pos_y, speed)
 
         # Get bitmap scale
         self.bitmap_width_scale  = bitmap_width * self.ppm / screen_width
@@ -86,6 +87,12 @@ class Player:
     def getY(self):
         return self.game_object.getY()  # In meters
 
+    def getSpeed(self):
+        return self.game_object.getSpeed()  # In meters
+
+    def getRotation(self):
+            return self.bitmap_rotation  # In degrees
+
     # Setters
 
     # Set common world height for the players
@@ -109,19 +116,19 @@ class Player:
     # Update UI
     def update(self, dt):
         # Set player Y based on last player input
-        setY( getY() + getSpeed() * dt )
+        self.setY( self.getY() + self.getSpeed() * dt )
 
         # Constrain the bitmap in the screen
         # (based on the height of the larger screen in portrait orientation)
-        if getY() < 0.0:
-            setY(0.0)
-        elif getY() + getBitmapHeight() > getWorldHeight():
-            setY( getWorldHeight() - getBitmapHeight() )
+        if self.getY() < 0.0:
+            self.setY(0.0)
+        elif self.getY() + self.getBitmapHeight() > self.getWorldHeight():
+            self.setY( self.getWorldHeight() - self.getBitmapHeight() )
 
         # Constrain the rotation of the bitmap
-        if last_player_input > 0.0 and self.bitmap_rotation <= self.max_rotation:
+        if self.getSpeed() > 0.0 and self.bitmap_rotation <= self.max_rotation:
             self.bitmap_rotation += self.rotation_increment
-        elif last_player_input < 0.0 and self.bitmap_rotation >= self.min_rotation:
+        elif self.getSpeed() < 0.0 and self.bitmap_rotation >= self.min_rotation:
             self.bitmap_rotation -= self.rotation_increment
 
     # Change player device's orientation

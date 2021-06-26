@@ -1,3 +1,5 @@
+from GameObject import *
+
 class Obstacle(GameObject):
     def __init__(self, id, width, height, pos_x, pos_y, speed):
         super().__init__(id, width, height, pos_x, pos_y, speed)
@@ -9,11 +11,11 @@ class Obstacle(GameObject):
     # Update UI
     def update(self, dt):
         # Move object to left
-        setX( getX() - getSpeed() * dt )
+        self.setX( self.getX() - self.getSpeed() * dt )
 
         # Check if it is outside the left margin of the screen
-        if getX() + getWidth() < 0.0:
-            setX(self.respawn_pos_x)
+        if self.getX() + self.getWidth() < 0.0:
+            self.setX(self.respawn_pos_x)
             self.respawn = True
         else:
             self.respawn = False

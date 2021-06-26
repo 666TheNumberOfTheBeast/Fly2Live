@@ -22,14 +22,13 @@ STATE_PREPARE = 2
 STATE_PLAY    = 3
 STATE_END     = 4
 
-# Constants for the client requests
-NEW_GAME = 0
-POLLING  = 1
-NEW_MOVE = 2
-
 # Constants for the players IDs
 UNDEFINED  = -1
-DRAW       = 0
+DRAW       = 2
+
+# Constants for the client requests
+REQ_CODE_NEW_GAME = 0
+REQ_CODE_NEW_MOVE = 1
 
 # Constants for the messages
 MSG_CODE_BAD_REQ       = 0
@@ -45,7 +44,9 @@ MSG_CODE_SERVER_BUSY   = 7
 state = STATE_INIT
 
 # Dictionary of players currently connected to the server
-players = {}
+playersConnected = {}
+playersInRoom    = []
+
 # For using multiple rooms, I need multithread for properly handling below server variables
 #rooms   = []
 room = "game"
@@ -98,21 +99,29 @@ obstacle_initial_pos_y = 20.0  # In meters
 #obstacle_initial_pos_y = 0.05  # In height ratio
 
 vehicles = [
-    Obstacle("biplane", 6.0, 2.5, obstacle_initial_pos_x, obstacle_initial_pos_y, speed),
-    Obstacle("dirigible_1", 20.0, 8.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed),
-    Obstacle("dirigible_2", 20.0, 8.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed),
-    Obstacle("dirigible_3", 20.0, 8.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed),
-    Obstacle("dirigible_4", 20.0, 8.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed),
-    Obstacle("dirigible_5", 20.0, 8.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed),
-    Obstacle("dirigible_6", 20.0, 8.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed),
-    Obstacle("dirigible_7", 20.0, 8.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed),
-    Obstacle("ufo", 4.0, 2.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed)
+    Obstacle("vehicle_01", 6.0, 2.5, obstacle_initial_pos_x, obstacle_initial_pos_y, speed),
+    Obstacle("vehicle_02", 20.0, 8.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed),
+    Obstacle("vehicle_03", 20.0, 8.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed),
+    Obstacle("vehicle_04", 20.0, 8.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed),
+    Obstacle("vehicle_05", 20.0, 8.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed),
+    Obstacle("vehicle_06", 20.0, 8.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed),
+    Obstacle("vehicle_07", 20.0, 8.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed),
+    Obstacle("vehicle_08", 20.0, 8.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed),
+    Obstacle("vehicle_09", 4.0, 2.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed)
 ]
 
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "my_secret_key"
-socketio = SocketIO(app)
+#socketio = SocketIO(app)
+
+# monkey patching is necessary because this application uses a background thread
+socketio = SocketIO(app, async_mode="eventlet")
+import eventlet
+eventlet.monkey_patch()
+
+# Prova al posto di start_background_task (non invia i messaggi)
+from threading import Thread
 
 
 # ********* APIs *********
@@ -130,8 +139,10 @@ def connect():
     print("=========================")
     print("Client connected: " + request.sid)
 
-    # Add the player socket ID to the dictionary of players
-    players[request.sid] = { "id": None, "room": None }
+    # Add the player socket ID to the dictionary of players currently connected to the server
+    playersConnected[request.sid] = { "id": None, "room": None }
+
+    print("Players connected to the server: ", playersConnected)
 
     # Check if a room is available (multithread version)
     '''if not rooms:
@@ -141,11 +152,14 @@ def connect():
         room = rooms.pop(0)'''
 
     # Check if the room is available (monothread version)
-    if (player_0 != None and player_1 != None):
+    if len(playersInRoom) == 2:
         # Room is busy
         return
 
-    players[request.sid]["room"] = room
+    print("Player added to the room: " + room)
+    playersConnected[request.sid]["room"] = room
+
+    playersInRoom.append(request.sid)
 
     # Add the player to an available room
     join_room(room, sid=request.sid)
@@ -172,14 +186,17 @@ def disconnect():
 
     leave_room(room, sid=request.sid)
 
-    player_id = players[request.sid]["id"]
-    print("Player ID: " + player_id)
+    if request.sid in playersInRoom:
+        playersInRoom.remove(request.sid)
+
+    player_id = playersConnected[request.sid]["id"]
+    print("Player ID: ", player_id)
     print("Server state: ", state)
 
     # Check if player quit before sending NEW_GAME request
     if not player_id:
-        # Remove the player socket ID from the dictionary of players
-        players.pop(request.sid)
+        # Remove the player socket ID from the dictionary of players connected to the server
+        playersConnected.pop(request.sid)
         return
 
     # Check if player_0 quit while the server is in the STATE_SEARCH
@@ -209,7 +226,7 @@ def disconnect():
     # Check if player_0 quit while the server is in the STATE_PLAY
     elif state == STATE_PLAY and player_id == player_0.getId():
         winner = player_1
-        emit("new game response",
+        emit("game update",
             { "error": False,
               "msg_code": MSG_CODE_GAME_END,
               "cpu_building": { "id": cpu_building.getId(),
@@ -224,17 +241,19 @@ def disconnect():
                                "width": cpu_vehicle.getWidth(),
                                "height": cpu_vehicle.getHeight()
                              },
-              "player_0": { "player_id": player_0.getId(),
+              "player_0": { "id": player_0.getId(),
                             "pos_x": player_0.getX(),
                             "pos_y": player_0.getY(),
-                            "width": player_0.getWidth(),
-                            "height": player_0.getHeight()
+                            "rotation": player_0.getRotation()#,
+                            #"width": player_0.getBitmapWidth(),
+                            #"height": player_0.getBitmapHeight()'''
                           },
-              "player_1": { "player_id": player_1.getId(),
+              "player_1": { "id": player_1.getId(),
                             "pos_x": player_1.getX(),
                             "pos_y": player_1.getY(),
-                            "width": player_1.getWidth(),
-                            "height": player_1.getHeight()
+                            "rotation": player_1.getRotation()#,
+                            #"width": player_1.getBitmapWidth(),
+                            #"height": player_1.getBitmapHeight()
                           },
               "score": score,
               "winner": winner
@@ -243,7 +262,7 @@ def disconnect():
     # Check if player_1 quit while the server is in the STATE_PLAY
     elif state == STATE_PLAY and player_id == player_1.getId():
         winner = player_0
-        emit("new game response",
+        emit("game update",
             { "error": False,
               "msg_code": MSG_CODE_GAME_END,
               "cpu_building": { "id": cpu_building.getId(),
@@ -258,25 +277,27 @@ def disconnect():
                                "width": cpu_vehicle.getWidth(),
                                "height": cpu_vehicle.getHeight()
                              },
-              "player_0": { "player_id": player_0.getId(),
+              "player_0": { "id": player_0.getId(),
                             "pos_x": player_0.getX(),
                             "pos_y": player_0.getY(),
-                            "width": player_0.getWidth(),
-                            "height": player_0.getHeight()
+                            "rotation": player_0.getRotation()#,
+                            #"width": player_0.getBitmapWidth(),
+                            #"height": player_0.getBitmapHeight()'''
                           },
-              "player_1": { "player_id": player_1.getId(),
+              "player_1": { "id": player_1.getId(),
                             "pos_x": player_1.getX(),
                             "pos_y": player_1.getY(),
-                            "width": player_1.getWidth(),
-                            "height": player_1.getHeight()
+                            "rotation": player_1.getRotation()#,
+                            #"width": player_1.getBitmapWidth(),
+                            #"height": player_1.getBitmapHeight()
                           },
               "score": score,
               "winner": winner
             }, to=room)
         state = STATE_INIT
 
-    # Remove the player socket ID from the dictionary of players
-    players.pop(request.sid)
+    # Remove the player socket ID from the dictionary of players connected to the server
+    playersConnected.pop(request.sid)
 
 
 @socketio.on("new game request")
@@ -309,15 +330,15 @@ def new_game_event(json):
         return
 
     # Check if a NEW_GAME request arrives while the server is in the STATE_INIT
-    if state == STATE_INIT and json["req"] == NEW_GAME:
-        # Add player ID to the dictionary of players
-        players[request.sid]["id"] = json["who"]
+    if state == STATE_INIT and json["req"] == REQ_CODE_NEW_GAME:
+        # Add player ID to the dictionary of players connected to the server
+        playersConnected[request.sid]["id"] = json["who"]
 
         # Reset last players IDs variables
-        player_0 = Player(json["who"], json["screen_width"], json["screen_height"], world_width,
-                          0, player_bitmap_width, player_bitmap_height, player_initial_pos_x, player_initial_pos_y)
-        #player_0 = Player(json["who"], json["screen_width"], json["screen_height"], world_height,
-        #    0, player_bitmap_width, player_bitmap_height, player_initial_pos_x, player_initial_pos_y)
+        player_0 = Player(
+            json["who"], json["screen_width"], json["screen_height"], world_width,
+            player_bitmap_width, player_bitmap_height,
+            player_initial_pos_x, player_initial_pos_y, 0.0)
         player_1 = None
 
         # Reset obstacles variables
@@ -332,7 +353,7 @@ def new_game_event(json):
         emit("new game response", { "error": False, "msg_code": MSG_CODE_SEARCHING_ADV })
 
     # Check if NEW_GAME request while the server is in the STATE_SEARCH
-    elif state == STATE_SEARCH and json["req"] == NEW_GAME:
+    elif state == STATE_SEARCH and json["req"] == REQ_CODE_NEW_GAME:
         # Check if the request is coming from the same player who is waiting for an adversary.
         # NEW_GAME request can come from player_1 if the previous player_0 quit during STATE_PREPARE
         if (player_0 and json["who"] == player_0.getId()) or (player_1 and json["who"] == player_1.getId()):
@@ -341,15 +362,15 @@ def new_game_event(json):
         # Otherwise NEW_GAME request is coming from a different player than before
         else:
             if not player_0:
-                player_0 = Player(json["who"], json["screen_width"], json["screen_height"], world_width,
-                    0, player_bitmap_width, player_bitmap_height, player_initial_pos_x, player_initial_pos_y)
-                #player_0 = Player(json["who"], json["screen_width"], json["screen_height"], world_height,
-                #    0, player_bitmap_width, player_bitmap_height, player_initial_pos_x, player_initial_pos_y)
+                player_0 = Player(
+                    json["who"], json["screen_width"], json["screen_height"], world_width,
+                    player_bitmap_width, player_bitmap_height,
+                    player_initial_pos_x, player_initial_pos_y, 0.0)
             elif not player_1:
-                player_1 = Player(json["who"], json["screen_width"], json["screen_height"], world_width,
-                    1, player_bitmap_width, player_bitmap_height, player_initial_pos_x, player_initial_pos_y)
-                #player_1 = Player(json["who"], json["screen_width"], json["screen_height"], world_height,
-                #    1, player_bitmap_width, player_bitmap_height, player_initial_pos_x, player_initial_pos_y)
+                player_1 = Player(
+                    json["who"], json["screen_width"], json["screen_height"], world_width,
+                    player_bitmap_width, player_bitmap_height,
+                    player_initial_pos_x, player_initial_pos_y, 0.0)
             else:
                 # Just for super-safety but this condition should never be true
                 # because the server should be in STATE_PREPARE
@@ -377,53 +398,30 @@ def new_game_event(json):
             # Go to next server state
             state = STATE_PLAY
 
-            # Start game thread
-            thread = socketio.start_background_task(target=game_thread)
-
             emit("new game response",
-                 { "error": False,
-                   "msg_code": MSG_CODE_GAME_START,
-                   '''"cpu_building": { "id": cpu_building.getId(),
-                                     "pos_x": cpu_building.getX(),
-                                     "pos_y": cpu_building.getY(),
-                                     "width": cpu_building.getWidth(),
-                                     "height": cpu_building.getHeight()
-                                   },
-                   "cpu_vehicle": { "id": cpu_vehicle.getId(),
-                                    "pos_x": cpu_vehicle.getX(),
-                                    "pos_y": cpu_vehicle.getY(),
-                                    "width": cpu_vehicle.getWidth(),
-                                    "height": cpu_vehicle.getHeight()
-                                  },
-                   "player_0": { "player_id": player_0.getId(),
-                                 "pos_x": player_0.getX(),
-                                 "pos_y": player_0.getY(),
-                                 "width": player_0.getBitmapWidth(),
-                                 "height": player_0.getBitmapHeight()
-                               },
-                   "player_1": { "player_id": player_1.getId(),
-                                 "pos_x": player_1.getX(),
-                                 "pos_y": player_1.getY(),
-                                 "width": player_1.getBitmapWidth(),
-                                 "height": player_1.getBitmapHeight()
-                               },
-                   "score": score,
-                   "winner": winner'''
-                 }, to=room )
+                { "error": False,
+                  "msg_code": MSG_CODE_GAME_START
+                }, to=room )
+
+            # Start game thread (blocking)
+            #thread = socketio.start_background_task(target=game_thread)
+
+            # Non-blocking spawning of the game thread
+            eventlet.spawn_n(game_thread)
 
     # Check if NEW_GAME request while the server is in the STATE_PREPARE
-    elif state == STATE_PREPARE and json["req"] == NEW_GAME:
+    elif state == STATE_PREPARE and json["req"] == REQ_CODE_NEW_GAME:
         if json["who"] == player_0.getId() or json["who"] == player_1.getId():
             emit("new game response", { "error": False, "msg_code": MSG_CODE_PREPARE })
         else:
             emit("new game response", { "error": False, "msg_code": MSG_CODE_SERVER_BUSY })
 
     # Check if NEW_GAME request while the server is in the STATE_PLAY
-    elif state == STATE_PLAY and json["req"] == NEW_GAME:
+    elif state == STATE_PLAY and json["req"] == REQ_CODE_NEW_GAME:
         emit("new game response", { "error": False, "msg_code": MSG_CODE_SERVER_BUSY })
 
     # Check if NEW_GAME request while the server is in the STATE_END
-    #elif state == STATE_END and json["req"] == NEW_GAME:
+    #elif state == STATE_END and json["req"] == REQ_CODE_NEW_GAME:
     #    emit("new game response", { "error": False, "msg_code": MSG_CODE_SERVER_BUSY })
 
     else:
@@ -543,18 +541,25 @@ def game_thread():
     global state, \
            player_0, player_1, \
            cpu_building, cpu_vehicle, \
-           score, winner
+           score, speed, winner
 
     fps = 90
-    target_frame_time   = 1000 / fps  # In ms
-    time_previous_frame = 0           # In ms
+    target_frame_time   = 1.0 / fps  # In s
+    time_previous_frame = 0          # In s
 
+    # Wait a bit before starting the game loop
+    time.sleep(2.5)
+
+    print("Start game thread")
     while state == STATE_PLAY and winner == UNDEFINED:
         # Compute time difference
-        time_current_frame = int(round(time.time() * 1000))  # In ms
-        dt = min(time_current_frame - time_previous_frame, target_frame_time) / 1000.0  # In s
+        time_current_frame = int(round(time.time()))                           # In s
+        dt = min(time_current_frame - time_previous_frame, target_frame_time)  # In s
+        #dt = target_frame_time
 
         time_previous_frame = time_current_frame
+
+        print("dt: ", dt, " s")
 
         # Update players positions
         player_0.update(dt)
@@ -566,6 +571,7 @@ def game_thread():
         # Check if the cpu_building has been respawn
         if cpu_building.isRespawn():
             cpu_building = __pickBuilding()
+            print("new cpu_building ID: " + cpu_building.getId())
 
         # Update cpu_vehicle position
         cpu_vehicle.update(dt)
@@ -573,6 +579,12 @@ def game_thread():
         # Check if the cpu_vehicle has been respawn
         if cpu_vehicle.isRespawn():
             cpu_vehicle = __pickVehicle()
+            print("new cpu_vehicle ID: " + cpu_vehicle.getId())
+
+
+        print("cpu_building X: ", cpu_building.getX())
+        print("cpu_vehicle X: ", cpu_vehicle.getX())
+
 
         # Check players collisions
         is_player_0_collided, is_player_1_collided = __checkCollisions()
@@ -602,45 +614,50 @@ def game_thread():
             msg_code = MSG_CODE_GAMEPLAY
 
             #Compute time to wait to be consistent with the target frame time
-            time_current_frame_end = int(round(time.time() * 1000))
-            wait_time = target_frame_time - (time_current_frame_end - time_current_frame)
+            time_current_frame_end = int(round(time.time()))                               # In s
+            wait_time = target_frame_time - (time_current_frame_end - time_current_frame)  # In s
+            #wait_time = target_frame_time
+
+            print("wait_time: ", wait_time)
 
             if wait_time > 0:
                 time.sleep(wait_time)
 
-        with app.test_request_context("/"):
-            emit("new game response",
+        with app.app_context():
+            socketio.emit("game update",
                  { "error": False,
                    "msg_code": msg_code,
                    "cpu_building": { "id": cpu_building.getId(),
                                      "pos_x": cpu_building.getX(),
-                                     "pos_y": cpu_building.getY(),
-                                     "width": cpu_building.getWidth(),
-                                     "height": cpu_building.getHeight()
+                                     "pos_y": cpu_building.getY()#,
+                                     #"width": cpu_building.getWidth(),
+                                     #"height": cpu_building.getHeight()
                                    },
                    "cpu_vehicle": { "id": cpu_vehicle.getId(),
                                     "pos_x": cpu_vehicle.getX(),
-                                    "pos_y": cpu_vehicle.getY(),
-                                    "width": cpu_vehicle.getWidth(),
-                                    "height": cpu_vehicle.getHeight()
+                                    "pos_y": cpu_vehicle.getY()#,
+                                    #"width": cpu_vehicle.getWidth(),
+                                    #"height": cpu_vehicle.getHeight()
                                   },
-                   "player_0": { "player_id": player_0.getId(),
-                                 #"bitmap_id": player_0.getBitmapId(),
+                   "player_0": { "id": player_0.getId(),
                                  "pos_x": player_0.getX(),
                                  "pos_y": player_0.getY(),
-                                 "width": player_0.getBitmapWidth(),
-                                 "height": player_0.getBitmapHeight()
+                                 "rotation": player_0.getRotation()#,
+                                 #"width": player_0.getBitmapWidth(),
+                                 #"height": player_0.getBitmapHeight()'''
                                },
-                   "player_1": { "player_id": player_1.getId(),
-                                 #"bitmap_id": player_1.getBitmapId(),
+                   "player_1": { "id": player_1.getId(),
                                  "pos_x": player_1.getX(),
                                  "pos_y": player_1.getY(),
-                                 "width": player_1.getBitmapWidth(),
-                                 "height": player_1.getBitmapHeight()
+                                 "rotation": player_1.getRotation()#,
+                                 #"width": player_1.getBitmapWidth(),
+                                 #"height": player_1.getBitmapHeight()
                                },
                    "score": score,
                    "winner": winner
-                 }, namespace=None, to=room )
+                 }, to=room )
+
+            print("Game update message sent to clients in room: ", room)
 
 
 @socketio.on("new move request")
@@ -662,14 +679,14 @@ def new_move_event(json):
         emit("new move response", { "error": True, "message": "INVALID REQUEST" })
         return
 
-    if state == STATE_PLAY and json["req"] == NEW_MOVE:
+    if state == STATE_PLAY and json["req"] == REQ_CODE_NEW_MOVE:
         if json["who"] == player_0.getId():
             # Use the received value to change the y component of player_0 speed
-            player_0.setSpeedY(json["value"])
+            player_0.setSpeed(json["value"])
             emit("new move response", { "error": False, "message": "NEW MOVE ACCEPTED" })
         elif json["who"] == player_1.getId():
             # Use the received value to change the y component of player_1 speed
-            player_1.setSpeedY(json["value"])
+            player_1.setSpeed(json["value"])
             emit("new move response", { "error": False, "message": "NEW MOVE ACCEPTED" })
     else:
         emit("new move response", { "error": True, "message": "INVALID REQUEST" })

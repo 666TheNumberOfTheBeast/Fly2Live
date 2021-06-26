@@ -44,4 +44,4 @@ class GameObject:
 
     def setSpeed(self, speed):
         self.speed = speed  # In m/s
-    #    #self.speed = speed  # In %/s
+        #self.speed = speed  # In %/s

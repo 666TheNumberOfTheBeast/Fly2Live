@@ -20,18 +20,8 @@ import java.lang.Thread.sleep
 import kotlin.math.max
 import kotlin.math.min
 import android.os.Bundle
-import android.widget.Toast
-import androidx.navigation.fragment.findNavController
-import com.example.fly2live.configuration.Configuration
-import com.example.fly2live.configuration.Configuration.Companion.MULTIPLAYER
 import com.example.fly2live.game_object_cpu.GameObjectCpu
 import com.example.fly2live.game_object_player.GameObjectPlayer
-import io.socket.client.IO
-import io.socket.client.Socket
-import io.socket.engineio.client.transports.WebSocket
-import org.json.JSONException
-import org.json.JSONObject
-import java.net.URISyntaxException
 
 
 class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context), View.OnTouchListener, SensorEventListener2 {
@@ -103,8 +93,8 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
 
 
     // Variables for multiplayer mode
-    private var mSocket: Socket? = null
-    private var adversaryVehicle: GameObjectPlayer? = null
+    //private var mSocket: Socket? = null
+    //private var adversaryVehicle: GameObjectPlayer? = null
     private var winner = false
 
 
@@ -152,12 +142,13 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
         // It uses a common pool of shared background threads.
         // This is an appropriate choice for compute-intensive coroutines that consume CPU resources
         lifecycleScope.launch(Dispatchers.Default) {
-            if (MULTIPLAYER) {
+            /*if (MULTIPLAYER) {
                 // Force websocket
                 val options = IO.Options.builder()
                     .setTransports(arrayOf(WebSocket.NAME))
                     .build()
 
+                // Try to retrieve current socket
                 try {
                     mSocket = IO.socket(Configuration.URL, options)
                 } catch (e: URISyntaxException) {
@@ -196,15 +187,49 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                         return@on
                     }
 
-                    val cpuBuildingId = cpuBuildingJson.getInt("id")
-                    cpuBuildingJson.getDouble("pos_x")
-                    cpuBuildingJson.getDouble("pos_y")
-                    cpuBuildingJson.getDouble("width")
-                    cpuBuildingJson.getDouble("height")
+                    //val cpuBuildingId = cpuBuildingJson.getInt("id")
+                    val cpuBuildingId = cpuBuildingJson.getString("id")
+                    val cpuBuildingPosX = cpuBuildingJson.getDouble("pos_x")
+                    val cpuBuildingPosY = cpuBuildingJson.getDouble("pos_y")
+                    //cpuBuildingJson.getDouble("width")
+                    //cpuBuildingJson.getDouble("height")
 
-                    //pickBuilding(screenWidth, screenHeight, cpuBuildingId)
+                    pickBuilding(screenWidth, screenHeight, cpuBuildingId)
+
+                    //val cpuVehicleId = cpuVehicleJson.getInt("id")
+                    val cpuVehicleId = cpuVehicleJson.getString("id")
+                    val cpuVehiclePosX = cpuVehicleJson.getDouble("pos_x")
+                    val cpuVehiclePosY = cpuVehicleJson.getDouble("pos_y")
+                    //cpuBuildingJson.getDouble("width")
+                    //cpuBuildingJson.getDouble("height")
+
+                    pickVehicle(screenWidth, screenHeight, cpuVehicleId)
+
+                    //val player0Id = player0.getInt("id")
+                    val player0Id = player0.getString("id")
+                    val player0PosX = player0.getDouble("pos_x")
+                    val player0PosY = player0.getDouble("pos_y")
+                    //player0.getDouble("width")
+                    //player0.getDouble("height")
+
+                    if (player0Id == PLAYER_ID)
+                        // get vehicle 0
+                        // adversary get vehicle 1
+
+                    //val player1Id = player1.getInt("id")
+                    val player1Id = player1.getString("id")
+                    val player1PosX = player1.getDouble("pos_x")
+                    val player1PosY = player1.getDouble("pos_y")
+                    //player1.getDouble("width")
+                    //player1.getDouble("height")
+
+                    if (player1Id == PLAYER_ID)
+                        // get vehicle 1
+                        // adversary get vehicle 0
                 }
-            }
+            }*/
+
+
 
 
             // Calculate scale factor
@@ -1052,7 +1077,6 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                     ),*/
                     playerBitmaps,
                     arrayOf(arrayOf(0f, 0f, 1f, 1f)),
-                    //10f * scaleFactor, 3f * scaleFactor, screenWidth, screenHeight, ppm, 1f, screenHeight*0.4f//, speed // Measures in meters except pos_y
                     10f * scaleFactor, 3f * scaleFactor, screenWidth, screenHeight, ppm, 1f, 20f, 0f // Measures in meters
                 )
 
@@ -1063,8 +1087,8 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
             loadVehicles.await()
             loadPlayer.await()
 
-            if (!MULTIPLAYER)
-                start(screenWidth, screenHeight)
+            //if (!MULTIPLAYER)
+            start(screenWidth, screenHeight)
         }
     }
 
@@ -1156,7 +1180,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                         gameEnd = true
 
                         val fragment = findFragment<GameFragment>()
-                        fragment.gameEnd(score.toLong(), winner)
+                        fragment.gameEnd(score.toLong(), -1)
                     }
 
                     // Update the score
@@ -1501,17 +1525,22 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
             Sensor.TYPE_GYROSCOPE      -> lastGyroscope    = event.values.clone()
         }
 
-        // Use X value if portrait mode, inversed Y value otherwise
-        val value = if (width < height) lastGyroscope[0] else lastGyroscope[1] * -1f
+        // Use X value if portrait mode, Y value otherwise
+        val value =
+            if (width < height)                lastGyroscope[0]        // Portrait
+            else if (display?.rotation == 1)   lastGyroscope[1] * -1f  // Landscape
+            else                               lastGyroscope[1]        // Reverse landscape
 
         if (value > 0f)
             lastGyroscopeInput = max(1f, min(value * 10f, 20f))
         else if (value < 0f)
             lastGyroscopeInput = min(-1f, max(value * 10f, -20f))
 
-        Log.d("SENSOR", "****************")
+        /*Log.d("SENSOR", "****************")
         Log.d("SENSOR", "value: $value")
         Log.d("SENSOR", "lastGyroscopeInput: $lastGyroscopeInput")
+        Log.d("SENSOR", "rotation: $rotation")
+        Log.d("SENSOR", "display.rotation: ${display?.rotation}")*/
     }
 
     // Save game variables
@@ -1660,6 +1689,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
 
                             break
                         } catch (e: UninitializedPropertyAccessException) {
+                            // Buildings variable has not been initialized
                             //e.printStackTrace()
                             sleep(100)
                         }
@@ -1690,6 +1720,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
 
                             break
                         } catch (e: UninitializedPropertyAccessException) {
+                            // Vehicles variable has not been initialized
                             //e.printStackTrace()
                             sleep(100)
                         }

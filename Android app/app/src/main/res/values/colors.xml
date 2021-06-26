@@ -5,13 +5,13 @@
     <color name="colorAccent">#D81B60</color>
 
     <!-- Text color for main fragment -->
-    <color name="green">#00FF00</color>
     <color name="red">#FF0000</color>
+    <color name="green">#00FF00</color>
 
     <!-- Text colors for stats podium -->
-    <color name="gold">#d4af37</color>
+    <color name="gold">#D4AF37</color>
     <color name="silver">#C0C0C0</color>
-    <color name="bronze">#cd7f32</color>
+    <color name="bronze">#CD7F32</color>
 
     <!-- Background colors for stats fragment -->
     <color name="orange_bg">#4DFFA500</color>
@@ -19,7 +19,7 @@
     <color name="red_bg">#4DFF0000</color>
     <color name="blue_bg">#4D0000FF</color>
 
-    <color name="dark_green_bg">#2b472b</color>
+    <color name="dark_green_bg">#2B472B</color>
 
     <!-- Text color for locked scenario -->
     <color name="white_locked">#4DFFFFFF</color>
@@ -28,4 +28,6 @@
     <color name="orange">#FFAA00</color>
     <color name="blue">#1F51FF</color>
     <color name="bright_blue">#0096FF</color>
+
+    <color name="gray">#909090</color>
 </resources>

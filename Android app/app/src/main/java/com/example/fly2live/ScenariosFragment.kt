@@ -61,7 +61,7 @@ class ScenariosFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         // TEMP TO SAVE API CALLS
-        updateUI(1, 500)
+        updateUI(1, 500L)
         return
 
         // Check if local configuration has been initialized
@@ -254,7 +254,8 @@ class ScenariosFragment : Fragment() {
             //val progress = ((playerXp - playerLevelMaxXp) / (10f * (playerLevel + 1))).toInt()
 
             // RAGIONANDO IN TERMINI DI XP RELATIVI (OGNI VOLTA CHE SALGO DI LIVELLO SOTTRAGGO MAX XP LIVELLO PRECEDENTE)
-            val progress = (playerXp / playerLevelMaxXp).toInt()
+            //val progress = (playerXp / playerLevelMaxXp).toInt()
+            val progress = (playerXp.toFloat() / playerLevelMaxXp * 100).toInt()
 
             Log.d("progress", "playerLevel: $playerLevel")
             Log.d("progress", "playerXp: $playerXp")

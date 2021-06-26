@@ -17,7 +17,7 @@
     </shared>
   </component>
   <component name="AndroidLogFilters">
-    <option name="TOOL_WINDOW_CUSTOM_FILTER" value="sensor" />
+    <option name="TOOL_WINDOW_CUSTOM_FILTER" value="new m" />
     <option name="TOOL_WINDOW_LOG_LEVEL" value="verbose" />
     <option name="TOOL_WINDOW_CONFIGURED_FILTER" value="Show only selected application" />
   </component>
@@ -31,14 +31,18 @@
       <change beforePath="$PROJECT_DIR$/.gradle/5.4.1/javaCompile/classAnalysis.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/5.4.1/javaCompile/classAnalysis.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/5.4.1/javaCompile/jarAnalysis.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/5.4.1/javaCompile/jarAnalysis.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/5.4.1/javaCompile/javaCompile.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/5.4.1/javaCompile/javaCompile.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/5.4.1/javaCompile/taskHistory.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/5.4.1/javaCompile/taskHistory.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/GameEndFragment.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/GameEndFragment.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/GameFragment.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/GameFragment.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/GameView.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/GameView.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/LoadingFragment.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/LoadingFragment.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/game_object/GameObject.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/game_object/GameObject.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/game_object_cpu/GameObjectCpu.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/game_object_cpu/GameObjectCpu.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/game_object_player/GameObjectPlayer.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/game_object_player/GameObjectPlayer.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/ScenariosFragment.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/ScenariosFragment.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/configuration/Configuration.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/configuration/Configuration.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/values/colors.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values/colors.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Server/GameObject.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Server/GameObject.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../Server/Obstacle.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Server/Obstacle.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../Server/Player.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Server/Player.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../Server/Server_socket.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Server/Server_socket.py" afterDir="false" />
@@ -52,7 +56,7 @@
   <component name="DefaultGradleProjectSettings">
     <option name="isMigrated" value="true" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="Nexus_5X_API_30" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="Pixel_XL_API_29" />
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
       <ProjectState />
@@ -70,8 +74,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/LoadingFragment.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="725">
-              <caret line="174" column="75" selection-start-line="174" selection-start-column="45" selection-end-line="174" selection-end-column="75" />
+            <state relative-caret-position="986">
+              <caret line="172" column="67" selection-start-line="172" selection-start-column="67" selection-end-line="172" selection-end-column="67" />
             </state>
           </provider>
         </entry>
@@ -79,8 +83,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/GameFragment.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-1131">
-              <caret line="16" selection-start-line="16" selection-end-line="16" />
+            <state relative-caret-position="522">
+              <caret line="73" column="77" selection-start-line="73" selection-start-column="77" selection-end-line="73" selection-end-column="77" />
             </state>
           </provider>
         </entry>
@@ -88,8 +92,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/configuration/Configuration.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state>
-              <caret column="42" selection-start-column="42" selection-end-column="42" />
+            <state relative-caret-position="783">
+              <caret line="27" column="43" selection-start-line="27" selection-start-column="43" selection-end-line="27" selection-end-column="43" />
             </state>
           </provider>
         </entry>
@@ -97,29 +101,29 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/GameEndFragment.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1687">
-              <caret line="124" column="10" selection-start-line="124" selection-start-column="10" selection-end-line="124" selection-end-column="10" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/GameView.kt">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="874">
-              <caret line="198" column="44" selection-start-line="198" selection-start-column="44" selection-end-line="198" selection-end-column="44" />
+            <state relative-caret-position="493">
+              <caret line="249" column="73" selection-start-line="249" selection-start-column="73" selection-end-line="249" selection-end-column="73" />
+              <folding>
+                <element signature="e#5025#5049#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/game_object/GameObject.kt">
+        <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/GameView.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-2059">
-              <caret line="73" column="18" selection-start-line="73" selection-start-column="18" selection-end-line="73" selection-end-column="18" />
-              <folding>
-                <element signature="e#42#133#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="726">
+              <caret line="1182" column="60" selection-start-line="1182" selection-start-column="60" selection-end-line="1182" selection-end-column="60" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/GameViewMultiplayer.kt">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="754">
+              <caret line="610" column="24" selection-start-line="610" selection-start-column="24" selection-end-line="610" selection-end-column="24" />
             </state>
           </provider>
         </entry>
@@ -136,7 +140,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/game_object_player/GameObjectPlayer.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-25">
+            <state relative-caret-position="116">
               <caret line="24" column="13" selection-start-line="24" selection-start-column="13" selection-end-line="24" selection-end-column="13" />
               <folding>
                 <element signature="e#50#154#0" expanded="true" />
@@ -160,6 +164,11 @@
   <component name="FindInProjectRecents">
     <findStrings>
       <find>getY</find>
+      <find>BUILDING</find>
+      <find>* scaleFactor</find>
+      <find>20f, 8f,</find>
+      <find>, speed</find>
+      <find>speed</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -168,7 +177,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/app/src/main/res/layout/fragment_game_over.xml" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/GameOverFragment.kt" />
         <option value="$PROJECT_DIR$/app/src/main/res/layout/fragment_stats_slide_scores.xml" />
         <option value="$PROJECT_DIR$/app/src/main/res/layout/fragment_stats_slide_score.xml" />
@@ -188,8 +196,6 @@
         <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/player/PlayersLevelsCollection.kt" />
         <option value="$PROJECT_DIR$/app/src/main/res/layout/fragment_scenarios.xml" />
         <option value="$PROJECT_DIR$/app/src/main/res/layout/fragment_loading.xml" />
-        <option value="$PROJECT_DIR$/app/src/main/res/layout/fragment_game_end.xml" />
-        <option value="$PROJECT_DIR$/app/src/main/res/values/colors.xml" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/LoginFragment.kt" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/utils/Utils.kt" />
         <option value="$PROJECT_DIR$/app/src/main/res/anim/fade_in.xml" />
@@ -200,7 +206,6 @@
         <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/IntroFragment.kt" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/MainFragment.kt" />
         <option value="$PROJECT_DIR$/app/src/main/res/values/ids.xml" />
-        <option value="$PROJECT_DIR$/app/src/main/res/values/strings.xml" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/GameView2.kt" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/obstacle/Obstacle.kt" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/building/Building.kt" />
@@ -208,17 +213,21 @@
         <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/game_object.kt" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/game_object/gameObject.kt" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/MainActivity.kt" />
-        <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/GameEndFragment.kt" />
-        <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/ScenariosFragment.kt" />
-        <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/configuration/Configuration.kt" />
         <option value="$PROJECT_DIR$/app/src/main/res/layout/fragment_login.xml" />
         <option value="$PROJECT_DIR$/app/src/main/res/layout/fragment_intro.xml" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/game_object_cpu/GameObjectCpu.kt" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/game_object/GameObject.kt" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/game_object_player/GameObjectPlayer.kt" />
-        <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/GameFragment.kt" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/configuration/Configuration.kt" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/LoadingFragment.kt" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/GameFragment.kt" />
+        <option value="$PROJECT_DIR$/app/src/main/res/values/strings.xml" />
+        <option value="$PROJECT_DIR$/app/src/main/res/values/colors.xml" />
+        <option value="$PROJECT_DIR$/app/src/main/res/layout/fragment_game_end.xml" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/GameEndFragment.kt" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/GameView.kt" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/ScenariosFragment.kt" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/GameViewMultiplayer.kt" />
       </list>
     </option>
   </component>
@@ -233,8 +242,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
-      <pane id="PackagesPane" />
+      <pane id="ProjectPane" />
       <pane id="AndroidView">
         <subPane>
           <expand>
@@ -255,18 +263,20 @@
             </path>
             <path>
               <item name="Fly2Live" type="1abcf292:AndroidViewProjectNode" />
-              <item name="Gradle Scripts" type="ae0cef3a:AndroidBuildScriptsGroupNode" />
+              <item name="app" type="feadf853:AndroidModuleNode" />
+              <item name="res" type="d4f16f75:AndroidResFolderNode" />
             </path>
           </expand>
           <select />
         </subPane>
       </pane>
-      <pane id="ProjectPane" />
+      <pane id="Scope" />
+      <pane id="PackagesPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="DeviceAndSnapshotComboBoxAction.selectedDevice" value="Nexus_5X_API_30" />
-    <property name="DeviceAndSnapshotComboBoxAction.selectionTime" value="2021-06-22T16:02:56.866Z" />
+    <property name="DeviceAndSnapshotComboBoxAction.selectedDevice" value="Pixel_XL_API_29" />
+    <property name="DeviceAndSnapshotComboBoxAction.selectionTime" value="2021-06-26T00:43:57.715Z" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="android.sdk.path" value="$USER_HOME$/Android/Sdk" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
@@ -382,7 +392,7 @@
     <editor active="true" />
     <layout>
       <window_info id="Captures" order="0" side_tool="true" weight="0.25" />
-      <window_info active="true" content_ui="combo" id="Project" order="1" visible="true" weight="0.21188699" />
+      <window_info content_ui="combo" id="Project" order="1" visible="true" weight="0.21188699" />
       <window_info id="Structure" order="2" side_tool="true" />
       <window_info id="Favorites" order="3" side_tool="true" />
       <window_info id="Build Variants" order="4" side_tool="true" />
@@ -395,7 +405,7 @@
       <window_info anchor="bottom" id="TODO" order="2" weight="0.32972974" />
       <window_info anchor="bottom" id="Terminal" order="3" />
       <window_info anchor="bottom" id="Event Log" order="4" sideWeight="0.50026655" side_tool="true" weight="0.32972974" />
-      <window_info anchor="bottom" id="Build" order="5" sideWeight="0.49973348" visible="true" weight="0.32972974" />
+      <window_info anchor="bottom" id="Build" order="5" sideWeight="0.49973348" weight="0.32972974" />
       <window_info anchor="bottom" id="Android Profiler" order="6" />
       <window_info anchor="bottom" id="Run" order="7" weight="0.32972974" />
       <window_info anchor="bottom" id="Debug" order="8" />
@@ -436,13 +446,6 @@
     </layout-to-restore>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/build.gradle">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="464">
-          <caret line="16" column="52" selection-start-line="16" selection-start-column="52" selection-end-line="16" selection-end-column="52" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/build.gradle">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1026">
@@ -582,24 +585,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/values/colors.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="812">
-          <caret line="28" column="38" lean-forward="true" selection-start-line="28" selection-start-column="38" selection-end-line="28" selection-end-column="38" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_game_end.xml">
-      <provider selected="true" editor-type-id="android-designer2" />
-      <provider editor-type-id="text-editor">
-        <state relative-caret-position="812">
-          <caret line="58" column="45" selection-start-line="58" selection-start-column="45" selection-end-line="58" selection-end-column="45" />
-          <folding>
-            <element signature="e#2359#2378#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_main.xml">
       <provider editor-type-id="android-designer2" />
       <provider selected="true" editor-type-id="text-editor">
@@ -612,13 +597,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2726">
           <caret line="122" column="44" selection-start-line="122" selection-start-column="44" selection-end-line="122" selection-end-column="44" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/utils/Utils.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1455">
-          <caret line="408" column="25" lean-forward="true" selection-start-line="408" selection-start-column="25" selection-end-line="408" selection-end-column="25" />
         </state>
       </provider>
     </entry>
@@ -637,12 +615,12 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/res/navigation/nav_graph.xml">
-      <provider editor-type-id="nav-designer" />
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="464">
           <caret line="16" column="39" selection-start-line="16" selection-start-column="39" selection-end-line="16" selection-end-column="39" />
         </state>
       </provider>
+      <provider editor-type-id="nav-designer" />
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/AndroidManifest.xml">
       <provider editor-type-id="android-manifest" />
@@ -677,13 +655,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/MainFragment.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-2141">
-          <caret line="33" column="46" selection-start-line="33" selection-start-column="46" selection-end-line="33" selection-end-column="46" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/IntroFragment.kt">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1160">
@@ -694,25 +665,11 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/ScenariosFragment.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="928">
-          <caret line="63" column="24" selection-start-line="63" selection-start-column="24" selection-end-line="63" selection-end-column="24" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_loading.xml">
       <provider editor-type-id="android-designer2" />
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="464">
           <caret line="16" column="47" selection-start-line="16" selection-start-column="47" selection-end-line="16" selection-end-column="47" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/values/strings.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="980">
-          <caret line="51" column="35" selection-start-line="51" selection-start-column="18" selection-end-line="51" selection-end-column="35" />
         </state>
       </provider>
     </entry>
@@ -733,12 +690,12 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/game_object_player/GameObjectPlayer.kt">
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/game_object/GameObject.kt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-25">
-          <caret line="24" column="13" selection-start-line="24" selection-start-column="13" selection-end-line="24" selection-end-column="13" />
+        <state relative-caret-position="203">
+          <caret line="9" column="18" selection-start-line="9" selection-start-column="4" selection-end-line="9" selection-end-column="18" />
           <folding>
-            <element signature="e#50#154#0" expanded="true" />
+            <element signature="e#42#133#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -750,48 +707,101 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/game_object/GameObject.kt">
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/MainFragment.kt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-2059">
-          <caret line="73" column="18" selection-start-line="73" selection-start-column="18" selection-end-line="73" selection-end-column="18" />
-          <folding>
-            <element signature="e#42#133#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/GameEndFragment.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1687">
-          <caret line="124" column="10" selection-start-line="124" selection-start-column="10" selection-end-line="124" selection-end-column="10" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/configuration/Configuration.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="42" selection-start-column="42" selection-end-column="42" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/GameFragment.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1131">
-          <caret line="16" selection-start-line="16" selection-end-line="16" />
+        <state relative-caret-position="-58">
+          <caret line="33" column="46" selection-start-line="33" selection-start-column="46" selection-end-line="33" selection-end-column="46" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/LoadingFragment.kt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="725">
-          <caret line="174" column="75" selection-start-line="174" selection-start-column="45" selection-end-line="174" selection-end-column="75" />
+        <state relative-caret-position="986">
+          <caret line="172" column="67" selection-start-line="172" selection-start-column="67" selection-end-line="172" selection-end-column="67" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/GameFragment.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="522">
+          <caret line="73" column="77" selection-start-line="73" selection-start-column="77" selection-end-line="73" selection-end-column="77" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/values/strings.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="690">
+          <caret line="65" column="28" selection-start-line="65" selection-start-column="28" selection-end-line="65" selection-end-column="28" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_game_end.xml">
+      <provider selected="true" editor-type-id="android-designer2" />
+      <provider editor-type-id="text-editor">
+        <state relative-caret-position="435">
+          <caret line="15" column="37" selection-start-line="15" selection-start-column="37" selection-end-line="15" selection-end-column="37" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/values/colors.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="899">
+          <caret line="31" column="25" selection-start-line="31" selection-start-column="25" selection-end-line="31" selection-end-column="25" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/GameView.kt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="874">
-          <caret line="198" column="44" selection-start-line="198" selection-start-column="44" selection-end-line="198" selection-end-column="44" />
+        <state relative-caret-position="726">
+          <caret line="1182" column="60" selection-start-line="1182" selection-start-column="60" selection-end-line="1182" selection-end-column="60" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/GameEndFragment.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="493">
+          <caret line="249" column="73" selection-start-line="249" selection-start-column="73" selection-end-line="249" selection-end-column="73" />
+          <folding>
+            <element signature="e#5025#5049#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/configuration/Configuration.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="783">
+          <caret line="27" column="43" selection-start-line="27" selection-start-column="43" selection-end-line="27" selection-end-column="43" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/utils/Utils.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1396">
+          <caret line="408" column="25" lean-forward="true" selection-start-line="408" selection-start-column="25" selection-end-line="408" selection-end-column="25" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/ScenariosFragment.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="788">
+          <caret line="257" column="46" selection-start-line="257" selection-start-column="46" selection-end-line="257" selection-end-column="46" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/game_object_player/GameObjectPlayer.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="116">
+          <caret line="24" column="13" selection-start-line="24" selection-start-column="13" selection-end-line="24" selection-end-column="13" />
+          <folding>
+            <element signature="e#50#154#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/GameViewMultiplayer.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="754">
+          <caret line="610" column="24" selection-start-line="610" selection-start-column="24" selection-end-line="610" selection-end-column="24" />
         </state>
       </provider>
     </entry>

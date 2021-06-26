@@ -38,7 +38,7 @@ class GameEndFragment : Fragment() {
     var account: GoogleSignInAccount? = null
 
     private var score  = 0L
-    private var winner = false
+    private var winner = -1
 
     private lateinit var mLeaderboardClient: LeaderboardsClient
     private var newHighScore      = false
@@ -61,7 +61,7 @@ class GameEndFragment : Fragment() {
         // Get passed arguments the first time the fragment is created
         if (savedInstanceState == null) {
             score  = arguments!!.getLong("score")
-            winner = arguments!!.getBoolean("winner")
+            winner = arguments!!.getInt("winner")
 
             // Get events and leaderboards clients
             /*val mEventsClient  = Games.getEventsClient(context!!, account!!)
@@ -90,7 +90,7 @@ class GameEndFragment : Fragment() {
         // Load & Start the audio only if the preference is enabled
         if (isAudioEnabled) {
             // Load the correct sound
-            if (MULTIPLAYER && winner)
+            if (MULTIPLAYER && winner > 0)
                 loadSound(R.raw.soundtrack_game_win)
             else
                 loadSound(R.raw.soundtrack_game_over)
@@ -109,11 +109,20 @@ class GameEndFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Check if the player has won in multiplayer mode
-        if (MULTIPLAYER && winner) {
+        // Check if the player has played in multiplayer mode
+        if (MULTIPLAYER) {
             val gameStatusView = view.findViewById<TextView>(R.id.game_status_text)
-            gameStatusView.text = getString(R.string.you_win)
-            gameStatusView.setTextColor(ContextCompat.getColor(context!!, R.color.green))
+
+            // Check if the player has won in multiplayer mode
+            if (winner > 0) {
+                gameStatusView.text = getString(R.string.you_win)
+                gameStatusView.setTextColor(ContextCompat.getColor(context!!, R.color.green))
+            }
+            // Check if draw in multiplayer mode
+            else if (winner < 0) {
+                gameStatusView.text = getString(R.string.draw)
+                gameStatusView.setTextColor(ContextCompat.getColor(context!!, R.color.gray))
+            }
         }
 
         // Show earned XP
@@ -238,7 +247,8 @@ class GameEndFragment : Fragment() {
         else
             scoreView.text = scoreView.text.toString() + " " + score.toString()
 
-        if (winner || newHighScore) {
+        // Check if player has won in multiplayer mode or has achieved a new high score
+        if (winner > 0 || newHighScore) {
             val shareView = view!!.findViewById<TextView>(R.id.button_share)
 
             // Make the share button visible and add listener
@@ -250,9 +260,9 @@ class GameEndFragment : Fragment() {
                 // TODO: add link to open stats page at the correct position
 
                 val shareBody: String
-                if (winner && newHighScore)
+                if (winner > 0 && newHighScore)
                     shareBody = "I've won with a new high score of " + score + " on Fly2Live - multiplayer"
-                else if (winner)
+                else if (winner > 0)
                     shareBody = "I've won with a score of " + score + " on Fly2Live - multiplayer"
                 else
                     shareBody = "I've achieved a new high score of " + score + " on Fly2Live - single player"

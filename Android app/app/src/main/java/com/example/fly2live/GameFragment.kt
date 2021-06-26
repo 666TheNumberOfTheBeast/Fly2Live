@@ -60,7 +60,8 @@ class GameFragment : Fragment() {
         if (MULTIPLAYER)
             findNavController().popBackStack(R.id.loadingFragment, true)
 
-        val view = GameView(context, lifecycleScope)
+        //val view = GameView(context, lifecycleScope)
+        val view: View = if (MULTIPLAYER) GameViewMultiplayer(context, lifecycleScope) else GameView(context, lifecycleScope)
 
         // Set view ID to override onSaveInstanceState and onRestoreInstanceState of the view
         view.id = R.id.game_view
@@ -70,13 +71,13 @@ class GameFragment : Fragment() {
     }
 
     // GameView call this function when the game ends
-    // (single player -> game over, multiplayer -> game winner or loser)
-    fun gameEnd(score: Long, winner: Boolean) {
+    // (single player -> game over, multiplayer -> game winner, loser or draw)
+    fun gameEnd(score: Long, winner: Int) {
         stopSoundtrack()
 
         val bundle = Bundle()
         bundle.putLong("score", score)
-        bundle.putBoolean("winner", winner)
+        bundle.putInt("winner", winner)
 
         findNavController().navigate(R.id.action_gameFragment_to_gameEndFragment, bundle)
     }

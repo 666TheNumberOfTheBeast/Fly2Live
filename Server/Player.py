@@ -115,6 +115,8 @@ class Player:
 
     # Update UI
     def update(self, dt):
+        #self.game_object.update(dt)
+
         # Set player Y based on last player input
         self.setY( self.getY() + self.getSpeed() * dt )
 

@@ -10,6 +10,8 @@ class Obstacle(GameObject):
 
     # Update UI
     def update(self, dt):
+        #super().update(dt)
+
         # Move object to left
         self.setX( self.getX() - self.getSpeed() * dt )
 

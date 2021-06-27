@@ -9,8 +9,10 @@ import android.view.ViewGroup
 import androidx.navigation.fragment.findNavController
 import android.media.MediaPlayer
 import android.util.Log
+import androidx.activity.addCallback
 import androidx.lifecycle.lifecycleScope
 import com.example.fly2live.configuration.Configuration.Companion.MULTIPLAYER
+import com.example.fly2live.configuration.Configuration.Companion.WINNER_UNDEFINED
 
 class GameFragment : Fragment() {
     private var soundtrack: MediaPlayer? = null
@@ -71,10 +73,18 @@ class GameFragment : Fragment() {
     }
 
     // GameView call this function when the game ends
-    // (single player -> game over, multiplayer -> game winner, loser or draw)
+    // (single player -> game over, multiplayer -> undefined, game winner, loser or draw)
     fun gameEnd(score: Long, winner: Int) {
         stopSoundtrack()
 
+        // Check if winner is undefined in multiplayer mode
+        if (MULTIPLAYER && winner == WINNER_UNDEFINED) {
+            // Go back to the main fragment
+            findNavController().popBackStack(R.id.mainFragment, false)
+            return
+        }
+
+        // Otherwise go to game end fragment
         val bundle = Bundle()
         bundle.putLong("score", score)
         bundle.putInt("winner", winner)

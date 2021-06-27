@@ -127,6 +127,10 @@
             app:destination="@id/gameFragment"
             app:popUpTo="@id/mainFragment" />
         <action
+            android:id="@+id/action_gameEndFragment_to_loadingFragment"
+            app:destination="@id/loadingFragment"
+            app:popUpTo="@id/mainFragment" />
+        <action
             android:id="@+id/action_gameEndFragment_to_mainFragment"
             app:destination="@id/mainFragment"
             app:popUpTo="@id/mainFragment"

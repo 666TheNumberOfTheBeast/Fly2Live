@@ -32,8 +32,10 @@ import com.example.fly2live.configuration.Configuration.Companion.MSG_CODE_BAD_R
 import com.example.fly2live.configuration.Configuration.Companion.MSG_CODE_FOUND_ADV
 import com.example.fly2live.configuration.Configuration.Companion.MSG_CODE_GAME_START
 import com.example.fly2live.configuration.Configuration.Companion.MSG_CODE_PREPARE
+import com.example.fly2live.configuration.Configuration.Companion.MSG_CODE_RESEND
 import com.example.fly2live.configuration.Configuration.Companion.MSG_CODE_SEARCHING_ADV
 import com.example.fly2live.configuration.Configuration.Companion.MSG_CODE_SERVER_BUSY
+import com.example.fly2live.configuration.Configuration.Companion.SCENARIO
 import com.example.fly2live.configuration.Configuration.Companion.SOCKET_INSTANCE
 import io.socket.engineio.client.transports.WebSocket
 import kotlinx.coroutines.Runnable
@@ -114,6 +116,9 @@ class LoadingFragment : Fragment() {
             Log.d("json", "connected to the server")
             Log.d("json", "socket ID: " + mSocket.id()) // sid (e.g. x8WIv7-mJelg7on_ALbx)
 
+            // Remove listener for the event of connection error
+            mSocket.off(Socket.EVENT_CONNECT_ERROR)
+
             activity?.runOnUiThread(Runnable {
                 // Get screen width and height
                 //val displayMetrics = Resources.getSystem().displayMetrics
@@ -145,18 +150,26 @@ class LoadingFragment : Fragment() {
 
         mSocket.once(Socket.EVENT_DISCONNECT) { args ->
             Log.d("json", "disconnected from the server")
+
+            /*Log.d("json", "args: $args")
+            for (arg in args)
+                Log.d("json", "arg: $arg")*/
+
+            activity?.runOnUiThread(Runnable {
+                // Create Toast outside the looper to avoid crashes due to bad context
+                val toast = Toast.makeText(context, "Disconnected from the server", Toast.LENGTH_SHORT)
+
+                // Delay action for a better UX
+                Handler(Looper.myLooper()!!).postDelayed({
+                    toast.show()
+                    goBack()
+                }, 1000)
+            })
         }
     }
 
     private fun searchGame(screen_width: Int, screen_height: Int) {
-        val json = JSONObject()
-        json.put("who", PLAYER_ID)
-        json.put("req", REQ_CODE_NEW_GAME)
-        json.put("screen_width", screen_width)
-        json.put("screen_height", screen_height)
-
-        mSocket.emit("new game request", json)
-        Log.d("json", "new game request sent")
+        sendNewGameRequest(screen_width, screen_height)
 
         // Add a listener for the new game response event
         mSocket.on("new game response") { args ->
@@ -191,7 +204,25 @@ class LoadingFragment : Fragment() {
                     }
                 }
             })
+
+            if (messageCode == MSG_CODE_RESEND)
+                sendNewGameRequest(screen_width, screen_height)
         }
+    }
+
+    private fun sendNewGameRequest(screen_width: Int, screen_height: Int) {
+        if (!::mSocket.isInitialized)
+            return
+
+        val json = JSONObject()
+        json.put("who", PLAYER_ID)
+        json.put("req", REQ_CODE_NEW_GAME)
+        json.put("screen_width", screen_width)
+        json.put("screen_height", screen_height)
+        json.put("scenario", SCENARIO)
+
+        mSocket.emit("new game request", json)
+        Log.d("json", "new game request sent")
     }
 
     private fun goBack() {
@@ -216,8 +247,8 @@ class LoadingFragment : Fragment() {
             MSG_CODE_SEARCHING_ADV -> return getString(R.string.msg_searching_adv)
             MSG_CODE_FOUND_ADV     -> return getString(R.string.msg_found_adv)
             MSG_CODE_PREPARE       -> return getString(R.string.msg_prepare)
-            /*MSG_CODE_GAME_START    -> return getString(R.string.msg_game_start)
-            MSG_CODE_GAMEPLAY      -> return getString(R.string.msg_gameplay)
+            MSG_CODE_GAME_START    -> return getString(R.string.msg_game_start)
+            /*MSG_CODE_GAMEPLAY      -> return getString(R.string.msg_gameplay)
             MSG_CODE_GAME_END      -> return getString(R.string.msg_game_end)*/
             MSG_CODE_SERVER_BUSY   -> return getString(R.string.msg_server_busy)
         }

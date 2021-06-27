@@ -6,7 +6,7 @@ class Configuration {
     companion object {
         // Google Games player ID
         //var PLAYER_ID = "" // TEMP DISABLED TO SAVE API CALLS
-        var PLAYER_ID = (0..60).random().toString()
+        var PLAYER_ID = (0..1000).random().toString()
         // Player JWT for MongoDB Realm
         var PLAYER_JWT = "" // MESSO QUI E NON IN SHARED PREFERENCES, VIENE ELIMINATO OGNI VOLTA CHE L'APP VIENE CHIUSA
         // Player levels and xp (retrieve the first time and then handle them locally)
@@ -34,19 +34,23 @@ class Configuration {
         const val REQ_CODE_NEW_GAME = 0
         const val REQ_CODE_NEW_MOVE = 1
 
-        const val POLLING  = 1
-        const val NEW_MOVE = 2
-
         // Constants for the server message codes
         const val MSG_CODE_BAD_REQ       = 0
         const val MSG_CODE_SEARCHING_ADV = 1
         const val MSG_CODE_FOUND_ADV     = 2
         const val MSG_CODE_PREPARE       = 3
         const val MSG_CODE_GAME_START    = 4
-        const val MSG_CODE_GAMEPLAY      = 5
-        const val MSG_CODE_GAME_END      = 6
-        const val MSG_CODE_SERVER_BUSY   = 7
+        const val MSG_CODE_GAME_READY    = 5
+        const val MSG_CODE_GAME_PLAY     = 6
+        const val MSG_CODE_GAME_END      = 7
+        const val MSG_CODE_SERVER_BUSY   = 8
+        const val MSG_CODE_RESEND        = 9
 
+        // Constants for game end status
+        const val WINNER_UNDEFINED = -1
+        const val WINNER_ADVERSARY = 0
+        const val WINNER_PLAYER    = 1
+        const val WINNER_DRAW      = 2
 
 
 

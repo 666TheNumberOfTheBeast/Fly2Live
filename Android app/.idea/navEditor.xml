@@ -36,6 +36,11 @@
                                 <LayoutPositions />
                               </value>
                             </entry>
+                            <entry key="action_gameEndFragment_to_loadingFragment">
+                              <value>
+                                <LayoutPositions />
+                              </value>
+                            </entry>
                             <entry key="action_gameEndFragment_to_mainFragment">
                               <value>
                                 <LayoutPositions />

@@ -1,5 +1,6 @@
 package com.example.fly2live
 
+import android.app.Activity
 import android.content.Context
 import android.graphics.*
 import android.hardware.Sensor
@@ -9,9 +10,10 @@ import android.hardware.SensorManager
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
-import android.widget.Toast
+import androidx.activity.addCallback
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toBitmap
+import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.findFragment
 import com.example.fly2live.configuration.Configuration
 import com.example.fly2live.configuration.Configuration.Companion.MSG_CODE_GAME_END
@@ -20,17 +22,13 @@ import com.example.fly2live.configuration.Configuration.Companion.PLAYER_ID
 import com.example.fly2live.configuration.Configuration.Companion.PLAYER_WIDTH
 import com.example.fly2live.configuration.Configuration.Companion.REQ_CODE_NEW_MOVE
 import com.example.fly2live.configuration.Configuration.Companion.SOCKET_INSTANCE
-import com.example.fly2live.game_object_cpu.GameObjectCpu
-import io.socket.client.IO
+import com.example.fly2live.configuration.Configuration.Companion.WINNER_ADVERSARY
+import com.example.fly2live.configuration.Configuration.Companion.WINNER_PLAYER
+import com.example.fly2live.configuration.Configuration.Companion.WINNER_UNDEFINED
 import io.socket.client.Socket
-import io.socket.engineio.client.transports.WebSocket
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import org.json.JSONException
 import org.json.JSONObject
-import java.net.URISyntaxException
 import kotlin.math.max
 import kotlin.math.min
 
@@ -51,8 +49,8 @@ class GameViewMultiplayer(context: Context?, lifecycleScope: CoroutineScope) : V
     private lateinit var bg: Bitmap
 
     // Players' objects
-    private lateinit var player0Vehicle: Object
-    private lateinit var player1Vehicle: Object
+    private lateinit var player0Vehicle: ObjectPlayer
+    private lateinit var player1Vehicle: ObjectPlayer
     private var playerNumber = -1   // Set to 0 or 1 based on player ID
 
     // CPU's game objects
@@ -64,8 +62,8 @@ class GameViewMultiplayer(context: Context?, lifecycleScope: CoroutineScope) : V
 
     // Sensors values
     private var lastAcceleration = FloatArray(3)
-    private var lastGyroscope    = FloatArray(3)
-    private var lastGyroscopeInput = 0f // meters
+    private var gyroscopeValues = FloatArray(3)
+    private var previousGyroscopeInput = 0f // meters
 
 
     // World constants
@@ -77,7 +75,7 @@ class GameViewMultiplayer(context: Context?, lifecycleScope: CoroutineScope) : V
 
     private var speed = 10f // m/s
     private var score = 0f  // meters traveled
-    private var winner = -1 // -1, 0, 1 -> -1 undefined if the players die in the same frame
+    private var winner = -1 // -1, 0, 1, 2 -> -1 undefined, 0 if player loses, 1 if player wins, 2 if the players die in the same frame
 
 
     // Variable to stop drawing when game ends
@@ -154,6 +152,24 @@ class GameViewMultiplayer(context: Context?, lifecycleScope: CoroutineScope) : V
         lifecycleScope.launch(Dispatchers.Default) {
             // Retrieve current socket
             mSocket = SOCKET_INSTANCE!!
+
+            withContext(Dispatchers.Main) {
+                // Override back behavior
+                (context as FragmentActivity).onBackPressedDispatcher.addCallback(context as FragmentActivity) {
+                    // Remove all listeners (for any event)
+                    mSocket.off()
+
+                    // Disconnect the socket
+                    mSocket.disconnect()
+
+                    winner =
+                        if (!startDrawing)  WINNER_UNDEFINED  // Disconnection before start drawing, winner undefined
+                        else                WINNER_ADVERSARY  // Disconnection during gameplay, so adversary is the winner
+
+
+                    gameEnd()
+                }
+            }
 
             // Calculate PPM
 
@@ -439,7 +455,7 @@ class GameViewMultiplayer(context: Context?, lifecycleScope: CoroutineScope) : V
             val loadPlayers = async {
                 Log.d("COROUTINE", "Load players vehicles")
                 val playerVehicles = arrayOf(
-                    Object(
+                    ObjectPlayer(
                         "player_0",
                         arrayOf(
                             ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_red_0, null)?.toBitmap(screenWidth, screenHeight)!!,
@@ -449,7 +465,7 @@ class GameViewMultiplayer(context: Context?, lifecycleScope: CoroutineScope) : V
                         ),
                         screenWidth, screenHeight, ppm, PLAYER_WIDTH, PLAYER_HEIGHT, 0f, 0f // Measures in meters except screen dimensions
                     ),
-                    Object(
+                    ObjectPlayer(
                         "player_1",
                         arrayOf(
                             ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_yellow_0, null)?.toBitmap(screenWidth, screenHeight)!!,
@@ -470,12 +486,36 @@ class GameViewMultiplayer(context: Context?, lifecycleScope: CoroutineScope) : V
             loadPlayers.await()
 
 
+            // Send client ready message to the server
+            val json = JSONObject()
+            json.put("who", PLAYER_ID)
+            //json.put("req", REQ_CODE_CLIENT_READY)
+
+            mSocket.emit("client ready", json)
+            Log.d("json", "Client ready message sent to the server")
+
+
             mSocket.on(Socket.EVENT_DISCONNECT) { args ->
                 Log.d("json", "disconnected from the server in game view")
 
-                // TODO: Game end? Or can disconnection be temporary?
+                // Assume no temporary disconnection,
+                // so if player disconnects & started drawing, he loses
+
+                // If the server disconnects, the client is disconnected too but it's a server fault.
+                // However, the server should never disconnect
+
+                winner =
+                    if (!startDrawing)  WINNER_UNDEFINED  // Disconnection before start drawing, winner undefined
+                    else                WINNER_ADVERSARY  // Disconnection during gameplay, so adversary is the winner
+
+
+                // Fragment navigation requires the main thread
+                lifecycleScope.launch(Dispatchers.Main) {
+                    gameEnd()
+                }
             }
 
+            // Add a listener for the game update event
             mSocket.on("game update") { args ->
                 Log.d("json", "Gameplay message from server arrived in game view")
 
@@ -509,121 +549,6 @@ class GameViewMultiplayer(context: Context?, lifecycleScope: CoroutineScope) : V
                     return@on
                 }
 
-                // Check if game ended
-                if (messageCode == MSG_CODE_GAME_END) {
-                    gameEnd = true
-
-                    if (winner == playerNumber) winner = 1  // Send 1 if the player wins
-                    else if (winner >= 0)       winner = 0  // Send 0 if the player loses
-                                                            // Send -1 if draw (NB: ORA IL SERVER PER DRAW USA UN VALORE DIVERSO)
-
-                    val fragment = findFragment<GameFragment>()
-                    fragment.gameEnd(score.toLong(), winner)
-                }
-
-                // Extract the game object id by object name
-                fun getGameObjectIndexByName(gameObjectName: String): Int {
-                    var i = -1
-
-                    try {
-                        i = gameObjectName.substring(gameObjectName.length - 2).toInt() - 1
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
-
-                    return i
-                }
-
-                fun updateObjectCpu(jsonObject: JSONObject, cpuObjects: Array<Object>, cpuObject: Object): Object {
-                    //val id: Int
-                    val id: String
-                    val posX: Float
-                    val posY: Float
-                    //val width: Float
-                    //val height: Float
-
-                    try {
-                        //id     = jsonObject.getInt("id")
-                        id     = jsonObject.getString("id")
-                        posX   = jsonObject.getDouble("pos_x").toFloat()
-                        posY   = jsonObject.getDouble("pos_y").toFloat()
-                        //width  = jsonObject.getDouble("width").toFloat()
-                        //height = jsonObject.getDouble("height").toFloat()
-                    } catch (e: JSONException) {
-                        e.printStackTrace()
-                        Log.d("json", "Error in retrieving data about cpu object")
-                        return cpuObject
-                    }
-
-                    val o: Object
-                    val i = getGameObjectIndexByName(id) // Otherwise provide directly the index as id
-
-                    // Pick building object
-                    try {
-                        o = cpuObjects[i]
-                    } catch (e: IndexOutOfBoundsException) {
-                        e.printStackTrace()
-                        return cpuObject
-                    }
-
-                    o.setX(posX * ppm)
-                    o.setY(posY * ppm)
-
-                    return o
-                }
-
-                fun updateObjectPlayer(jsonObject: JSONObject, playerObject: Object, playerNumber: Int) {
-                    //val id: Int
-                    val id: String
-                    val posX: Float
-                    val posY: Float
-                    val rotation: Float
-                    //val width: Float
-                    //val height: Float
-
-                    try {
-                        //id     = jsonObject.getInt("id")
-                        id       = jsonObject.getString("id")
-                        posX     = jsonObject.getDouble("pos_x").toFloat()
-                        posY     = jsonObject.getDouble("pos_y").toFloat()
-                        rotation = jsonObject.getDouble("rotation").toFloat()
-                        //width  = jsonObject.getDouble("width").toFloat()
-                        //height = jsonObject.getDouble("height").toFloat()
-                    } catch (e: JSONException) {
-                        e.printStackTrace()
-                        Log.d("json", "Error in retrieving data about player")
-                        return
-                    }
-
-                    // Version where player always has the same bitmap and the adversary the other.
-                    // Each one sees he controls 0 and the other 1 but if the two users play one beside the other,
-                    // it can look "strange" because apparently both control 0
-                    /*if (id == PLAYER_ID) {
-                        playerObject.animate()
-                        player0Vehicle.setX(posX)
-                        player0Vehicle.setY(posY)
-                        playerObject.setRotation(rotation)
-                    }
-                    else {
-                        playerObject.animate()
-                        player1Vehicle.setX(posX)
-                        player1Vehicle.setY(posY)
-                        playerObject.setRotation(rotation)
-                    }*/
-
-
-                    // Version where the player can be player0Vehicle or player1Vehicle
-                    // and the adversary the other one
-                    playerObject.animate()
-                    playerObject.setX(posX * ppm)
-                    playerObject.setY(posY * ppm)
-                    playerObject.setRotation(rotation)
-
-                    // Set player number for drawing the corresponding bitmap in foreground
-                    if (id == PLAYER_ID)
-                        this@GameViewMultiplayer.playerNumber = playerNumber
-                }
-
                 Log.d("json", "Update CPU objects")
                 cpuBuilding = updateObjectCpu(cpuBuildingJson, buildings, cpuBuilding)
                 cpuVehicle  = updateObjectCpu(cpuVehicleJson, vehicles, cpuVehicle)
@@ -631,6 +556,26 @@ class GameViewMultiplayer(context: Context?, lifecycleScope: CoroutineScope) : V
                 Log.d("json", "Update players objects")
                 updateObjectPlayer(player0, player0Vehicle, 0)
                 updateObjectPlayer(player1, player1Vehicle, 1)
+
+
+                // Check if game ended (after update object player to get the playerNumber)
+                if (messageCode == MSG_CODE_GAME_END) {
+                    if (winner == playerNumber)             winner = WINNER_PLAYER     // The player wins
+                    else if (winner == 0 || winner == 1)    winner = WINNER_ADVERSARY  // The player loses
+
+                    // Otherwise keep the received winner value
+
+                    // Remove all listeners (for any event)
+                    mSocket.off()
+
+                    // Disconnect the socket
+                    mSocket.disconnect()
+
+                    // Fragment navigation requires the main thread
+                    lifecycleScope.launch(Dispatchers.Main) {
+                        gameEnd()
+                    }
+                }
 
                 Log.d("json", "Draw bitmaps!")
                 startDrawing = true
@@ -652,8 +597,8 @@ class GameViewMultiplayer(context: Context?, lifecycleScope: CoroutineScope) : V
         if (gameEnd)
             return
 
-        // Check if game has been initialized & variables have been restored (if any)
-        if (!startDrawing || !resumeDrawing) {
+        // Check if game has been initialized
+        if (!startDrawing) {
             // Get the rect of the text to center this in the screen
             painterFill.textSize = 80f
             painterFill.getTextBounds(loadingText, 0, loadingText.length, textRect)
@@ -696,6 +641,117 @@ class GameViewMultiplayer(context: Context?, lifecycleScope: CoroutineScope) : V
         canvas?.drawBitmap(cpuBuilding.getBitmap(), cpuBuilding.getMatrix(), null)
 
         canvas?.drawText("SCORE " + score.toLong(), 20f, 60f, painterFill)
+    }
+
+
+    // Extract the game object id by object name
+    private fun getGameObjectIndexByName(gameObjectName: String): Int {
+        var i = -1
+
+        try {
+            i = gameObjectName.substring(gameObjectName.length - 2).toInt() - 1
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        return i
+    }
+
+    private fun updateObjectCpu(jsonObject: JSONObject, cpuObjects: Array<Object>, cpuObject: Object): Object {
+        //val id: Int
+        val id: String
+        val posX: Float
+        val posY: Float
+        //val width: Float
+        //val height: Float
+
+        try {
+            //id     = jsonObject.getInt("id")
+            id     = jsonObject.getString("id")
+            posX   = jsonObject.getDouble("pos_x").toFloat()
+            posY   = jsonObject.getDouble("pos_y").toFloat()
+            //width  = jsonObject.getDouble("width").toFloat()
+            //height = jsonObject.getDouble("height").toFloat()
+        } catch (e: JSONException) {
+            e.printStackTrace()
+            Log.d("json", "Error in retrieving data about cpu object")
+            return cpuObject
+        }
+
+        val o: Object
+        val i = getGameObjectIndexByName(id) // Otherwise provide directly the index as id
+
+        // Pick building object
+        try {
+            o = cpuObjects[i]
+        } catch (e: IndexOutOfBoundsException) {
+            e.printStackTrace()
+            return cpuObject
+        }
+
+        o.setX(posX * ppm)
+        o.setY(posY * ppm)
+
+        return o
+    }
+
+    private fun updateObjectPlayer(jsonObject: JSONObject, playerObject: ObjectPlayer, playerNumber: Int) {
+        //val id: Int
+        val id: String
+        val posX: Float
+        val posY: Float
+        val rotation: Float
+        //val width: Float
+        //val height: Float
+
+        try {
+            //id     = jsonObject.getInt("id")
+            id       = jsonObject.getString("id")
+            posX     = jsonObject.getDouble("pos_x").toFloat()
+            posY     = jsonObject.getDouble("pos_y").toFloat()
+            rotation = jsonObject.getDouble("rotation").toFloat()
+            //width  = jsonObject.getDouble("width").toFloat()
+            //height = jsonObject.getDouble("height").toFloat()
+        } catch (e: JSONException) {
+            e.printStackTrace()
+            Log.d("json", "Error in retrieving data about player")
+            return
+        }
+
+        // Version where player always has the same bitmap and the adversary the other.
+        // Each one sees he controls 0 and the other 1 but if the two users play one beside the other,
+        // it can look "strange" because apparently both control 0
+        /*if (id == PLAYER_ID) {
+            playerObject.animate()
+            player0Vehicle.setX(posX)
+            player0Vehicle.setY(posY)
+            playerObject.setRotation(rotation)
+        }
+        else {
+            playerObject.animate()
+            player1Vehicle.setX(posX)
+            player1Vehicle.setY(posY)
+            playerObject.setRotation(rotation)
+        }*/
+
+
+        // Version where the player can be player0Vehicle or player1Vehicle
+        // and the adversary the other one
+        playerObject.animate()
+        playerObject.setX(posX * ppm)
+        playerObject.setY(posY * ppm)
+        playerObject.setRotation(rotation)
+
+        // Set player number for drawing the corresponding bitmap in foreground
+        if (id == PLAYER_ID)
+            this@GameViewMultiplayer.playerNumber = playerNumber
+    }
+
+    private fun gameEnd() {
+        gameEnd = true
+
+        val fragment = findFragment<GameFragment>()
+        fragment.gameEnd(score.toLong(), winner)
     }
 
 
@@ -758,26 +814,32 @@ class GameViewMultiplayer(context: Context?, lifecycleScope: CoroutineScope) : V
 
         when (event?.sensor?.type) {
             //Sensor.TYPE_ACCELEROMETER  -> lastAcceleration = event.values.clone()
-            //Sensor.TYPE_MAGNETIC_FIELD      -> lastGyroscope    = event.values.clone()
-            Sensor.TYPE_GYROSCOPE      -> lastGyroscope    = event.values.clone()
+            //Sensor.TYPE_MAGNETIC_FIELD      -> gyroscopeValues    = event.values.clone()
+            Sensor.TYPE_GYROSCOPE -> gyroscopeValues = event.values.clone()
         }
 
         // Use X value if portrait mode, Y value otherwise
         val value =
-            if (width < height)                lastGyroscope[0]        // Portrait
-            else if (display?.rotation == 1)   lastGyroscope[1] * -1f  // Landscape
-            else                               lastGyroscope[1]        // Reverse landscape
+            if (width < height)                gyroscopeValues[0]        // Portrait
+            else if (display?.rotation == 1)   gyroscopeValues[1] * -1f  // Landscape
+            else                               gyroscopeValues[1]        // Reverse landscape
 
-        if (value > 0f)
-            lastGyroscopeInput = max(1f, min(value * 10f, 20f))
-        else if (value < 0f)
-            lastGyroscopeInput = min(-1f, max(value * 10f, -20f))
-        else
-            return // Avoid to send to the server useless data
+        // Enhance gyroscopeValues value
+        val currentGyroscopeInput =
+            if (value > 0f)         max(1f, min(value * 10f, 20f))
+            else if (value < 0f)    min(-1f, max(value * 10f, -20f))
+            else                    0f
+
+        // Avoid to send useless data to the server
+        if (currentGyroscopeInput == 0f || currentGyroscopeInput == previousGyroscopeInput) {
+            previousGyroscopeInput = currentGyroscopeInput
+            return
+        }
+
+        previousGyroscopeInput = currentGyroscopeInput
 
         /*Log.d("SENSOR", "****************")
         Log.d("SENSOR", "value: $value")
-        Log.d("SENSOR", "lastGyroscopeInput: $lastGyroscopeInput")
         Log.d("SENSOR", "rotation: $rotation")
         Log.d("SENSOR", "display.rotation: ${display?.rotation}")*/
 
@@ -785,7 +847,7 @@ class GameViewMultiplayer(context: Context?, lifecycleScope: CoroutineScope) : V
         val json = JSONObject()
         json.put("who", PLAYER_ID)
         json.put("req", REQ_CODE_NEW_MOVE)
-        json.put("value", value)
+        json.put("value", currentGyroscopeInput)
 
         mSocket.emit("new move request", json)
         Log.d("json", "new move request sent")
@@ -800,11 +862,12 @@ class GameViewMultiplayer(context: Context?, lifecycleScope: CoroutineScope) : V
 
 
     // TEMP HERE (SIMILAR TO GAME OBJECT BUT AT A HIGH LEVEL, LESS PARAMETERS (i.e. bounds offsets and speed))
-    class Object(name: String,
-                 bitmaps: Array<Bitmap>,
-                 screen_width: Int, screen_height: Int, ppm: Float,
-                 width: Float, height: Float,
-                 pos_x: Float, pos_y: Float) {
+    open class Object(
+            name: String,
+            bitmaps: Array<Bitmap>,
+            screen_width: Int, screen_height: Int, ppm: Float,
+            width: Float, height: Float,
+            pos_x: Float, pos_y: Float) {
 
         private val name: String
 
@@ -831,8 +894,6 @@ class GameViewMultiplayer(context: Context?, lifecycleScope: CoroutineScope) : V
         private var posX: Float
         private var posY: Float
 
-        // Only for players
-        private var bitmapRotation: Float
 
         init {
             this.name = name
@@ -859,8 +920,6 @@ class GameViewMultiplayer(context: Context?, lifecycleScope: CoroutineScope) : V
             // Convert meters into pixels (once and not continuosly in update() because matrix translation works with pixels)
             this.posX = pos_x * ppm
             this.posY = pos_y * ppm
-
-            bitmapRotation = 8f
         }
 
 
@@ -917,10 +976,6 @@ class GameViewMultiplayer(context: Context?, lifecycleScope: CoroutineScope) : V
             return posY  // In pixels (for efficiency of update calls)
         }
 
-        fun getRotation(): Float {
-            return bitmapRotation  // In degrees (for efficiency of update calls)
-        }
-
 
         // Setters
         fun setX(pos_x: Float) {
@@ -931,9 +986,6 @@ class GameViewMultiplayer(context: Context?, lifecycleScope: CoroutineScope) : V
             this.posY = pos_y  // In pixels (both in input and output for efficiency of update calls)
         }
 
-        fun setRotation(rotation: Float) {
-            bitmapRotation = rotation  // In degrees (for efficiency of update calls)
-        }
 
         fun animate () {
             // Select next bitmap for the animation frame
@@ -944,9 +996,8 @@ class GameViewMultiplayer(context: Context?, lifecycleScope: CoroutineScope) : V
         }
 
         // Perform graphics transformations
-        fun transform() {
+        open fun transform() {
             matrix.setScale(bitmapScaleX, bitmapScaleY)
-            matrix.postRotate(bitmapRotation) // Only the players
             matrix.postTranslate(posX, posY)
         }
 
@@ -980,9 +1031,37 @@ class GameViewMultiplayer(context: Context?, lifecycleScope: CoroutineScope) : V
 
     }
 
+    class ObjectPlayer(
+            name: String,
+            bitmaps: Array<Bitmap>,
+            screen_width: Int, screen_height: Int, ppm: Float,
+            width: Float, height: Float,
+            pos_x: Float, pos_y: Float) :
+        Object(name, bitmaps, screen_width, screen_height, ppm, width, height, pos_x, pos_y) {
+
+        private var bitmapRotation = 8f
+
+        // Getters
+        fun getRotation(): Float {
+            return bitmapRotation  // In degrees (for efficiency of update calls)
+        }
 
 
+        // Setters
+        fun setRotation(rotation: Float) {
+            bitmapRotation = rotation  // In degrees (for efficiency of update calls)
+        }
 
+
+        // Perform graphics transformations
+        override fun transform() {
+            val m = getMatrix()
+            m.setScale(getBitmapScaleX(), getBitmapScaleY())
+            m.postRotate(bitmapRotation)
+            m.postTranslate(getX(), getY())
+        }
+
+    }
 
 }
 

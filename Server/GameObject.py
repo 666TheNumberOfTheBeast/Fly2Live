@@ -1,12 +1,11 @@
 class GameObject:
-    def __init__(self, id, width, height, pos_x, pos_y, speed):
-    #def __init__(self, id, bounds_offsets, width, height, pos_x, pos_y, speed):
+    def __init__(self, id, bounds_offsets, width, height, pos_x, pos_y, speed):
         self.id = id
 
-        '''self.bounds_offsets = bounds_offsets
+        self.bounds_offsets = bounds_offsets
         self.bounds = []
         for offset_array in bounds_offsets:
-            bounds.append( {} )'''
+            self.bounds.append({})
 
         self.width  = width   # In meters
         self.height = height  # In meters
@@ -21,8 +20,8 @@ class GameObject:
     def getId(self):
         return self.id
 
-    #def getBounds(self):
-    #    return bounds.clone()
+    def getBounds(self):
+        return self.bounds.copy()
 
     def getWidth(self):
         return self.width
@@ -51,14 +50,14 @@ class GameObject:
         #self.speed = speed  # In %/s
 
     # Update UI
-    '''def update(self, dt):
+    def update(self, dt):
         # Set physics bounds
-        for i in len(self.bounds_offsets):
-            offset_array = bounds_offsets[i]
+        for i in range(len(self.bounds_offsets)):
+            offset_array = self.bounds_offsets[i]
 
             if len(offset_array) == 4:
                 b = self.bounds[i]
                 b["x1"] = self.getX() + offset_array[0] * self.getWidth()
                 b["y1"] = self.getY() + offset_array[1] * self.getHeight()
                 b["x2"] = self.getX() + offset_array[2] * self.getWidth()
-                b["y2"] = self.getY() + offset_array[3] * self.getHeight()'''
+                b["y2"] = self.getY() + offset_array[3] * self.getHeight()

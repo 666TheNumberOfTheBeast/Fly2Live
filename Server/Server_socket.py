@@ -79,6 +79,7 @@ world_width  = 50.0  # In meters
 world_height = 60.0  # In meters
 speed = 10.0         # In m/s
 
+player_bitmap_bounds_offsets = [[0.0, 0.0, 1.0, 1.0]]
 player_bitmap_width  = 10.0  # In meters
 player_bitmap_height = 3.0   # In meters
 player_initial_pos_x = 1.0   # In meters
@@ -103,7 +104,7 @@ winner = UNDEFINED
 
 buildings = UNDEFINED
 
-buildings_day = [
+'''buildings_day = [
     Obstacle("building_01", 25.0, 70.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed),
     Obstacle("building_02", 10.0, 80.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed),
     Obstacle("building_03", 25.0, 110.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed),
@@ -143,6 +144,395 @@ vehicles = [
     Obstacle("vehicle_07", 20.0, 8.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed),
     Obstacle("vehicle_08", 20.0, 8.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed),
     Obstacle("vehicle_09", 4.0, 2.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed)
+]'''
+
+
+
+buildings_day = [
+    Obstacle(
+        "building_01",
+        [
+            [0.0, 0.048, 1.0, 1.0],   # Bottom rect
+            [0.07, 0.031, 0.38, 1.0], # Middle left rect
+            [0.47, 0.031, 0.8, 1.0],  # Middle right rect
+            [0.1, 0.0, 0.18, 1.0],    # Top left rect
+            [0.47, 0.023, 0.63, 1.0]  # Top right rect
+        ],
+        25.0, 70.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed
+    ),
+    Obstacle(
+        "building_02",
+        [
+            [0.18, 0.365, 0.82, 1.0], # Bottom rect
+            [0.33, 0.187, 0.7, 1.0],  # Middle rect
+            [0.47, 0.0, 0.56, 1.0]    # Top rect
+        ],
+        10.0, 80.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed
+    ),
+    Obstacle(
+        "building_03",
+        [
+            [0.0, 0.16, 1.0, 1.0],    # Bottom rect
+            [0.13, 0.105, 0.86, 1.0], # Middle rect 1
+            [0.28, 0.045, 0.68, 1.0], # Middle rect 2
+            [0.45, 0.0, 0.6, 1.0]     # Top left rect
+        ],
+        25.0, 110.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed
+    ),
+    Obstacle(
+        "building_04",
+        [
+            [0.13, 0.28, 0.86, 1.0],  # Bottom rect
+            [0.21, 0.173, 0.79, 1.0], # Middle rect 1
+            [0.23, 0.07, 0.76, 1.0],  # Middle rect 2
+            [0.31, 0.003, 0.67, 1.0], # Top rect
+        ],
+        35.0, 90.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed
+    ),
+    Obstacle(
+        "building_05",
+        [
+            [0.0, 0.185, 1.0, 1.0],   # Bottom rect
+            [0.0, 0.1, 0.23, 1.0],    # Middle left rect
+            [0.27, 0.136, 0.75, 1.0], # Middle center rect
+            [0.77, 0.136, 0.9, 1.0],  # Middle right rect
+            [0.33, 0.0, 0.75, 1.0]    # Top rect
+        ],
+        35.0, 50.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed
+    ),
+    Obstacle(
+        "building_06",
+        [
+            [0.0, 0.55, 1.0, 1.0],   # Bottom rect
+            [0.0, 0.14, 0.36, 1.0],  # Middle left rect
+            [0.53, 0.32, 0.86, 1.0], # Middle right rect
+            [0.07, 0.0, 0.29, 1.0]   # Top rect
+        ],
+        45.0, 50.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed
+    ),
+    Obstacle(
+        "building_07",
+        [
+            [0.0, 0.291, 1.0, 1.0],  # Bottom rect
+            [0.0, 0.15, 0.91, 1.0],  # Middle rect
+            [0.0, 0.13, 0.22, 1.0],  # Left triangle
+            [0.7, 0.13, 0.91, 1.0],  # Right triangle
+            [0.31, 0.06, 0.39, 1.0], # Top rect 1
+            [0.31, 0.0, 0.33, 1.0]   # Top rect 2
+        ],
+        15.0, 80.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed
+    ),
+    Obstacle(
+        "building_08",
+        [
+            [0.0, 0.123, 1.0, 1.0], # Bottom rect
+            [0.1, 0.0, 0.9, 1.0]    # Top rect
+        ],
+        13.0, 70.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed
+    ),
+    Obstacle(
+        "building_09",
+        [
+            [0.0, 0.115, 1.0, 1.0],   # Bottom rect
+            [0.28, 0.095, 0.7, 1.0],  # Middle rect 1
+            [0.4, 0.026, 0.5, 1.0],   # Middle rect 2
+            [0.43, 0.003, 0.48, 1.0]  # Top rect
+        ],
+        17.0, 70.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed
+    ),
+    Obstacle(
+        "building_10",
+        [
+            [0.0, 0.094, 1.0, 1.0],   # Bottom rect
+            [0.09, 0.087, 0.96, 1.0], # Middle rect
+            [0.13, 0.015, 0.29, 1.0], # Top left rect
+            [0.4, 0.0, 0.7, 1.0],     # Top middle rect
+            [0.75, 0.026, 0.92, 1.0]  # Top right rect
+        ],
+        13.0, 60.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed
+    ),
+    Obstacle(
+        "building_11",
+        [
+            [0.0, 0.03, 1.0, 1.0],   # Bottom rect
+            [0.15, 0.0, 0.57, 1.0]  # Top rect
+        ],
+        17.0, 55.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed
+    ),
+    Obstacle(
+        "building_12",
+        [
+            [0.0, 0.042, 1.0, 1.0],   # Bottom rect
+            [0.06, 0.0, 0.9, 1.0]  # Top rect
+        ],
+        15.0, 50.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed
+    ),
+    Obstacle(
+        "building_13",
+        [
+            [0.0, 0.11, 1.0, 1.0],   # Bottom rect
+            [0.05, 0.01, 0.15, 1.0], # Top left rect
+            [0.15, 0.0, 0.82, 1.0],  # Top middle rect
+            [0.83, 0.04, 1.0, 1.0],  # Top right rect 1
+            [0.86, 0.0, 0.94, 1.0]   # Top right rect 2
+        ],
+        20.0, 50.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed
+    ),
+    Obstacle(
+        "building_14",
+        [
+            [0.0, 0.185, 1.0, 1.0],   # Bottom rect
+            [0.29, 0.065, 0.68, 1.0], # Middle rect
+            [0.53, 0.035, 0.59, 1.0], # Top left rect
+            [0.34, 0.0, 0.35, 1.0]    # Top right rect
+        ],
+        30.0, 55.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed
+    ),
+    Obstacle(
+        "building_15",
+        [
+            [0.0, 0.43, 1.0, 1.0],    # Bottom rect
+            [0.1, 0.3, 0.86, 1.0],    # Middle rect 1
+            [0.25, 0.256, 0.71, 1.0], # Middle rect 2
+            [0.28, 0.236, 0.68, 1.0], # Middle rect 3
+            [0.4, 0.18, 0.57, 1.0],   # Top rect 1
+            [0.53, 0.0, 0.57, 1.0]    # Top rect 2
+        ],
+        13.0, 55.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed
+    ),
+    Obstacle(
+        "building_16",
+        [
+            [0.0, 0.2, 1.0, 1.0],     # Bottom rect
+            [0.13, 0.175, 0.87, 1.0], # Middle rect 1
+            [0.24, 0.147, 0.76, 1.0], # Middle rect 2
+            [0.28, 0.122, 0.49, 1.0], # Middle rect 3
+            [0.53, 0.0, 0.55, 1.0],   # Top left rect
+            [0.6, 0.039, 0.62, 1.0],  # Top middle rect
+            [0.68, 0.03, 0.71, 1.0]   # Top right rect
+        ],
+        20.0, 50.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed
+    ),
+    Obstacle(
+        "building_17",
+        [
+            [0.0, 0.094, 1.0, 1.0],  # Bottom rect
+            [0.15, 0.06, 0.88, 1.0], # Middle rect
+            [0.41, 0.0, 0.63, 1.0]   # Top rect
+        ],
+        28.0, 60.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed
+    )
+]
+
+buildings_night = [
+    Obstacle(
+        "building_01",
+        [   # TODO
+            [0.0, 0.094, 1.0, 1.0],   # Bottom rect
+            [0.09, 0.087, 0.96, 1.0], # Middle rect
+            [0.13, 0.015, 0.29, 1.0], # Top left rect
+            [0.4, 0.0, 0.7, 1.0],     # Top middle rect
+            [0.75, 0.026, 0.92, 1.0]  # Top right rect
+        ],
+        15.0, 100.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed
+    ),
+    Obstacle(
+        "building_02",
+        [   # TODO
+            [0.0, 0.094, 1.0, 1.0],   # Bottom rect
+            [0.09, 0.087, 0.96, 1.0], # Middle rect
+            [0.13, 0.015, 0.29, 1.0], # Top left rect
+            [0.4, 0.0, 0.7, 1.0],     # Top middle rect
+            [0.75, 0.026, 0.92, 1.0]  # Top right rect
+        ],
+        10.0, 110.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed
+    ),
+    Obstacle(
+        "building_03",
+        [   # TODO
+            [0.0, 0.094, 1.0, 1.0],   # Bottom rect
+            [0.09, 0.087, 0.96, 1.0], # Middle rect
+            [0.13, 0.015, 0.29, 1.0], # Top left rect
+            [0.4, 0.0, 0.7, 1.0],     # Top middle rect
+            [0.75, 0.026, 0.92, 1.0]  # Top right rect
+        ],
+        18.0, 70.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed
+    ),
+    Obstacle(
+        "building_04",
+        [   # TODO
+            [0.0, 0.094, 1.0, 1.0],   # Bottom rect
+            [0.09, 0.087, 0.96, 1.0], # Middle rect
+            [0.13, 0.015, 0.29, 1.0], # Top left rect
+            [0.4, 0.0, 0.7, 1.0],     # Top middle rect
+            [0.75, 0.026, 0.92, 1.0]  # Top right rect
+        ],
+        20.0, 70.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed
+    ),
+    Obstacle(
+        "building_05",
+        [   # TODO
+            [0.0, 0.094, 1.0, 1.0],   # Bottom rect
+            [0.09, 0.087, 0.96, 1.0], # Middle rect
+            [0.13, 0.015, 0.29, 1.0], # Top left rect
+            [0.4, 0.0, 0.7, 1.0],     # Top middle rect
+            [0.75, 0.026, 0.92, 1.0]  # Top right rect
+        ],
+        25.0, 60.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed
+    ),
+    Obstacle(
+        "building_06",
+        [   # TODO
+            [0.0, 0.094, 1.0, 1.0],   # Bottom rect
+            [0.09, 0.087, 0.96, 1.0], # Middle rect
+            [0.13, 0.015, 0.29, 1.0], # Top left rect
+            [0.4, 0.0, 0.7, 1.0],     # Top middle rect
+            [0.75, 0.026, 0.92, 1.0]  # Top right rect
+        ],
+        25.0, 100.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed
+    ),
+    Obstacle(
+        "building_07",
+        [   # TODO
+            [0.0, 0.094, 1.0, 1.0],   # Bottom rect
+            [0.09, 0.087, 0.96, 1.0], # Middle rect
+            [0.13, 0.015, 0.29, 1.0], # Top left rect
+            [0.4, 0.0, 0.7, 1.0],     # Top middle rect
+            [0.75, 0.026, 0.92, 1.0]  # Top right rect
+        ],
+        18.0, 80.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed
+    ),
+    Obstacle(
+        "building_08",
+        [   # TODO
+            [0.0, 0.094, 1.0, 1.0],   # Bottom rect
+            [0.09, 0.087, 0.96, 1.0], # Middle rect
+            [0.13, 0.015, 0.29, 1.0], # Top left rect
+            [0.4, 0.0, 0.7, 1.0],     # Top middle rect
+            [0.75, 0.026, 0.92, 1.0]  # Top right rect
+        ],
+        17.0, 70.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed
+    ),
+    Obstacle(
+        "building_09",
+        [   # TODO
+            [0.0, 0.094, 1.0, 1.0],   # Bottom rect
+            [0.09, 0.087, 0.96, 1.0], # Middle rect
+            [0.13, 0.015, 0.29, 1.0], # Top left rect
+            [0.4, 0.0, 0.7, 1.0],     # Top middle rect
+            [0.75, 0.026, 0.92, 1.0]  # Top right rect
+        ],
+        25.0, 70.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed
+    ),
+    Obstacle(
+        "building_10",
+        [   # TODO
+            [0.0, 0.094, 1.0, 1.0],   # Bottom rect
+            [0.09, 0.087, 0.96, 1.0], # Middle rect
+            [0.13, 0.015, 0.29, 1.0], # Top left rect
+            [0.4, 0.0, 0.7, 1.0],     # Top middle rect
+            [0.75, 0.026, 0.92, 1.0]  # Top right rect
+        ],
+        13.0, 65.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed
+    ),
+    Obstacle(
+        "building_11",
+        [   # TODO
+            [0.0, 0.094, 1.0, 1.0],   # Bottom rect
+            [0.09, 0.087, 0.96, 1.0], # Middle rect
+            [0.13, 0.015, 0.29, 1.0], # Top left rect
+            [0.4, 0.0, 0.7, 1.0],     # Top middle rect
+            [0.75, 0.026, 0.92, 1.0]  # Top right rect
+        ],
+        13.0, 80.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed
+    )
+]
+
+obstacle_initial_pos_y = 20.0  # In meters
+#obstacle_initial_pos_y = 0.05  # In height ratio
+
+vehicles = [
+    Obstacle(
+        "vehicle_01",
+        [
+            [0.0, 0.3, 0.2, 1.0],  # Bottom rect
+            [0.0, 0.3, 1.0, 0.77], # Middle rect
+            [0.1, 0.0, 0.4, 0.6]   # Top rect
+        ],
+        6.0, 2.5, obstacle_initial_pos_x, obstacle_initial_pos_y, speed
+    ),
+    Obstacle(
+        "vehicle_02",
+        [
+            [0.0, 0.0, 1.0, 1.0]
+        ],
+        20.0, 8.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed
+    ),
+    Obstacle(
+        "vehicle_03",
+        [
+            [0.24, 0.8, 0.4, 1.0],  # Bottom rect
+            [0.0, 0.05, 1.0, 0.85], # Middle rect
+            [0.77, 0.0, 1.0, 0.92]  # Top rect
+        ],
+        20.0, 8.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed
+    ),
+    Obstacle(
+        "vehicle_04",
+        [
+            [0.28, 0.8, 0.44, 1.0],   # Bottom rect
+            [0.0, 0.3, 1.0, 0.6],     # Middle rect 1
+            [0.05, 0.2, 0.15, 0.7],   # Middle rect 2
+            [0.15, 0.06, 0.77, 0.85], # Middle rect 3
+            [0.77, 0.0, 0.92, 0.9]    # Top rect
+        ],
+        20.0, 8.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed
+    ),
+    Obstacle(
+        "vehicle_05",
+        [
+            [0.29, 0.8, 0.44, 1.0],  # Bottom rect
+            [0.0, 0.3, 1.0, 0.53],   # Middle rect 1
+            [0.05, 0.1, 0.86, 0.7],  # Middle rect 2
+            [0.12, 0.0, 0.77, 0.85], # Middle rect 3
+            [0.86, 0.0, 0.97, 0.85]  # Top rect
+        ], 20.0, 8.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed
+    ),
+    Obstacle(
+        "vehicle_06",
+        [
+            [0.29, 0.8, 0.51, 1.0],  # Bottom rect
+            [0.0, 0.3, 1.0, 0.58],   # Middle rect 1
+            [0.05, 0.1, 0.86, 0.76], # Middle rect 2
+            [0.12, 0.0, 0.77, 0.85], # Middle rect 3
+            [0.86, 0.12, 0.97, 0.8]  # Top rect
+        ], 20.0, 8.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed
+    ),
+    Obstacle(
+        "vehicle_07",
+        [
+            [0.26, 0.8, 0.49, 1.0],  # Bottom rect
+            [0.0, 0.3, 0.82, 0.58],  # Middle rect 1
+            [0.05, 0.1, 0.71, 0.76], # Middle rect 2
+            [0.12, 0.0, 0.6, 0.85],  # Middle rect 3
+            [0.82, 0.17, 0.99, 0.7]  # Top rect
+        ], 20.0, 8.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed
+    ),
+    Obstacle(
+        "vehicle_08",
+        [
+            [0.32, 0.8, 0.48, 1.0],  # Bottom rect
+            [0.0, 0.25, 0.07, 0.65], # Middle rect 1
+            [0.1, 0.04, 0.82, 0.82], # Middle rect 2
+            [0.82, 0.02, 0.99, 0.86] # Top rect
+        ], 20.0, 8.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed
+    ),
+    Obstacle(
+        "vehicle_09",
+        [
+            [0.0, 0.0, 1.0, 1.0]
+        ], 4.2, 2.1, obstacle_initial_pos_x, obstacle_initial_pos_y, speed
+    )
 ]
 
 # NB: The previous widths and heights of obstacles must be consistent with the client
@@ -168,7 +558,7 @@ eventlet.monkey_patch()
 
 
 
-# Event connection to the server
+# Event connection to server
 @socketio.on("connect")
 def connect():
     # No need global variables declaration to read but not modify them
@@ -180,6 +570,7 @@ def connect():
 
     print("Players connected to the server: ", players_connected)
 
+
 # Event join a room
 '''@socketio.on('join')
 def on_join(data):
@@ -189,6 +580,7 @@ def on_join(data):
     send(username + ' has entered the room.', to=room)'''
 
 
+# Event disconnect from server
 @socketio.on("disconnect")
 def disconnect():
     # Declare global variables that will be modified by this function
@@ -208,8 +600,6 @@ def disconnect():
     # Check if player quit before sending NEW_GAME request or
     # if he quit while is waiting in the dictionary of connected players
     if not player_id or request.sid not in players_in_room:
-        # Remove the player from the dictionary of players connected to the server
-        players_connected.pop(request.sid)
         return
 
     # Else the player who quit is in the room, so remove him from there
@@ -217,20 +607,30 @@ def disconnect():
     players_in_room.remove(request.sid)
 
     # Check if player_0 quit while the server is in the STATE_SEARCH
-    if state == STATE_SEARCH and player_id == player_0.getId():
+    if state == STATE_SEARCH and player_0 and player_id == player_0.getId():
         player_0 = None
         state = STATE_INIT
 
-        # Try to notify someone connected to the server who shares the same scenario
-        __notifyPlayerByScenario(scenario, player_1.getId())
+        # Check if there is a player_1 (it should not happen, as the server should be in >=STATE_PREPARE)
+        if player_1:
+            # Try to notify someone connected to the server who shares the same scenario
+            __notifyPlayerByScenario(scenario, player_1.getId())
+        else:
+             # Try to notify two players connected to the server who share the same scenario
+            __notifyPlayerConnected()
 
     # Check if player_1 quit while the server is in the STATE_SEARCH
-    elif state == STATE_SEARCH and player_id == player_1.getId():
+    elif state == STATE_SEARCH and player_1 and player_id == player_1.getId():
         player_1 = None
         state = STATE_INIT
 
-        # Try to notify someone connected to the server who shares the same scenario
-        __notifyPlayerByScenario(scenario, player_0.getId())
+        # Check if there is a player_0 (it should not happen, as the server should be in >=STATE_PREPARE)
+        if player_0:
+            # Try to notify someone connected to the server who shares the same scenario
+            __notifyPlayerByScenario(scenario, player_0.getId())
+        else:
+             # Try to notify two players connected to the server who share the same scenario
+            __notifyPlayerConnected()
 
     # Check if player_0 quit while the server is in the STATE_PREPARE or STATE_READY
     elif (state == STATE_PREPARE or state == STATE_READY) and player_id == player_0.getId():
@@ -336,73 +736,7 @@ def disconnect():
         # removed from the dictionary of connected players
 
         # Try to notify two players connected to the server who share the same scenario
-
-        # Check if there are other players connected to server
-        if not players_connected:
-            # Nobody is connected, so go to STATE_INIT
-            state = STATE_INIT
-            return
-
-        # Check if there is only one player connected to server
-        if len(players_connected) == 1:
-            # There is one, so go to STATE_INIT
-            state = STATE_INIT
-
-            # Get his socket id and
-            # tell him to resend a new game message to restart the process
-            for player in players_connected:
-                __notify(player)
-                '''with app.app_context():
-                    socketio.emit("new game response",
-                         { "error": False,
-                           "msg_code": MSG_CODE_RESEND
-                         }, to=player )
-
-                    print("Resend request new game sent to client: ", player)'''
-                return
-
-        # Else, select two players from the dictionary of connected players
-        # that share the same scenario (VERSION WITH NUMBER_PLAYERS_GAME = 2)
-        players_by_scenarios = {}
-        player_sid = None
-
-        for player in players_connected:
-            s = player["scenario"]
-
-            # Check if the scenario has been encountered so far
-            if s in players_by_scenarios:
-                # There is one entry, get the other player sid and
-                # tell them to resend a new game message to restart the process
-
-                # Go to STATE_INIT
-                state = STATE_INIT
-
-                __notify(player)
-                __notify(players_by_scenarios[s])
-
-                '''with app.app_context():
-                    socketio.emit("new game response",
-                         { "error": False,
-                           "msg_code": MSG_CODE_RESEND
-                         }, to=player )
-
-                    socketio.emit("new game response",
-                         { "error": False,
-                           "msg_code": MSG_CODE_RESEND
-                         }, to=players_by_scenarios[s] )
-
-                    print("Resend request new game sent to client: ", player)
-                    print("Resend request new game sent to client: ", players_by_scenarios[s])
-
-                return'''
-            else:
-                players_by_scenarios[s] = player  # Player socket ID
-
-            player_sid = player
-
-        # There are not NUMBER_PLAYERS_GAME players that share the same scenario,
-        # notify one random (VERSION WITH NUMBER_PLAYERS_GAME = 2)
-        __notify(player_sid)
+        __notifyPlayerConnected()
 
 
 
@@ -420,9 +754,14 @@ def __notify(player_sid):
 
 # Get a player by scenario among connected ones with a different ID from player_id
 def __getPlayerByScenario(scenario, player_id):
-    for player in players_connected:
-        if player["id"] != player_id and player["scenario"] == scenario:
-            return player  # Player socket ID
+    print("Get player by scenario: ", scenario)
+
+    for player_sid, player_info in players_connected.items():
+        print("player id: ", player_info["id"])
+        print("player scenario: ", player_info["scenario"])
+
+        if player_info["id"] != player_id and player_info["scenario"] == scenario:
+            return player_sid  # Player socket ID
     return None
 
 # Get a player by scenario among connected ones with a different ID from player_id and
@@ -431,11 +770,88 @@ def __notifyPlayerByScenario(scenario, player_id):
     player_sid = __getPlayerByScenario(scenario, player_id)
     __notify(player_sid)
 
+def __notifyPlayerConnected():
+    global state
 
+    print("In notify player connected")
+
+    # Check if there are other players connected to server
+    if not players_connected:
+        # Nobody is connected, so go to STATE_INIT
+        state = STATE_INIT
+        return
+
+    # Check if there is only one player connected to server
+    if len(players_connected) == 1:
+        # There is one, so go to STATE_INIT
+        state = STATE_INIT
+
+        # Get his socket id and
+        # tell him to resend a new game message to restart the process
+        for player in players_connected:
+            __notify(player)
+            '''with app.app_context():
+                socketio.emit("new game response",
+                     { "error": False,
+                       "msg_code": MSG_CODE_RESEND
+                     }, to=player )
+
+                print("Resend request new game sent to client: ", player)'''
+            return
+
+    # Else, select two players from the dictionary of connected players
+    # that share the same scenario (VERSION WITH NUMBER_PLAYERS_GAME = 2)
+    players_by_scenarios = {}
+    player_sid = None
+
+    for player_sid, player_info in players_connected.items():
+        print("player id: ", player_info["id"])
+        print("player scenario: ", player_info["scenario"])
+
+        s = player_info["scenario"]
+
+        # Check if the scenario has been encountered so far
+        if s in players_by_scenarios:
+            # There is one entry, get the other player sid and
+            # tell them to resend a new game message to restart the process
+
+            # Go to STATE_INIT
+            state = STATE_INIT
+
+            __notify(player_sid)
+            __notify(players_by_scenarios[s])
+
+            '''with app.app_context():
+                socketio.emit("new game response",
+                     { "error": False,
+                       "msg_code": MSG_CODE_RESEND
+                     }, to=player )
+
+                socketio.emit("new game response",
+                     { "error": False,
+                       "msg_code": MSG_CODE_RESEND
+                     }, to=players_by_scenarios[s] )
+
+                print("Resend request new game sent to client: ", player)
+                print("Resend request new game sent to client: ", players_by_scenarios[s])'''
+
+            return
+
+        # Else check if the scenario is not None
+        elif s:
+            # Add an entry in the dictionary indexed by scenarios
+            players_by_scenarios[s] = player_sid  # Player socket ID
+
+    # There are not NUMBER_PLAYERS_GAME players that share the same scenario,
+    # notify one random (VERSION WITH NUMBER_PLAYERS_GAME = 2)
+    __notify(player_sid)
+
+
+# Event new game request
 @socketio.on("new game request")
 def new_game_event(json):
     global state, \
-           room, \
+           room, players_in_room, \
            scenario, buildings, \
            player_0, player_1, \
            cpu_building, cpu_vehicle, \
@@ -508,7 +924,7 @@ def new_game_event(json):
         # Reset last players IDs variables
         player_0 = Player(
             json["who"], json["screen_width"], json["screen_height"], world_width,
-            player_bitmap_width, player_bitmap_height,
+            player_bitmap_bounds_offsets, player_bitmap_width, player_bitmap_height,
             player_initial_pos_x, player_initial_pos_y, 0.0)
         player_1 = None
 
@@ -551,13 +967,13 @@ def new_game_event(json):
             if not player_0:
                 player_0 = Player(
                     json["who"], json["screen_width"], json["screen_height"], world_width,
-                    player_bitmap_width, player_bitmap_height,
+                    player_bitmap_bounds_offsets, player_bitmap_width, player_bitmap_height,
                     player_initial_pos_x, player_initial_pos_y, 0.0)
             # Check if player_1 is free
             elif not player_1:
                 player_1 = Player(
                     json["who"], json["screen_width"], json["screen_height"], world_width,
-                    player_bitmap_width, player_bitmap_height,
+                    player_bitmap_bounds_offsets, player_bitmap_width, player_bitmap_height,
                     player_initial_pos_x, player_initial_pos_y, 0.0)
             else:
                 # Just for super-safety but this condition should never be true
@@ -651,6 +1067,9 @@ def client_ready_event(json):
 
                 # Start non-blocking game thread
                 eventlet.spawn_n(game_thread)
+
+                # Start non-blocking game thread with a delay of X seconds
+                #eventlet.spawn_after(2, game_thread)
         else:
             emit("client ready response", { "error": False, "msg_code": MSG_CODE_SERVER_BUSY })
     else:
@@ -710,7 +1129,7 @@ def __pickBuilding():
     # Building pos Y in meters
     building_pos_y = random.randrange(17, 48)
 
-    #building.setX(10.0)
+    #building.setX(15.0)
     #building.setY(height_ratio)
     building.setY(building_pos_y)
 
@@ -737,7 +1156,7 @@ def __pickVehicle():
     # Vehicle pos Y in meters
     vehicle_pos_y = random.randrange(0, 17)
 
-    #vehicle.setX(10.0)
+    #vehicle.setX(15.0)
     #vehicle.setY(height_ratio)
     vehicle.setY(vehicle_pos_y)
 
@@ -753,7 +1172,6 @@ def __checkCollisions():
 
     def createRect(x, y, w, h):
         # Sum values here because it cannot be done inside dict definition
-        #x2 = w+h
         x2 = x+w
         y2 = y+h
         return { "x1": x, "y1": y, "x2": x2, "y2": y2 }
@@ -803,35 +1221,35 @@ def __checkCollisions():
 
 
     # All verifications in meters (VERSION WITH ONE RECT FOR EACH OBJECT)
-    player_0_rect = createRect(player_0.getX(), player_0.getY(), player_0.getBitmapWidth(), player_0.getBitmapHeight())
+    '''player_0_rect = createRect(player_0.getX(), player_0.getY(), player_0.getBitmapWidth(), player_0.getBitmapHeight())
     player_1_rect = createRect(player_1.getX(), player_1.getY(), player_1.getBitmapWidth(), player_1.getBitmapHeight())
 
     cpu_building_rect = createRect(
         cpu_building.getX(),
         cpu_building.getY(),
-        cpu_building.getBitmapWidth(),
-        cpu_building.getBitmapHeight())
+        cpu_building.getWidth(),
+        cpu_building.getHeight())
     cpu_vehicle_rect  = createRect(
         cpu_vehicle.getX(),
         cpu_vehicle.getY(),
-        cpu_vehicle.getBitmapWidth(),
-        cpu_vehicle.getBitmapHeight())
+        cpu_vehicle.getWidth(),
+        cpu_vehicle.getHeight())
 
     obstacles_rects = [cpu_building_rect, cpu_vehicle_rect]
     res_0 = checkCollisionsAux(player_0_rect, obstacles_rects)
-    res_1 = checkCollisionsAux(player_1_rect, obstacles_rects)
+    res_1 = checkCollisionsAux(player_1_rect, obstacles_rects)'''
 
 
     # All verifications in meters (VERSION WITH MULTIPLE RECTS FOR EACH OBJECT)
-    '''player_0_rects = player_0.getBounds()
-    player_1_rects = player_1.getBounds()
+    player_0_rect = player_0.getBounds()[0]
+    player_1_rect = player_1.getBounds()[0]
 
     #cpu_building_rects = cpu_building.getBounds()
     #cpu_vehicle_rects  = cpu_vehicle.getBounds()
     obstacles_rects = cpu_building.getBounds() + cpu_vehicle.getBounds()
 
     res_0 = checkCollisionsAux(player_0_rect, obstacles_rects)
-    res_1 = checkCollisionsAux(player_1_rect, obstacles_rects)'''
+    res_1 = checkCollisionsAux(player_1_rect, obstacles_rects)
 
     return (res_0, res_1)
 
@@ -931,13 +1349,15 @@ def game_thread():
                    "msg_code": msg_code,
                    "cpu_building": { "id": cpu_building.getId(),
                                      "pos_x": cpu_building.getX(),
-                                     "pos_y": cpu_building.getY()#,
+                                     "pos_y": cpu_building.getY(),
+                                     #"bounds": cpu_building.getBounds()#,
                                      #"width": cpu_building.getWidth(),
                                      #"height": cpu_building.getHeight()
                                    },
                    "cpu_vehicle": { "id": cpu_vehicle.getId(),
                                     "pos_x": cpu_vehicle.getX(),
-                                    "pos_y": cpu_vehicle.getY()#,
+                                    "pos_y": cpu_vehicle.getY(),
+                                    #"bounds": cpu_vehicle.getBounds()#,
                                     #"width": cpu_vehicle.getWidth(),
                                     #"height": cpu_vehicle.getHeight()
                                   },

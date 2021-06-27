@@ -1,8 +1,8 @@
 from GameObject import *
 
 class Obstacle(GameObject):
-    def __init__(self, id, width, height, pos_x, pos_y, speed):
-        super().__init__(id, width, height, pos_x, pos_y, speed)
+    def __init__(self, id, bounds_offsets, width, height, pos_x, pos_y, speed):
+        super().__init__(id, bounds_offsets, width, height, pos_x, pos_y, speed)
 
         self.respawn = False
         self.respawn_pos_x = pos_x  # In meters
@@ -21,6 +21,8 @@ class Obstacle(GameObject):
             self.respawn = True
         else:
             self.respawn = False
+
+        super().update(dt)
 
     # Return true if the vehicle has been respawn in the current UI update
     def isRespawn(self):

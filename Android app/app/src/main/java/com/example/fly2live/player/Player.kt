@@ -64,9 +64,9 @@ class Player(name: String) {
         if (wins < 0L || loses < 0L)
             return
         if (wins == 0L && loses == 0L)
-            winPercentage = "0.000"
+            winPercentage = "0.00"
         else
-            winPercentage = String.format("%.3f", wins / (wins + loses).toFloat())
+            winPercentage = String.format("%.2f", (wins / (wins + loses).toFloat()) * 100)
     }
 
     override fun equals(other: Any?): Boolean {

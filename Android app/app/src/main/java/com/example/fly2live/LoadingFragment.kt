@@ -37,12 +37,16 @@ import com.example.fly2live.configuration.Configuration.Companion.MSG_CODE_SEARC
 import com.example.fly2live.configuration.Configuration.Companion.MSG_CODE_SERVER_BUSY
 import com.example.fly2live.configuration.Configuration.Companion.SCENARIO
 import com.example.fly2live.configuration.Configuration.Companion.SOCKET_INSTANCE
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import io.socket.engineio.client.transports.WebSocket
 import kotlinx.coroutines.Runnable
 
 
 // Fragment shown only if multiplayer mode
 class LoadingFragment : Fragment() {
+    private var account: GoogleSignInAccount? = null
+
     private lateinit var textView: TextView
 
     private lateinit var mSocket: Socket
@@ -51,12 +55,12 @@ class LoadingFragment : Fragment() {
         super.onCreate(savedInstanceState)
 
         // Access control
-        /*account = GoogleSignIn.getLastSignedInAccount(activity)
+        account = GoogleSignIn.getLastSignedInAccount(activity)
         if (account == null) {
             // Attempt to pop the controller's back stack back to a specific destination
             findNavController().popBackStack(R.id.mainFragment, false)
             return
-        }*/ // TEMP DISABLED TO SAVE API CALLS
+        } // DISABLE DURING DEVELOPING TO SAVE API CALLS
     }
 
     override fun onCreateView(
@@ -70,6 +74,10 @@ class LoadingFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Access control (continue)
+        if (account == null)
+            return
+
         textView = view.findViewById(R.id.textView)
 
         // VERSIONE CON SOCKETS
@@ -81,12 +89,13 @@ class LoadingFragment : Fragment() {
     // Connect to server with socket.io
     private fun connect() {
         // Force websocket
-        val options = IO.Options.builder()
+        /*val options = IO.Options.builder()
             .setTransports(arrayOf(WebSocket.NAME))
-            .build()
+            .build()*/
 
         try {
-            mSocket = IO.socket(URL, options)
+            //mSocket = IO.socket(URL, options)
+            mSocket = IO.socket(URL)
         } catch (e: URISyntaxException) {
             e.printStackTrace()
             Toast.makeText(context, "Error in connecting to the server: bad URL", Toast.LENGTH_SHORT).show()

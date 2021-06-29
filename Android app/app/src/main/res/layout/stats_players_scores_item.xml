@@ -93,10 +93,10 @@
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
             android:fontFamily="@font/audiowide"
-            android:text="1"
             android:textSize="@dimen/text_size_paragraph_4"
             android:textColor="@color/green" />
     </LinearLayout>
+    <!--android:text="1"-->
 
 
     <LinearLayout
@@ -115,10 +115,10 @@
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
             android:fontFamily="@font/audiowide"
-            android:text="player_name"
             android:textSize="@dimen/text_size_paragraph_4"
             android:textColor="@color/green" />
     </LinearLayout>
+    <!-- android:text="player_name" -->
 
     <LinearLayout
         android:id="@+id/value_cell"
@@ -137,9 +137,9 @@
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
             android:fontFamily="@font/audiowide"
-            android:text="175"
             android:textSize="@dimen/text_size_paragraph_4"
             android:textColor="@color/green" />
     </LinearLayout>
+    <!-- android:text="175" -->
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -18,20 +18,22 @@ import android.util.Log
 import android.widget.TextView
 import com.example.fly2live.utils.createScaleAnimation
 import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.example.fly2live.configuration.Configuration as myConfiguration
 
 
 class MainFragment : Fragment() {
+    private var account: GoogleSignInAccount? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         // Access control
-        val account = GoogleSignIn.getLastSignedInAccount(activity)
-        /*if (account == null) {
+        account = GoogleSignIn.getLastSignedInAccount(activity)
+        if (account == null) {
             findNavController().navigate(R.id.action_mainFragment_to_loginFragment)
             return
-        }*/ // TEMP DISABLED TO SAVE API CALLS
+        } // DISABLE DURING DEVELOPING TO SAVE API CALLS
     }
 
     override fun onCreateView(
@@ -44,6 +46,10 @@ class MainFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        // Access control (continue)
+        if (account == null)
+            return
 
         val cockpit = view.findViewById<ImageView>(R.id.cockpit)
         val logo = view.findViewById<ImageView>(R.id.logo)

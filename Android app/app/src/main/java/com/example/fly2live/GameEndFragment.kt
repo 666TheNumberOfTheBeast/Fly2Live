@@ -54,12 +54,12 @@ class GameEndFragment : Fragment() {
         super.onCreate(savedInstanceState)
 
         // Access control
-        /*account = GoogleSignIn.getLastSignedInAccount(activity)
+        account = GoogleSignIn.getLastSignedInAccount(activity)
         if (account == null) {
             // Attempt to pop the controller's back stack back to a specific destination
             findNavController().popBackStack(R.id.mainFragment, false)
             return
-        }*/ // TEMP DISABLED TO SAVE API CALLS
+        } // DISABLE DURING DEVELOPING TO SAVE API CALLS
 
         // Get passed arguments to this fragment
         score  = arguments!!.getLong("score")
@@ -68,7 +68,7 @@ class GameEndFragment : Fragment() {
         // Increment wins or loses & submit score once (the first time the fragment is created)
         if (savedInstanceState == null) {
             // Get events and leaderboards clients
-            /*val mEventsClient  = Games.getEventsClient(context!!, account!!)
+            val mEventsClient  = Games.getEventsClient(context!!, account!!)
             mLeaderboardClient = Games.getLeaderboardsClient(context!!, account!!)
 
             // Increment the correct event for the currently signed-in player.
@@ -76,16 +76,18 @@ class GameEndFragment : Fragment() {
             // The score is ignored if it is worse (as defined by the leaderboard configuration)
             // than a previously submitted score for the same player.
             if (MULTIPLAYER) {
-                if (winner)
-                    mEventsClient.increment(getString(R.string.event_game_won_multiplayer_id), 1)
-                else
-                    mEventsClient.increment(getString(R.string.event_game_lost_multiplayer_id), 1)
+                if (winner != WINNER_DRAW) {
+                    if (winner == WINNER_PLAYER)
+                        mEventsClient.increment(getString(R.string.event_game_won_multiplayer_id), 1)
+                    else
+                        mEventsClient.increment(getString(R.string.event_game_lost_multiplayer_id), 1)
 
-                submitScore(getString(R.string.leaderboard_best_score_multiplayer_id))
+                    submitScore(getString(R.string.leaderboard_best_score_multiplayer_id))
+                }
             }
             else
-                submitScore(getString(R.string.leaderboard_best_score_single_player_id))*/
-            // TEMP DISABLED TO SAVE API CALLS
+                submitScore(getString(R.string.leaderboard_best_score_single_player_id))
+            // DISABLE DURING DEVELOPING TO SAVE API CALLS
         }
 
         val sharedPref = context?.getSharedPreferences(getString(R.string.shared_preferences_name), Context.MODE_PRIVATE)
@@ -113,6 +115,10 @@ class GameEndFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Access control (continue)
+        if (account == null)
+            return
+
         // Check if the player has played in multiplayer mode
         if (MULTIPLAYER) {
             val gameStatusView = view.findViewById<TextView>(R.id.game_status_text)
@@ -136,15 +142,15 @@ class GameEndFragment : Fragment() {
         xpView.text = xpView.text.toString() + " " + earnedXp.toString()
 
         //====================
-        // TEMP TO SAVE API CALLS
+        // ENABLE DURING DEVELOPING TO SAVE API CALLS
         // Set button listeners
-        view.findViewById<TextView>(R.id.button_restart).setOnClickListener{
+        /*view.findViewById<TextView>(R.id.button_restart).setOnClickListener{
             if (MULTIPLAYER)
                 findNavController().navigate(R.id.action_gameEndFragment_to_loadingFragment)
             else
                 findNavController().navigate(R.id.action_gameEndFragment_to_gameFragment)
         }
-        return
+        return*/
         //====================
 
         // Check if local configuration has been initialized (it should be)

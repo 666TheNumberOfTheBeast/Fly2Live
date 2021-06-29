@@ -12,12 +12,15 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import io.realm.mongodb.App
 import io.realm.mongodb.AppConfiguration
 
 
 class SettingsFragment : Fragment() {
+    private var account: GoogleSignInAccount? = null
+
     private lateinit var sharedPref: SharedPreferences
 
     private lateinit var btnAudio: TextView
@@ -28,7 +31,7 @@ class SettingsFragment : Fragment() {
         super.onCreate(savedInstanceState)
 
         // Access control
-        val account = GoogleSignIn.getLastSignedInAccount(activity)
+        account = GoogleSignIn.getLastSignedInAccount(activity)
         if (account == null) {
             // Attempt to pop the controller's back stack back to a specific destination
             findNavController().popBackStack(R.id.mainFragment, false)
@@ -48,6 +51,10 @@ class SettingsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        // Access control (continue)
+        if (account == null)
+            return
 
         btnAudio       = view.findViewById(R.id.button_audio)
         val btnLogout  = view.findViewById<TextView>(R.id.button_logout)

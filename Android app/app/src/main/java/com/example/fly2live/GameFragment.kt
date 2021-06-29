@@ -13,27 +13,38 @@ import androidx.activity.addCallback
 import androidx.lifecycle.lifecycleScope
 import com.example.fly2live.configuration.Configuration.Companion.MULTIPLAYER
 import com.example.fly2live.configuration.Configuration.Companion.WINNER_UNDEFINED
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import java.lang.IllegalArgumentException
+import java.lang.IllegalStateException
+import java.lang.Thread.sleep
 
 class GameFragment : Fragment() {
+    private var account: GoogleSignInAccount? = null
+
     private var soundtrack: MediaPlayer? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         // Access control
-        /*account = GoogleSignIn.getLastSignedInAccount(activity)
+        account = GoogleSignIn.getLastSignedInAccount(activity)
         if (account == null) {
             // Attempt to pop the controller's back stack back to a specific destination
             findNavController().popBackStack(R.id.mainFragment, false)
             return
-        }*/ // TEMP DISABLED TO SAVE API CALLS
+        } // DISABLE DURING DEVELOPING TO SAVE API CALLS
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+
+        // Access control (continue)
+        if (account == null)
+            return null
+
         val sharedPref = context?.getSharedPreferences(getString(R.string.shared_preferences_name), Context.MODE_PRIVATE)
         val isAudioEnabled = sharedPref?.getBoolean(getString(R.string.shared_preference_audio), true)!!
 
@@ -61,7 +72,11 @@ class GameFragment : Fragment() {
 
         // Remove LoadingFragment from the backstack if multiplayer mode
         if (MULTIPLAYER)
-            findNavController().popBackStack(R.id.loadingFragment, true)
+            try {
+                findNavController().popBackStack(R.id.loadingFragment, true)
+            } catch (e: IllegalStateException) {
+                e.printStackTrace()
+            }
 
         val view: View = if (MULTIPLAYER) GameViewMultiplayer(context, this) else GameView(context, this)
 
@@ -79,8 +94,12 @@ class GameFragment : Fragment() {
 
         // Check if winner is undefined in multiplayer mode
         if (MULTIPLAYER && winner == WINNER_UNDEFINED) {
-            // Go back to the main fragment
-            findNavController().popBackStack(R.id.mainFragment, false)
+            // Go back to the main fragment using a coroutine tied to the fragment lifecycle
+            // in order to avoid crashes
+            lifecycleScope.launchWhenResumed {
+                findNavController().popBackStack(R.id.mainFragment, false)
+            }
+
             return
         }
 

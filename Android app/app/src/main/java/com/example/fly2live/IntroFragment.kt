@@ -37,12 +37,12 @@ class IntroFragment : Fragment() {
     override fun onStart() {
         super.onStart()
 
-        // TEMP BYPASS LOGIN TO SAVE API CALLS
-        findNavController().navigate(R.id.action_introFragment_to_mainFragment)
+        // BYPASS LOGIN DURING DEVELOPING TO SAVE API CALLS
+        //findNavController().navigate(R.id.action_introFragment_to_mainFragment)
 
         // Check for existing Google Sign In account.
         // If the user is already signed in the GoogleSignInAccount will be non-null.
-        /*val account = GoogleSignIn.getLastSignedInAccount(context)
+        val account = GoogleSignIn.getLastSignedInAccount(context)
 
         // Check if the user is already logged in
         logIn(account, context!!) { isLoggedIn ->
@@ -61,7 +61,7 @@ class IntroFragment : Fragment() {
                     findNavController().navigate(R.id.action_introFragment_to_loginFragment)
 
             }, 1000)
-        }*/
+        }
     }
 
 }

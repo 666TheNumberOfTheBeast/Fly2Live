@@ -70,6 +70,8 @@ class LoginFragment : Fragment() {
                 val res = Auth.GoogleSignInApi.getSignInResultFromIntent(data)
                 handleSignInResult(res)
             }
+            else
+                Log.d("login", "Result launcher for sign in failed")
         }
 
         // Inflate the layout for this fragment

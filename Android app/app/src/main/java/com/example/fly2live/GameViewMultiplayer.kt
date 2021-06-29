@@ -116,7 +116,7 @@ import kotlin.math.sqrt
 
 class GameViewMultiplayer(context: Context?, fragment: GameFragment) : View(context), View.OnTouchListener, SensorEventListener2 {
     // Fragment associated with this view
-    private val fragment = fragment
+    private var fragment = fragment
 
     // Socket io
     private lateinit var mSocket: Socket
@@ -933,19 +933,7 @@ class GameViewMultiplayer(context: Context?, fragment: GameFragment) : View(cont
 
         sensorManager.unregisterListener(this@GameViewMultiplayer)
 
-        //val fragment = findFragment<GameFragment>()
         fragment.gameEnd(score.toLong(), winner)
-
-        /*var fragmentLoaded = false
-        while (!fragmentLoaded) {
-            try {
-                fragment.gameEnd(score.toLong(), winner)
-                fragmentLoaded = true
-            } catch (e: IllegalStateException) {
-                e.printStackTrace()
-                sleep(100)
-            }
-        }*/
     }
 
 

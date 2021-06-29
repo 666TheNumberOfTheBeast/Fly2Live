@@ -12,8 +12,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
+        android:usesCleartextTraffic="true" >
 
-        android:usesCleartextTraffic="true">
+    <!-- Without this line the app does not connect to server
+     android:usesCleartextTraffic="true" -->
 
         <meta-data android:name="com.google.android.gms.games.APP_ID"
             android:value="@string/app_id" />

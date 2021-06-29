@@ -5,14 +5,14 @@ import io.socket.client.Socket
 class Configuration {
     companion object {
         // Google Games player ID
-        //var PLAYER_ID = "" // TEMP DISABLED TO SAVE API CALLS
-        var PLAYER_ID = (0..1000).random().toString()
+        var PLAYER_ID = "" // TEMP DISABLED TO SAVE API CALLS
+        //var PLAYER_ID = (0..1000).random().toString()
         // Player JWT for MongoDB Realm
         var PLAYER_JWT = "" // MESSO QUI E NON IN SHARED PREFERENCES, VIENE ELIMINATO OGNI VOLTA CHE L'APP VIENE CHIUSA
         // Player levels and xp (retrieve the first time and then handle them locally)
         var PLAYER_LEVEL = -1
         var PLAYER_XP    = -1L
-        var PLAYER_SCORE = -1L
+        //var PLAYER_SCORE = -1L
 
 
         // Game mode
@@ -24,7 +24,7 @@ class Configuration {
         const val SCENARIO_CITY_NIGHT = 1
 
 
-        // Socket instance (TEMP)
+        // Socket instance
         var SOCKET_INSTANCE: Socket? = null
 
         // Server URL

@@ -221,9 +221,9 @@
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
             android:fontFamily="@font/audiowide"
-            android:text="1"
             android:textSize="@dimen/text_size_paragraph_4"
             android:textColor="@color/green" />
+        <!-- android:text="1" -->
     </LinearLayout>
 
 
@@ -243,9 +243,9 @@
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
             android:fontFamily="@font/audiowide"
-            android:text="player_name"
             android:textSize="@dimen/text_size_paragraph_4"
             android:textColor="@color/green" />
+        <!-- android:text="player_name" -->
     </LinearLayout>
 
     <LinearLayout
@@ -265,9 +265,9 @@
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
             android:fontFamily="@font/audiowide"
-            android:text="175"
             android:textSize="@dimen/text_size_paragraph_4"
             android:textColor="@color/green" />
+        <!-- android:text="175" -->
     </LinearLayout>
 
     <LinearLayout
@@ -287,9 +287,9 @@
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
             android:fontFamily="@font/audiowide"
-            android:text="134"
             android:textSize="@dimen/text_size_paragraph_4"
             android:textColor="@color/green" />
+        <!-- android:text="134" -->
     </LinearLayout>
 
     <LinearLayout
@@ -310,9 +310,9 @@
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
             android:fontFamily="@font/audiowide"
-            android:text="0.631"
             android:textSize="@dimen/text_size_paragraph_4"
             android:textColor="@color/green" />
+        <!-- android:text="0.631" -->
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

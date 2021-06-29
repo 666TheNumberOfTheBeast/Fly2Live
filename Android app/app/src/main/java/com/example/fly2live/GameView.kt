@@ -1039,7 +1039,8 @@ class GameView(context: Context?, fragment: GameFragment) : View(context), View.
                         arrayOf(0.07f, 0.2f, 0.33f, 0.5f),   // Middle rect
                         arrayOf(0.64f, 0.19f, 0.95f, 0.21f)  // Top rect
                     ),
-                    screenWidth, screenHeight, ppm, PLAYER_WIDTH * scaleFactor, PLAYER_HEIGHT * scaleFactor, 1f, 20f, 0f // Measures in meters
+                    //screenWidth, screenHeight, ppm, PLAYER_WIDTH * scaleFactor, PLAYER_HEIGHT * scaleFactor, 1f, 20f, 0f // Measures in meters
+                    screenWidth, screenHeight, ppm, PLAYER_WIDTH * scaleFactor, PLAYER_HEIGHT * scaleFactor, 1f, 4f, 0f // Measures in meters
                 )
 
                 // I put the vehicle at 20 m from the top. See comment above about the height
@@ -1149,11 +1150,10 @@ class GameView(context: Context?, fragment: GameFragment) : View(context), View.
                     }
 
                     // Update the score
-                    // s = v * dt  in m/s
+                    // s = v * dt  in m
                     score += speed * dt
 
-                    // Update the speed
-                    //speed += 0.003f // max about 36-43 m/s. 50 m/s very difficult!
+                    // Update the speed (max about 36-43 m/s. 50 m/s very difficult!)
                     if (speed < 40f)
                         speed += 0.001f
                 }
@@ -1252,7 +1252,7 @@ class GameView(context: Context?, fragment: GameFragment) : View(context), View.
 
         // Measures from meters to pixels
         /*canvas?.drawLine(0f, 17f * ppm, width.toFloat(), 17f * ppm, painterStroke)
-        canvas?.drawLine(0f, 48f * ppm, width.toFloat(), 48f * ppm, painterStroke)*/
+        canvas?.drawLine(0f, 33f * ppm, width.toFloat(), 33f * ppm, painterStroke)*/
     }
 
     // Convert density independent pixels into screen pixels
@@ -1305,10 +1305,9 @@ class GameView(context: Context?, fragment: GameFragment) : View(context), View.
         // Height range height*0.2 .. height*0.76 = from 20% to 76% of the screen height
         // Remember that 0% = top and 100% = bottom
         //val r = (20..76).random() / 100f
-        //val r = (20..58).random() / 100f
 
         // Building pos Y in meters
-        val buildingPosY = (17..48).random()
+        val buildingPosY = (17..33).random()
 
         //=================
         // For debug
@@ -1324,7 +1323,7 @@ class GameView(context: Context?, fragment: GameFragment) : View(context), View.
         //cpuBuilding.setX(13f * ppm)
 
         // Set Y of the building in pixels from meters (for efficiency of update calls)
-        cpuBuilding.setY(17f * ppm)
+        //cpuBuilding.setY(17f * ppm)
         //=================
 
         // Set Y of the building relative to the height of the current screen orientation
@@ -1334,7 +1333,7 @@ class GameView(context: Context?, fragment: GameFragment) : View(context), View.
         //cpuBuilding.setY( max(screenWidth, screenHeight) * r )
 
         // Set Y of the building in pixels from meters (for efficiency of update calls)
-        //cpuBuilding.setY(buildingPosY * ppm)
+        cpuBuilding.setY(buildingPosY * ppm)
 
         // Increase the distance between obstacles if the height of
         // the cpuBuilding is greater than a threshold
@@ -1379,7 +1378,6 @@ class GameView(context: Context?, fragment: GameFragment) : View(context), View.
         //val r = (0..20).random() / 100f
 
         // Vehicle pos Y in meters
-        //val vehiclePosY = (0..17).random()
         val vehiclePosY = (0..5).random()
 
 
@@ -1429,7 +1427,6 @@ class GameView(context: Context?, fragment: GameFragment) : View(context), View.
 
         return false
     }
-
 
 
 
@@ -1576,12 +1573,12 @@ class GameView(context: Context?, fragment: GameFragment) : View(context), View.
                     lastGyroscopeInput = min(0f, lastGyroscopeInput+1f)
             }*/
 
-            Log.d("SENSOR", "****************")
+            /*Log.d("SENSOR", "****************")
             //Log.d("SENSOR", "dt: $dt")
             Log.d("SENSOR", "value: $axisX")
             Log.d("SENSOR", "angular speed: $angularSpeed")
             //Log.d("SENSOR", "angular speed * dt: ${angularSpeed*dt}")
-            Log.d("SENSOR", "lastGyroscopeInput: $lastGyroscopeInput")
+            Log.d("SENSOR", "lastGyroscopeInput: $lastGyroscopeInput")*/
             //=========================================
         /*}
 
@@ -1659,7 +1656,7 @@ class GameView(context: Context?, fragment: GameFragment) : View(context), View.
         // USA LA PERCENTUALE DELLO SCHERMO PER ENTRAMBE LE DIMENSIONI!
 
         // Get screen width and height (don't use directly getWidth() and getHeight() because here return 0) ?
-        val width  = resources.displayMetrics.widthPixels
+        /*val width  = resources.displayMetrics.widthPixels
         val height = resources.displayMetrics.heightPixels
 
         Log.d("save", "Save state game view - player X: ${playerVehicle.getX()} px")
@@ -1676,7 +1673,7 @@ class GameView(context: Context?, fragment: GameFragment) : View(context), View.
 
         Log.d("save", "Save state game view - building Y: ${cpuBuilding.getY()} px")
         Log.d("save", "Save state game view - building Y: ${cpuBuilding.getY() / ppm} m")
-        Log.d("save", "Save state game view - building Y: ${cpuBuilding.getY() / height} => ${cpuBuilding.getY() / height * 100} %")
+        Log.d("save", "Save state game view - building Y: ${cpuBuilding.getY() / height} => ${cpuBuilding.getY() / height * 100} %")*/
 
 
         // VERSIONE CON METRI
@@ -1723,9 +1720,9 @@ class GameView(context: Context?, fragment: GameFragment) : View(context), View.
                     val py = state.getFloat("playerPosY")
 
                     // VERSIONE CON METRI
-                    Log.d("save", "Restore state game view - player Y: $py m")
+                    /*Log.d("save", "Restore state game view - player Y: $py m")
                     Log.d("save", "Restore state game view - player Y: ${py * ppm} px")
-                    Log.d("save", "Save state game view - player Y: ${py * ppm / height} => ${py * ppm / height * 100} %")//*/
+                    Log.d("save", "Save state game view - player Y: ${py * ppm / height} => ${py * ppm / height * 100} %")*/
 
                     // VERSIONE CON PERCENTUALE SCHERMO
                     /*Log.d("save", "Restore state game view - player Y: $py => ${py * 100} %")
@@ -1755,13 +1752,13 @@ class GameView(context: Context?, fragment: GameFragment) : View(context), View.
                     val by = state.getFloat("cpuBuildingPosY")
 
                     // VERSIONE CON METRI
-                    Log.d("save", "Restore state game view - building X: $bx m")
+                    /*Log.d("save", "Restore state game view - building X: $bx m")
                     Log.d("save", "Restore state game view - building X: ${bx * ppm} px")
-                    Log.d("save", "Save state game view - building X: ${bx * ppm / width} => ${bx * ppm / width * 100} %")//*/
+                    Log.d("save", "Save state game view - building X: ${bx * ppm / width} => ${bx * ppm / width * 100} %")
 
                     Log.d("save", "Restore state game view - building Y: $by m")
                     Log.d("save", "Restore state game view - building Y: ${by * ppm} px")
-                    Log.d("save", "Save state game view - building Y: ${by * ppm / height} => ${by * ppm / height * 100} %")//*/
+                    Log.d("save", "Save state game view - building Y: ${by * ppm / height} => ${by * ppm / height * 100} %")*/
 
                     // VERSIONE CON PERCENTUALE SCHERMO
                     /*Log.d("save", "Restore state game view - building X: $bx => ${bx * 100} %")

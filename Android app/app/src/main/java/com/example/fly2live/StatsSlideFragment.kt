@@ -55,6 +55,10 @@ class StatsSlideFragment() : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        // Access control (continue)
+        if (account == null)
+            return null
+
         // Retrieve additional information
         position = arguments!!.getInt("position")
 
@@ -71,8 +75,12 @@ class StatsSlideFragment() : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Access control (continue)
+        if (account == null)
+            return
+
         // Check if position is valid
-        if (position >=  NUM_PAGES)
+        if (position >= NUM_PAGES)
             return
 
         when (position) {

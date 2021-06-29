@@ -10,9 +10,12 @@ import androidx.viewpager2.widget.ViewPager2
 import androidx.activity.addCallback
 import androidx.navigation.fragment.findNavController
 import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 
 
 class StatsFragment : Fragment() {
+    private var account: GoogleSignInAccount? = null
+
     // The pager widget, which handles animation and
     // allows swiping horizontally to access previous and next wizard steps
     private lateinit var mPager: ViewPager2
@@ -27,7 +30,7 @@ class StatsFragment : Fragment() {
         super.onCreate(savedInstanceState)
 
         // Access control
-        val account = GoogleSignIn.getLastSignedInAccount(activity)
+        account = GoogleSignIn.getLastSignedInAccount(activity)
         if (account == null) {
             // Attempt to pop the controller's back stack back to a specific destination
             findNavController().popBackStack(R.id.mainFragment, false)
@@ -59,6 +62,10 @@ class StatsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        // Access control (continue)
+        if (account == null)
+            return
 
         mPager = view.findViewById(R.id.pager)
 

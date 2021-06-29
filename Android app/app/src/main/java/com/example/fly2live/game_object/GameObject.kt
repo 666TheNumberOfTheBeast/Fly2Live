@@ -8,8 +8,8 @@ abstract class GameObject(
     name: String,
     bitmaps: Array<Bitmap>,
     bounds_offsets: Array<Array<Float>>,
-    width: Float, height: Float,
     screen_width: Int, screen_height: Int, ppm: Float,
+    width: Float, height: Float,
     pos_x: Float, pos_y: Float, speed: Float) {
 
     private val name: String
@@ -21,7 +21,7 @@ abstract class GameObject(
 
     // Array of arrays for bounds offsets for game physics
     private val boundsOffsets: Array<Array<Float>>
-    private val bounds = ArrayList<RectF>()
+    protected val bitmapBounds = ArrayList<RectF>()
 
     // Matrix for graphics transformations
     private val matrix: Matrix
@@ -52,7 +52,7 @@ abstract class GameObject(
         this.boundsOffsets = bounds_offsets
 
         for (offset_array in bounds_offsets)
-            bounds.add( RectF() )
+            bitmapBounds.add( RectF() )
 
         this.matrix  = Matrix()
 
@@ -90,7 +90,7 @@ abstract class GameObject(
 
     fun getBounds(): ArrayList<RectF> {
         @Suppress("UNCHECKED_CAST")
-        return bounds.clone() as ArrayList<RectF>
+        return bitmapBounds.clone() as ArrayList<RectF>
     }
 
     fun getMatrix(): Matrix {
@@ -167,7 +167,7 @@ abstract class GameObject(
             val offsetArray = boundsOffsets[i]
 
             if (offsetArray.size == 4)
-                bounds[i].set(
+                bitmapBounds[i].set(
                     getX() + offsetArray[0] * getBitmapScaledWidth(),
                     getY() + offsetArray[1] * getBitmapScaledHeight(),
                     getX() + offsetArray[2] * getBitmapScaledWidth(),

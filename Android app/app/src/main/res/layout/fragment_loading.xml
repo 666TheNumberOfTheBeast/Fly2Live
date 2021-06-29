@@ -15,7 +15,7 @@
         android:fontFamily="@font/audiowide"
         android:text="@string/msg_connecting"
         android:textColor="@android:color/white"
-        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        android:textSize="@dimen/text_size_paragraph_1"
         app:layout_constraintBottom_toTopOf="@+id/progressBar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

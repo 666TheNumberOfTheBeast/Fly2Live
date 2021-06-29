@@ -61,11 +61,12 @@ class GameEndFragment : Fragment() {
             return
         }*/ // TEMP DISABLED TO SAVE API CALLS
 
-        // Get passed arguments the first time the fragment is created
-        if (savedInstanceState == null) {
-            score  = arguments!!.getLong("score")
-            winner = arguments!!.getInt("winner")
+        // Get passed arguments to this fragment
+        score  = arguments!!.getLong("score")
+        winner = arguments!!.getInt("winner")
 
+        // Increment wins or loses & submit score once (the first time the fragment is created)
+        if (savedInstanceState == null) {
             // Get events and leaderboards clients
             /*val mEventsClient  = Games.getEventsClient(context!!, account!!)
             mLeaderboardClient = Games.getLeaderboardsClient(context!!, account!!)

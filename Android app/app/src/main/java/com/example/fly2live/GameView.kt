@@ -17,22 +17,99 @@ import com.example.fly2live.configuration.Configuration.Companion.SCENARIO
 import com.example.fly2live.configuration.Configuration.Companion.SCENARIO_CITY_DAY
 import kotlinx.coroutines.*
 import java.lang.Thread.sleep
-import kotlin.math.max
-import kotlin.math.min
 import android.os.Bundle
+import androidx.activity.addCallback
+import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.lifecycleScope
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_01_DAY_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_01_DAY_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_01_NIGHT_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_01_NIGHT_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_02_DAY_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_02_DAY_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_02_NIGHT_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_02_NIGHT_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_03_DAY_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_03_DAY_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_03_NIGHT_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_03_NIGHT_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_04_DAY_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_04_DAY_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_04_NIGHT_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_04_NIGHT_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_05_DAY_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_05_DAY_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_05_NIGHT_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_05_NIGHT_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_06_DAY_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_06_DAY_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_06_NIGHT_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_06_NIGHT_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_07_DAY_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_07_DAY_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_07_NIGHT_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_07_NIGHT_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_08_DAY_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_08_DAY_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_08_NIGHT_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_08_NIGHT_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_09_DAY_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_09_DAY_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_09_NIGHT_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_09_NIGHT_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_10_DAY_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_10_DAY_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_10_NIGHT_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_10_NIGHT_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_11_DAY_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_11_DAY_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_11_NIGHT_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_11_NIGHT_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_12_DAY_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_12_DAY_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_13_DAY_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_13_DAY_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_14_DAY_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_14_DAY_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_15_DAY_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_15_DAY_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_16_DAY_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_16_DAY_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_17_DAY_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_17_DAY_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.SCENARIO_CITY_NIGHT
+import com.example.fly2live.configuration.Configuration.Companion.VEHICLE_01_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.VEHICLE_01_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.VEHICLE_02_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.VEHICLE_02_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.VEHICLE_03_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.VEHICLE_03_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.VEHICLE_04_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.VEHICLE_04_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.VEHICLE_05_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.VEHICLE_05_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.VEHICLE_06_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.VEHICLE_06_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.VEHICLE_07_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.VEHICLE_07_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.VEHICLE_08_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.VEHICLE_08_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.VEHICLE_09_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.VEHICLE_09_WIDTH
 import com.example.fly2live.configuration.Configuration.Companion.WINNER_UNDEFINED
 import com.example.fly2live.game_object_cpu.GameObjectCpu
 import com.example.fly2live.game_object_player.GameObjectPlayer
+import java.lang.IllegalStateException
+import kotlin.math.*
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+import com.example.fly2live.configuration.Configuration.Companion.PLAYER_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.PLAYER_WIDTH
 
 
-class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context), View.OnTouchListener, SensorEventListener2 {
 //class GameView(context: Context?) : View(context), View.OnTouchListener, SensorEventListener2 {
-    private val lifecycleScope = lifecycleScope
-    /*private var lifecycleScope: CoroutineScope? = null
-
-    constructor(context: Context?, lifecycleScope: CoroutineScope) : this(context) {
-        this.lifecycleScope = lifecycleScope
-    }*/
+class GameView(context: Context?, fragment: GameFragment) : View(context), View.OnTouchListener, SensorEventListener2 {
+    // Fragment associated with this view
+    private val fragment = fragment
 
     // Background bitmap
     private lateinit var bg: Bitmap
@@ -48,13 +125,14 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
 
 
     // Sensors values
-    private var lastAcceleration = FloatArray(3)
+    private var sensorManager: SensorManager
+    //private var lastAcceleration = FloatArray(3)
     private var gyroscopeValues = FloatArray(3)
     private var lastGyroscopeInput = 0f // meters
 
 
     // World constants
-    private val worldWidth  = 50f // meters
+    private val worldWidth  = 55f // meters 50f
     //private var worldHeight = 60f // meters
 
     // Pixel per meter
@@ -96,7 +174,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
     init {
         setOnTouchListener(this)
 
-        val sensorManager = context?.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        sensorManager = context?.getSystemService(Context.SENSOR_SERVICE) as SensorManager
 
         /*sensorManager.registerListener(
             this,
@@ -115,6 +193,17 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
             sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE),
             SensorManager.SENSOR_DELAY_NORMAL
         )
+
+        // Override back behavior
+        //fragment.requireActivity().onBackPressedDispatcher.addCallback(fragment) {
+        (context as FragmentActivity).onBackPressedDispatcher.addCallback(fragment) {
+            gameEnd = true
+
+            sensorManager.unregisterListener(this@GameView)
+
+            //val fragment = findFragment<GameFragment>()
+            fragment.gameEnd(score.toLong(), WINNER_UNDEFINED)
+        }
 
 
         Log.d("ppm", "***** INITIALIZATION *****")
@@ -136,7 +225,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
         // Dispatchers.Default — is used by all standard builders if no dispatcher or any other ContinuationInterceptor is specified in their context.
         // It uses a common pool of shared background threads.
         // This is an appropriate choice for compute-intensive coroutines that consume CPU resources
-        lifecycleScope.launch(Dispatchers.Default) {
+        fragment.lifecycleScope.launch(Dispatchers.Default) {
 
             // Calculate scale factor
 
@@ -292,7 +381,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                                 arrayOf(0.1f, 0f, 0.18f, 1f),      // Top left rect
                                 arrayOf(0.47f, 0.023f, 0.63f, 1f)  // Top right rect
                             ),
-                            25f * scaleFactor, 70f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed // Measures in meters except pos_y in pixels
+                            screenWidth, screenHeight, ppm, BUILDING_01_DAY_WIDTH * scaleFactor, BUILDING_01_DAY_HEIGHT * scaleFactor, initialObstaclePosX, initialObstaclePosY, speed // Measures in meters except pos_y in pixels
                         ),
                         GameObjectCpu(
                             "building_02",
@@ -302,7 +391,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                                 arrayOf(0.33f, 0.187f, 0.7f, 1f),   // Middle rect
                                 arrayOf(0.47f, 0f, 0.56f, 1f)       // Top rect
                             ),
-                            10f * scaleFactor, 80f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
+                            screenWidth, screenHeight, ppm, BUILDING_02_DAY_WIDTH * scaleFactor, BUILDING_02_DAY_HEIGHT * scaleFactor, initialObstaclePosX, initialObstaclePosY, speed
                         ),
                         GameObjectCpu(
                             "building_03",
@@ -313,7 +402,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                                 arrayOf(0.28f, 0.045f, 0.68f, 1f),  // Middle rect 2
                                 arrayOf(0.45f, 0f, 0.6f, 1f)        // Top rect
                             ),
-                            25f * scaleFactor, 110f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
+                            screenWidth, screenHeight, ppm, BUILDING_03_DAY_WIDTH * scaleFactor, BUILDING_03_DAY_HEIGHT * scaleFactor, initialObstaclePosX, initialObstaclePosY, speed
                         ),
                         GameObjectCpu(
                             "building_04",
@@ -324,7 +413,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                                 arrayOf(0.23f, 0.07f, 0.76f, 1f),  // Middle rect 2
                                 arrayOf(0.31f, 0.003f, 0.67f, 1f)  // Top rect
                             ),
-                            35f * scaleFactor, 90f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
+                            screenWidth, screenHeight, ppm, BUILDING_04_DAY_WIDTH * scaleFactor, BUILDING_04_DAY_HEIGHT * scaleFactor, initialObstaclePosX, initialObstaclePosY, speed
                         ),
                         GameObjectCpu(
                             "building_05",
@@ -337,7 +426,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                                 arrayOf(0.77f, 0.136f, 0.9f, 1f),  // Middle right rect
                                 arrayOf(0.33f, 0f, 0.75f, 1f)      // Top rect
                             ),
-                            35f * scaleFactor, 70f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
+                            screenWidth, screenHeight, ppm, BUILDING_05_DAY_WIDTH * scaleFactor, BUILDING_05_DAY_HEIGHT * scaleFactor, initialObstaclePosX, initialObstaclePosY, speed
                         ),
                         GameObjectCpu(
                             "building_06",
@@ -348,7 +437,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                                 arrayOf(0.53f, 0.32f, 0.86f, 1f), // Middle right rect
                                 arrayOf(0.07f, 0f, 0.29f, 1f)     // Top rect
                             ),
-                            45f * scaleFactor, 50f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed // Measures in meters except pos_y
+                            screenWidth, screenHeight, ppm, BUILDING_06_DAY_WIDTH * scaleFactor, BUILDING_06_DAY_HEIGHT * scaleFactor, initialObstaclePosX, initialObstaclePosY, speed // Measures in meters except pos_y
                         ),
                         GameObjectCpu(
                             "building_07",
@@ -361,7 +450,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                                 arrayOf(0.31f, 0.06f, 0.39f, 1f), // Top rect 1
                                 arrayOf(0.31f, 0f, 0.33f, 1f)     // Top rect 2
                             ),
-                            15f * scaleFactor, 80f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed // Measures in meters except pos_y
+                            screenWidth, screenHeight, ppm, BUILDING_07_DAY_WIDTH * scaleFactor, BUILDING_07_DAY_HEIGHT * scaleFactor, initialObstaclePosX, initialObstaclePosY, speed // Measures in meters except pos_y
                         ),
                         GameObjectCpu(
                             "building_08",
@@ -370,7 +459,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                                 arrayOf(0f, 0.123f, 1f, 1f),  // Bottom rect
                                 arrayOf(0.1f, 0f, 0.9f, 1f)   // Top rect
                             ),
-                            13f * scaleFactor, 70f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
+                            screenWidth, screenHeight, ppm, BUILDING_08_DAY_WIDTH * scaleFactor, BUILDING_08_DAY_HEIGHT * scaleFactor, initialObstaclePosX, initialObstaclePosY, speed
                         ),
                         GameObjectCpu(
                             "building_09",
@@ -381,7 +470,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                                 arrayOf(0.4f, 0.026f, 0.5f, 1f),   // Middle rect 2
                                 arrayOf(0.43f, 0.003f, 0.48f, 1f)  // Top rect
                             ),
-                            17f * scaleFactor, 70f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
+                            screenWidth, screenHeight, ppm, BUILDING_09_DAY_WIDTH * scaleFactor, BUILDING_09_DAY_HEIGHT * scaleFactor, initialObstaclePosX, initialObstaclePosY, speed
                         ),
                         GameObjectCpu(
                             "building_10",
@@ -393,7 +482,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                                 arrayOf(0.4f, 0f, 0.7f, 1f),        // Top rect middle
                                 arrayOf(0.75f, 0.026f, 0.92f, 1f)   // Top rect right
                             ),
-                            13f * scaleFactor, 60f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
+                            screenWidth, screenHeight, ppm, BUILDING_10_DAY_WIDTH * scaleFactor, BUILDING_10_DAY_HEIGHT * scaleFactor, initialObstaclePosX, initialObstaclePosY, speed
                         ),
                         GameObjectCpu(
                             "building_11",
@@ -402,7 +491,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                                 arrayOf(0f, 0.03f, 1f, 1f),    // Bottom rect
                                 arrayOf(0.15f, 0f, 0.57f, 1f)  // Top rect
                             ),
-                            17f * scaleFactor, 55f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
+                            screenWidth, screenHeight, ppm, BUILDING_11_DAY_WIDTH * scaleFactor, BUILDING_11_DAY_HEIGHT * scaleFactor, initialObstaclePosX, initialObstaclePosY, speed
                         ),
                         GameObjectCpu(
                             "building_12",
@@ -411,7 +500,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                                 arrayOf(0f, 0.042f, 1f, 1f),  // Bottom rect
                                 arrayOf(0.06f, 0f, 0.9f, 1f)  // Top rect
                             ),
-                            15f * scaleFactor, 50f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
+                            screenWidth, screenHeight, ppm, BUILDING_12_DAY_WIDTH * scaleFactor, BUILDING_12_DAY_HEIGHT * scaleFactor, initialObstaclePosX, initialObstaclePosY, speed
                         ),
                         GameObjectCpu(
                             "building_13",
@@ -423,7 +512,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                                 arrayOf(0.83f, 0.04f, 1f, 1f),     // Top rect right 1
                                 arrayOf(0.86f, 0f, 0.94f, 1f)      // Top rect right 2
                             ),
-                            20f * scaleFactor, 50f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
+                            screenWidth, screenHeight, ppm, BUILDING_13_DAY_WIDTH * scaleFactor, BUILDING_13_DAY_HEIGHT * scaleFactor, initialObstaclePosX, initialObstaclePosY, speed
                         ),
                         GameObjectCpu(
                             "building_14",
@@ -434,7 +523,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                                 arrayOf(0.53f, 0.035f, 0.59f, 1f),  // Top rect left
                                 arrayOf(0.34f, 0f, 0.35f, 1f)       // Top rect right
                             ),
-                            30f * scaleFactor, 55f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
+                            screenWidth, screenHeight, ppm, BUILDING_14_DAY_WIDTH * scaleFactor, BUILDING_14_DAY_HEIGHT * scaleFactor, initialObstaclePosX, initialObstaclePosY, speed
                         ),
                         GameObjectCpu(
                             "building_15",
@@ -447,7 +536,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                                 arrayOf(0.4f, 0.18f, 0.57f, 1f),    // Top rect 1
                                 arrayOf(0.53f, 0f, 0.57f, 1f)       // Top rect 2
                             ),
-                            13f * scaleFactor, 55f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
+                            screenWidth, screenHeight, ppm, BUILDING_15_DAY_WIDTH * scaleFactor, BUILDING_15_DAY_HEIGHT * scaleFactor, initialObstaclePosX, initialObstaclePosY, speed
                         ),
                         GameObjectCpu(
                             "building_16",
@@ -461,7 +550,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                                 arrayOf(0.6f, 0.039f, 0.62f, 1f),   // Top rect middle
                                 arrayOf(0.68f, 0.03f, 0.71f, 1f)    // Top rect right
                             ),
-                            20f * scaleFactor, 50f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
+                            screenWidth, screenHeight, ppm, BUILDING_16_DAY_WIDTH * scaleFactor, BUILDING_16_DAY_HEIGHT * scaleFactor, initialObstaclePosX, initialObstaclePosY, speed
                         ),
                         GameObjectCpu(
                             "building_17",
@@ -471,7 +560,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                                 arrayOf(0.15f, 0.06f, 0.88f, 1f),  // Middle rect
                                 arrayOf(0.41f, 0f, 0.63f, 1f)      // Top rect
                             ),
-                            28f * scaleFactor, 60f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
+                            screenWidth, screenHeight, ppm, BUILDING_17_DAY_WIDTH * scaleFactor, BUILDING_17_DAY_HEIGHT * scaleFactor, initialObstaclePosX, initialObstaclePosY, speed
                         )
                     )
                 }
@@ -483,137 +572,137 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                             "building_01",
                             arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_night_01, null)?.toBitmap(screenWidth, screenHeight)!!),
                             arrayOf(
-                                arrayOf(0f, dp2px(260f), 1f, 0f),       // Bottom rect
-                                arrayOf(0.05f, dp2px(210f), 0.92f, 0f), // Middle rect 1
-                                arrayOf(0.85f, dp2px(185f), 0.92f, 0f), // Middle rect 1
-                                arrayOf(0.1f, dp2px(165f), 0.86f, 0f),  // Middle rect 2
-                                arrayOf(0.78f, dp2px(145f), 0.86f, 0f), // Middle rect 2
-                                arrayOf(0.18f, dp2px(135f), 0.78f, 0f), // Middle rect 3
-                                arrayOf(0.2f, dp2px(118f), 0.75f, 0f),  // Top rect
-                                arrayOf(0.25f, dp2px(100f), 0.7f, 0f),  // Top rect
-                                arrayOf(0.3f, dp2px(90f), 0.65f, 0f),   // Top rect
-                                arrayOf(0.35f, dp2px(82f), 0.6f, 0f)    // Top rect
+                                arrayOf(0f, 0.19f, 1f, 1f),        // Bottom rect
+                                arrayOf(0.05f, 0.175f, 1f, 1f),    // Bottom rect
+                                arrayOf(0.05f, 0.151f, 0.92f, 1f), // Middle rect 1
+                                arrayOf(0.85f, 0.135f, 0.92f, 1f), // Middle rect 1
+                                arrayOf(0.1f, 0.12f, 0.86f, 1f),   // Middle rect 2
+                                arrayOf(0.78f, 0.105f, 0.86f, 1f), // Middle rect 2
+                                arrayOf(0.2f, 0.087f, 0.78f, 1f),  // Top rect
+                                arrayOf(0.25f, 0.077f, 0.72f, 1f), // Top rect
+                                arrayOf(0.3f, 0.067f, 0.65f, 1f),  // Top rect
+                                arrayOf(0.35f, 0.06f, 0.6f, 1f)    // Top rect
                             ),
-                            15f, 100f, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
+                            screenWidth, screenHeight, ppm, BUILDING_01_NIGHT_WIDTH, BUILDING_01_NIGHT_HEIGHT, initialObstaclePosX, initialObstaclePosY, speed
                         ),
                         GameObjectCpu(
                             "building_02",
                             arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_night_02, null)?.toBitmap(screenWidth, screenHeight)!!),
                             arrayOf(
-                                arrayOf(0.26f, dp2px(345f), 0.72f, 0f),  // Bottom rect
-                                arrayOf(0.4f, dp2px(153f), 0.6f, 0f),    // Middle rect
-                                arrayOf(0.45f, 0f, 0.54f, 0f)               // Top rect
+                                arrayOf(0.26f, 0.23f, 0.72f, 1f),  // Bottom rect
+                                arrayOf(0.4f, 0.1f, 0.6f, 1f),    // Middle rect
+                                arrayOf(0.45f, 0f, 0.54f, 1f)     // Top rect
                             ),
-                            10f, 110f, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
+                            screenWidth, screenHeight, ppm, BUILDING_02_NIGHT_WIDTH, BUILDING_02_NIGHT_HEIGHT, initialObstaclePosX, initialObstaclePosY, speed
                         ),
                         GameObjectCpu(
                             "building_03",
                             arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_night_03, null)?.toBitmap(screenWidth, screenHeight)!!),
                             arrayOf(
-                                arrayOf(0.75f, dp2px(75f), 1f, 0f),    // Bottom rect
-                                arrayOf(0f, dp2px(43f), 0.75f, 0f),    // Bottom rect
-                                arrayOf(0.68f, dp2px(19f), 0.82f, 0f), // Top rect
-                                arrayOf(0.16f, 0f, 0.68f, 0f)             // Top rect
+                                arrayOf(0.75f, 0.072f, 1f, 1f),   // Bottom rect
+                                arrayOf(0f, 0.045f, 0.75f, 1f),   // Bottom rect
+                                arrayOf(0.68f, 0.02f, 0.82f, 1f), // Top rect
+                                arrayOf(0.16f, 0f, 0.68f, 1f)     // Top rect
                             ),
-                            18f, 70f, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
+                            screenWidth, screenHeight, ppm, BUILDING_03_NIGHT_WIDTH, BUILDING_03_NIGHT_HEIGHT, initialObstaclePosX, initialObstaclePosY, speed
                         ),
                         GameObjectCpu(
                             "building_04",
                             arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_night_04, null)?.toBitmap(screenWidth, screenHeight)!!),
                             arrayOf(
-                                arrayOf(0f, dp2px(112f), 0.24f, 0f),  // Bottom rect
-                                arrayOf(0.24f, dp2px(85f), 1f, 0f),   // Bottom rect
-                                arrayOf(0.16f, dp2px(18f), 0.3f, 0f), // Top rect
-                                arrayOf(0.3f, 0f, 0.82f, 0f)             // Top rect
+                                arrayOf(0f, 0.11f, 0.24f, 1f),   // Bottom rect
+                                arrayOf(0.24f, 0.085f, 1f, 1f),   // Bottom rect
+                                arrayOf(0.16f, 0.02f, 0.3f, 1f), // Top rect
+                                arrayOf(0.3f, 0f, 0.82f, 1f)     // Top rect
                             ),
-                            20f, 70f, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
+                            screenWidth, screenHeight, ppm, BUILDING_04_NIGHT_WIDTH, BUILDING_04_NIGHT_HEIGHT, initialObstaclePosX, initialObstaclePosY, speed
                         ),
                         GameObjectCpu(
                             "building_05",
                             arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_night_05, null)?.toBitmap(screenWidth, screenHeight)!!),
                             arrayOf(
-                                arrayOf(0f, dp2px(72f), 1f, 0f),      // Bottom rect
-                                arrayOf(0f, dp2px(28f), 0.7f, 0f),    // Middle rect 1
-                                arrayOf(0.45f, dp2px(10f), 0.6f, 0f), // Middle rect 2
-                                arrayOf(0.7f, dp2px(40f), 0.8f, 0f), // Middle rect 3
-                                arrayOf(0.8f, dp2px(55f), 0.9f, 0f), // Middle rect 4
-                                arrayOf(0.13f, 0f, 0.45f, 0f)           // Top rect
+                                arrayOf(0f, 0.09f, 1f, 1f),      // Bottom rect
+                                arrayOf(0f, 0.031f, 0.7f, 1f),   // Middle rect 1
+                                arrayOf(0.45f, 0.01f, 0.6f, 1f), // Middle rect 2
+                                arrayOf(0.7f, 0.05f, 0.8f, 1f),  // Middle rect 3
+                                arrayOf(0.8f, 0.07f, 0.9f, 1f),  // Middle rect 4
+                                arrayOf(0.13f, 0f, 0.45f, 1f)    // Top rect
                             ),
-                            25f, 60f, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
+                            screenWidth, screenHeight, ppm, BUILDING_05_NIGHT_WIDTH, BUILDING_05_NIGHT_HEIGHT, initialObstaclePosX, initialObstaclePosY, speed
                         ),
                         GameObjectCpu(
                             "building_06",
                             arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_night_06, null)?.toBitmap(screenWidth, screenHeight)!!),
                             arrayOf(
-                                arrayOf(0f, dp2px(150f), 1f, 0f),        // Bottom rect
-                                arrayOf(0.05f, dp2px(122f), 0.95f, 0f),  // Middle rect 1
-                                arrayOf(0.1f, dp2px(98f), 0.9f, 0f),     // Middle rect 2
-                                arrayOf(0.15f, dp2px(80f), 0.86f, 0f),   // Middle rect 3
-                                arrayOf(0.18f, dp2px(67f), 0.82f, 0f),   // Middle rect 4
-                                arrayOf(0.23f, dp2px(57f), 0.76f, 0f),   // Middle rect 5
-                                arrayOf(0.28f, dp2px(46f), 0.72f, 0f),   // Middle rect 6
-                                arrayOf(0.33f, dp2px(36f), 0.68f, 0f),   // Middle rect 7
-                                arrayOf(0.37f, dp2px(26f), 0.65f, 0f),   // Middle rect 8
-                                arrayOf(0.41f, dp2px(16f), 0.6f, 0f),    // Middle rect 9
-                                arrayOf(0.47f, 0f, 0.52f, 0f)               // Top rect
+                                arrayOf(0f, 0.11f, 1f, 1f),        // Bottom rect
+                                arrayOf(0.05f, 0.09f, 0.95f, 1f),  // Middle rect 1
+                                arrayOf(0.1f, 0.07f, 0.9f, 1f),    // Middle rect 2
+                                arrayOf(0.15f, 0.057f, 0.86f, 1f), // Middle rect 3
+                                arrayOf(0.18f, 0.048f, 0.82f, 1f), // Middle rect 4
+                                arrayOf(0.23f, 0.04f, 0.76f, 1f),  // Middle rect 5
+                                arrayOf(0.28f, 0.03f, 0.72f, 1f),  // Middle rect 6
+                                arrayOf(0.33f, 0.02f, 0.66f, 1f),  // Middle rect 7
+                                arrayOf(0.37f, 0.015f, 0.63f, 1f), // Middle rect 8
+                                arrayOf(0.41f, 0.009f, 0.59f, 1f), // Middle rect 9
+                                arrayOf(0.47f, 0f, 0.52f, 1f)      // Top rect
                             ),
-                            25f, 100f, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed // Measures in meters except pos_y
+                            screenWidth, screenHeight, ppm, BUILDING_06_NIGHT_WIDTH, BUILDING_06_NIGHT_HEIGHT, initialObstaclePosX, initialObstaclePosY, speed // Measures in meters except pos_y
                         ),
                         GameObjectCpu(
                             "building_07",
                             arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_night_07, null)?.toBitmap(screenWidth, screenHeight)!!),
                             arrayOf(
-                                arrayOf(0f, dp2px(102f), 0.93f, 0f),    // Bottom rect
-                                arrayOf(0.06f, dp2px(60f), 0.87f, 0f),  // Middle rect
-                                arrayOf(0.19f, dp2px(10f), 0.74f, 0f),  // Middle rect
-                                arrayOf(0.26f, 0f, 0.67f, 0f)              // Top rect
+                                arrayOf(0f, 0.09f, 0.93f, 1f),     // Bottom rect
+                                arrayOf(0.06f, 0.05f, 0.87f, 1f),  // Middle rect
+                                arrayOf(0.19f, 0.01f, 0.74f, 1f),  // Middle rect
+                                arrayOf(0.26f, 0f, 0.67f, 1f)      // Top rect
                             ),
-                            18f, 80f, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed // Measures in meters except pos_y
+                            screenWidth, screenHeight, ppm, BUILDING_07_NIGHT_WIDTH, BUILDING_07_NIGHT_HEIGHT, initialObstaclePosX, initialObstaclePosY, speed // Measures in meters except pos_y
                         ),
                         GameObjectCpu(
                             "building_08",
                             arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_night_08, null)?.toBitmap(screenWidth, screenHeight)!!),
                             arrayOf(
-                                arrayOf(0f, dp2px(20f), 1f, 0f),      // Bottom rect
-                                arrayOf(0.1f, dp2px(15f), 0.95f, 0f), // Middle rect 1
-                                arrayOf(0.27f, dp2px(10f), 0.9f, 0f), // Middle rect 2
-                                arrayOf(0.47f, dp2px(5f), 0.8f, 0f),  // Middle rect 3
-                                arrayOf(0.65f, 0f, 0.75f, 0f)            // Top rect
+                                arrayOf(0f, 0.02f, 1f, 1f),       // Bottom rect
+                                arrayOf(0.1f, 0.015f, 0.95f, 1f), // Middle rect 1
+                                arrayOf(0.27f, 0.01f, 0.9f, 1f),  // Middle rect 2
+                                arrayOf(0.47f, 0.05f, 0.8f, 1f),  // Middle rect 3
+                                arrayOf(0.65f, 0f, 0.75f, 1f)     // Top rect
                             ),
-                            17f, 70f, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
+                            screenWidth, screenHeight, ppm, BUILDING_08_NIGHT_WIDTH, BUILDING_08_NIGHT_HEIGHT, initialObstaclePosX, initialObstaclePosY, speed
                         ),
                         GameObjectCpu(
                             "building_09",
                             arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_night_09, null)?.toBitmap(screenWidth, screenHeight)!!),
                             arrayOf(
-                                arrayOf(0f, dp2px(22f), 1f, 0f),       // Bottom rect
-                                arrayOf(0.08f, dp2px(15f), 0.93f, 0f), // Middle rect 1
-                                arrayOf(0.15f, dp2px(8f), 0.87f, 0f),  // Middle rect 2
-                                arrayOf(0.23f, 0f, 0.77f, 0f)             // Top rect
+                                arrayOf(0f, 0.022f, 1f, 1f),        // Bottom rect
+                                arrayOf(0.08f, 0.015f, 0.93f, 1f),  // Middle rect 1
+                                arrayOf(0.15f, 0.008f, 0.87f, 1f),  // Middle rect 2
+                                arrayOf(0.23f, 0f, 0.77f, 1f)       // Top rect
                             ),
-                            25f, 70f, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
+                            screenWidth, screenHeight, ppm, BUILDING_09_NIGHT_WIDTH, BUILDING_09_NIGHT_HEIGHT, initialObstaclePosX, initialObstaclePosY, speed
                         ),
                         GameObjectCpu(
                             "building_10",
                             arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_night_10, null)?.toBitmap(screenWidth, screenHeight)!!),
                             arrayOf(
-                                arrayOf(0.25f, dp2px(29f), 1f, 0f),    // Bottom rect
-                                arrayOf(0.33f, dp2px(20f), 0.87f, 0f)  // Top rect
+                                arrayOf(0.25f, 0.029f, 1f, 1f),   // Bottom rect
+                                arrayOf(0.33f, 0.02f, 0.87f, 1f)  // Top rect
                             ),
-                            13f, 65f, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
+                            screenWidth, screenHeight, ppm, BUILDING_10_NIGHT_WIDTH, BUILDING_10_NIGHT_HEIGHT, initialObstaclePosX, initialObstaclePosY, speed
                         ),
                         GameObjectCpu(
                             "building_11",
                             arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_night_11, null)?.toBitmap(screenWidth, screenHeight)!!),
                             arrayOf(
-                                arrayOf(0f, dp2px(203f), 1f, 0f),       // Bottom rect
-                                arrayOf(0.1f, dp2px(182f), 0.9f, 0f),  // Middle rect
-                                arrayOf(0.2f, dp2px(162f), 0.8f, 0f),  // Middle rect
-                                arrayOf(0.3f, dp2px(140f), 0.7f, 0f),  // Middle rect
-                                arrayOf(0.4f, dp2px(100f), 0.54f, 0f),  // Middle rect
-                                arrayOf(0.46f, 0f, 0.5f, 0f)               // Top rect
+                                arrayOf(0f, 0.183f, 1f, 1f),     // Bottom rect
+                                arrayOf(0.1f, 0.16f, 0.9f, 1f),  // Middle rect
+                                arrayOf(0.2f, 0.14f, 0.8f, 1f),  // Middle rect
+                                arrayOf(0.3f, 0.125f, 0.7f, 1f), // Middle rect
+                                arrayOf(0.4f, 0.09f, 0.54f, 1f), // Middle rect
+                                arrayOf(0.46f, 0f, 0.5f, 1f)     // Top rect
                             ),
-                            13f, 80f, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
+                            screenWidth, screenHeight, ppm, BUILDING_11_NIGHT_WIDTH, BUILDING_11_NIGHT_HEIGHT, initialObstaclePosX, initialObstaclePosY, speed
                         )
                     )
                 }
@@ -635,14 +724,20 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                             arrayOf(0f, 0.3f, 1f, 0.77f),   // Middle rect
                             arrayOf(0.1f, 0f, 0.4f, 0.6f)   // Top rect
                         ),
-                        6f * scaleFactor, 2.5f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed // Measures in meters except pos_y
+                        screenWidth, screenHeight, ppm, VEHICLE_01_WIDTH * scaleFactor, VEHICLE_01_HEIGHT * scaleFactor, initialObstaclePosX, initialObstaclePosY, speed // Measures in meters except pos_y
                     ),
 
                     GameObjectCpu(
                         "vehicle_02",
                         arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.vehicle_dirigible_1, null)?.toBitmap(screenWidth, screenHeight)!!),
-                        arrayOf(arrayOf(0f, 0f, 1f, 1f)),
-                        20f * scaleFactor, 8f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
+                        arrayOf(
+                            arrayOf(0.27f, 0.77f, 0.57f, 1f),     // Bottom rect
+                            arrayOf(0f, 0.2f, 1f, 0.6f),          // Middle rect 1
+                            arrayOf(0.08f, 0.1f, 0.75f, 0.7f),    // Middle rect 2
+                            arrayOf(0.15f, 0.01f, 0.65f, 0.78f),  // Middle rect 3
+                            arrayOf(0.75f, 0f, 0.93f, 0.78f)      // Top rect
+                        ),
+                        screenWidth, screenHeight, ppm, VEHICLE_02_WIDTH * scaleFactor, VEHICLE_02_HEIGHT * scaleFactor, initialObstaclePosX, initialObstaclePosY, speed
                     ),
                     GameObjectCpu(
                         "vehicle_03",
@@ -652,7 +747,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                             arrayOf(0f, 0.05f, 1f, 0.85f),   // Middle rect
                             arrayOf(0.77f, 0f, 1f, 0.92f)    // Top rect
                         ),
-                        20f * scaleFactor, 8f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
+                        screenWidth, screenHeight, ppm, VEHICLE_03_WIDTH * scaleFactor, VEHICLE_03_HEIGHT * scaleFactor, initialObstaclePosX, initialObstaclePosY, speed
                     ),
                     GameObjectCpu(
                         "vehicle_04",
@@ -664,7 +759,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                             arrayOf(0.15f, 0.06f, 0.77f, 0.85f),  // Middle rect 3
                             arrayOf(0.77f, 0f, 0.92f, 0.9f)       // Top rect
                         ),
-                        20f * scaleFactor, 8f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
+                        screenWidth, screenHeight, ppm, VEHICLE_04_WIDTH * scaleFactor, VEHICLE_04_HEIGHT * scaleFactor, initialObstaclePosX, initialObstaclePosY, speed
                     ),
                     GameObjectCpu(
                         "vehicle_05",
@@ -676,7 +771,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                             arrayOf(0.12f, 0f, 0.77f, 0.85f),   // Middle rect 3
                             arrayOf(0.86f, 0f, 0.97f, 0.85f)    // Top rect
                         ),
-                        20f * scaleFactor, 8f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
+                        screenWidth, screenHeight, ppm, VEHICLE_05_WIDTH * scaleFactor, VEHICLE_05_HEIGHT * scaleFactor, initialObstaclePosX, initialObstaclePosY, speed
                     ),
                     GameObjectCpu(
                         "vehicle_06",
@@ -688,7 +783,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                             arrayOf(0.12f, 0f, 0.77f, 0.85f),    // Middle rect 3
                             arrayOf(0.86f, 0.12f, 0.97f, 0.8f)   // Top rect
                         ),
-                        20f * scaleFactor, 8f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
+                        screenWidth, screenHeight, ppm, VEHICLE_06_WIDTH * scaleFactor, VEHICLE_06_HEIGHT * scaleFactor, initialObstaclePosX, initialObstaclePosY, speed
                     ),
                     GameObjectCpu(
                         "vehicle_07",
@@ -700,7 +795,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                             arrayOf(0.12f, 0f, 0.6f, 0.85f),     // Middle rect 3
                             arrayOf(0.82f, 0.17f, 0.99f, 0.7f)   // Top rect
                         ),
-                        20f * scaleFactor, 8f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
+                        screenWidth, screenHeight, ppm, VEHICLE_07_WIDTH * scaleFactor, VEHICLE_07_HEIGHT * scaleFactor, initialObstaclePosX, initialObstaclePosY, speed
                     ),
                     GameObjectCpu(
                         "vehicle_08",
@@ -711,7 +806,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                             arrayOf(0.1f, 0.04f, 0.82f, 0.82f),   // Middle rect 2
                             arrayOf(0.82f, 0.02f, 0.99f, 0.86f)   // Top rect
                         ),
-                        20f * scaleFactor, 8f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
+                        screenWidth, screenHeight, ppm, VEHICLE_08_WIDTH * scaleFactor, VEHICLE_08_HEIGHT * scaleFactor, initialObstaclePosX, initialObstaclePosY, speed
                     ),
 
 
@@ -719,7 +814,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                         "vehicle_09",
                         arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.vehicle_ufo, null)?.toBitmap(screenWidth, screenHeight)!!),
                         arrayOf(arrayOf(0f, 0f, 1f, 1f)),
-                        4.2f * scaleFactor, 2.1f * scaleFactor, screenWidth, screenHeight, ppm, initialObstaclePosX, initialObstaclePosY, speed
+                        screenWidth, screenHeight, ppm, VEHICLE_09_WIDTH * scaleFactor, VEHICLE_09_HEIGHT * scaleFactor, initialObstaclePosX, initialObstaclePosY, speed
                     )
                 )
 
@@ -790,42 +885,6 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                     4f, 2f, bitmaps[8].screenWidth, bitmaps[8].screenHeight, ppm, screenWidth + 20f + 20f, 20f, speed
                 )
             )*/
-
-
-            /*buildings = arrayOf(
-                ResourcesCompat.getDrawable(resources, R.drawable.building_01, null)?.toBitmap(screenWidth/4, screenHeight)!!,
-                ResourcesCompat.getDrawable(resources, R.drawable.building_02, null)?.toBitmap(screenWidth/4, screenHeight)!!,
-                ResourcesCompat.getDrawable(resources, R.drawable.building_03, null)?.toBitmap(screenWidth/3, screenHeight)!!,
-                ResourcesCompat.getDrawable(resources, R.drawable.building_04, null)?.toBitmap(screenWidth/2, screenHeight)!!,
-                ResourcesCompat.getDrawable(resources, R.drawable.building_05, null)?.toBitmap((screenWidth/1.5).toInt(), screenHeight)!!,
-                ResourcesCompat.getDrawable(resources, R.drawable.building_06, null)?.toBitmap((screenWidth/1.2).toInt(), screenHeight)!!,
-                ResourcesCompat.getDrawable(resources, R.drawable.building_07, null)?.toBitmap((screenWidth/3.5).toInt(), screenHeight)!!,
-                ResourcesCompat.getDrawable(resources, R.drawable.building_08, null)?.toBitmap(screenWidth/4, screenHeight)!!,
-                ResourcesCompat.getDrawable(resources, R.drawable.building_09, null)?.toBitmap(screenWidth/3, screenHeight)!!,
-                ResourcesCompat.getDrawable(resources, R.drawable.building_10, null)?.toBitmap(screenWidth/4, screenHeight)!!,
-                ResourcesCompat.getDrawable(resources, R.drawable.building_11, null)?.toBitmap((screenWidth/2.5).toInt(), screenHeight)!!,
-                ResourcesCompat.getDrawable(resources, R.drawable.building_12, null)?.toBitmap(screenWidth/3, screenHeight)!!,
-                ResourcesCompat.getDrawable(resources, R.drawable.building_13, null)?.toBitmap((screenWidth/2.5).toInt(), screenHeight)!!,
-                ResourcesCompat.getDrawable(resources, R.drawable.building_14, null)?.toBitmap(screenWidth/2, screenHeight)!!
-
-                /*ResourcesCompat.getDrawable(resources, R.drawable.building_15, null)?.toBitmap(screenWidth/4, screenHeight)!!,
-                ResourcesCompat.getDrawable(resources, R.drawable.building_16, null)?.toBitmap(screenWidth/4, screenHeight)!!,
-                ResourcesCompat.getDrawable(resources, R.drawable.building_17, null)?.toBitmap(screenWidth/4, screenHeight)!!,
-                ResourcesCompat.getDrawable(resources, R.drawable.building_18, null)?.toBitmap(screenWidth/4, screenHeight)!!,
-                ResourcesCompat.getDrawable(resources, R.drawable.building_19, null)?.toBitmap(screenWidth/4, screenHeight)!!,
-                ResourcesCompat.getDrawable(resources, R.drawable.building_20, null)?.toBitmap(screenWidth/4, screenHeight)!!,
-                ResourcesCompat.getDrawable(resources, R.drawable.building_21, null)?.toBitmap(screenWidth/4, screenHeight)!!,
-                ResourcesCompat.getDrawable(resources, R.drawable.building_22, null)?.toBitmap(screenWidth/4, screenHeight)!!,
-                ResourcesCompat.getDrawable(resources, R.drawable.building_23, null)?.toBitmap(screenWidth/4, screenHeight)!!,
-                ResourcesCompat.getDrawable(resources, R.drawable.building_24, null)?.toBitmap(screenWidth/4, screenHeight)!!,
-                ResourcesCompat.getDrawable(resources, R.drawable.building_25, null)?.toBitmap(screenWidth/4, screenHeight)!!,
-                ResourcesCompat.getDrawable(resources, R.drawable.building_26, null)?.toBitmap(screenWidth/4, screenHeight)!!,
-                ResourcesCompat.getDrawable(resources, R.drawable.building_27, null)?.toBitmap(screenWidth/4, screenHeight)!!*/
-            )*/
-
-
-
-
 
             // ALTERNATIVA COME SOPRA USANDO LE DIMENSIONI ORIGINALI DELLE BITMAP
             /*bitmaps = arrayOf(
@@ -974,15 +1033,13 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
 
                 playerVehicle = GameObjectPlayer(
                     "player_vehicle",
-                    /*arrayOf(
-                        ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_green_0, null)?.toBitmap(screenWidth, screenHeight)!!,
-                        ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_green_1, null)?.toBitmap(screenWidth, screenHeight)!!,
-                        ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_green_2, null)?.toBitmap(screenWidth, screenHeight)!!,
-                        ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_green_3, null)?.toBitmap(screenWidth, screenHeight)!!
-                    ),*/
                     playerBitmaps,
-                    arrayOf(arrayOf(0f, 0f, 1f, 1f)),
-                    10f * scaleFactor, 3f * scaleFactor, screenWidth, screenHeight, ppm, 1f, 20f, 0f // Measures in meters
+                    arrayOf(
+                        arrayOf(0.33f, 0.2f, 0.64f, 0.76f),  // Bottom rect
+                        arrayOf(0.07f, 0.2f, 0.33f, 0.5f),   // Middle rect
+                        arrayOf(0.64f, 0.19f, 0.95f, 0.21f)  // Top rect
+                    ),
+                    screenWidth, screenHeight, ppm, PLAYER_WIDTH * scaleFactor, PLAYER_HEIGHT * scaleFactor, 1f, 20f, 0f // Measures in meters
                 )
 
                 // I put the vehicle at 20 m from the top. See comment above about the height
@@ -1005,7 +1062,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
         // Dispatchers.Default — is used by all standard builders if no dispatcher or any other ContinuationInterceptor is specified in their context.
         // It uses a common pool of shared background threads.
         // This is an appropriate choice for compute-intensive coroutines that consume CPU resources
-        lifecycleScope.launch(Dispatchers.Default) {
+        fragment.lifecycleScope.launch(Dispatchers.Default) {
             while (true) {
                 // Check if the restoring of variables is completed if any
                 if (!resumeDrawing) {
@@ -1083,8 +1140,12 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
                     if (checkCollision()) {
                         gameEnd = true
 
-                        val fragment = findFragment<GameFragment>()
-                        fragment.gameEnd(score.toLong(), WINNER_UNDEFINED)
+                        sensorManager.unregisterListener(this@GameView)
+
+                        withContext(Dispatchers.Main) {
+                            //val fragment = findFragment<GameFragment>()
+                            fragment.gameEnd(score.toLong(), WINNER_UNDEFINED)
+                        }
                     }
 
                     // Update the score
@@ -1170,7 +1231,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
         canvas?.drawText("SCORE " + score.toLong(), 20f, 60f, painterFill)
 
         // Debug (draw player's bounds)
-        var bounds = playerVehicle.getBounds()
+        /*var bounds = playerVehicle.getBounds()
         for (rect in bounds)
             canvas?.drawRect(rect, painterStroke)
 
@@ -1182,7 +1243,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
         // Debug (draw cpuBuilding's bounds)
         bounds = cpuBuilding.getBounds()
         for (rect in bounds)
-            canvas?.drawRect(rect, painterStroke)
+            canvas?.drawRect(rect, painterStroke)*/
 
         // Debug (Draw min e max cpuBuilding heights)
         /*val h = max(width, height)
@@ -1195,9 +1256,9 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
     }
 
     // Convert density independent pixels into screen pixels
-    private fun dp2px(dp: Float): Float {
+    /*private fun dp2px(dp: Float): Float {
         return resources.displayMetrics.density * dp
-    }
+    }*/
 
     // Extract the game object id by object name
     private fun getGameObjectIndexByName(gameObjectName: String): Int {
@@ -1260,7 +1321,10 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
         // Set building pos X in pixel from meters (for efficiency of update calls)
         //cpuBuilding.setX(worldWidth*0.35f * ppm)
         //cpuBuilding.setX(worldWidth*0.1f * ppm)
-        cpuBuilding.setX(13f * ppm)
+        //cpuBuilding.setX(13f * ppm)
+
+        // Set Y of the building in pixels from meters (for efficiency of update calls)
+        cpuBuilding.setY(17f * ppm)
         //=================
 
         // Set Y of the building relative to the height of the current screen orientation
@@ -1270,7 +1334,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
         //cpuBuilding.setY( max(screenWidth, screenHeight) * r )
 
         // Set Y of the building in pixels from meters (for efficiency of update calls)
-        cpuBuilding.setY(buildingPosY * ppm)
+        //cpuBuilding.setY(buildingPosY * ppm)
 
         // Increase the distance between obstacles if the height of
         // the cpuBuilding is greater than a threshold
@@ -1315,7 +1379,8 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
         //val r = (0..20).random() / 100f
 
         // Vehicle pos Y in meters
-        val vehiclePosY = (0..17).random()
+        //val vehiclePosY = (0..17).random()
+        val vehiclePosY = (0..5).random()
 
 
         //=================
@@ -1329,7 +1394,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
         // Set vehicle pos X in pixels from meters (for efficiency of update calls)
         //cpuVehicle.setX(worldWidth*0.35f * ppm)
         //cpuVehicle.setX(worldWidth*0.1f * ppm)
-        cpuVehicle.setX(13f * ppm)
+        //cpuVehicle.setX(13f * ppm)
         //=================
 
         // Set Y of the vehicle relative to the height of the current screen orientation
@@ -1351,15 +1416,16 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
     }
 
     // Check if the user collides with an obstacle
-    private fun checkCollision(): Boolean { return false
-        val rects = cpuBuilding.getBounds()
-        rects.addAll(cpuVehicle.getBounds())
+    private fun checkCollision(): Boolean { //return false
+        val obstacleRects = cpuBuilding.getBounds()
+        obstacleRects.addAll(cpuVehicle.getBounds())
 
-        val playerRect = playerVehicle.getBounds()[0]
+        val playerRects = playerVehicle.getBounds()
 
-        for (r in rects)
-            if (RectF.intersects(playerRect, r))
-                return true
+        for (or in obstacleRects)
+            for (pr in playerRects)
+                if (RectF.intersects(pr, or))
+                    return true
 
         return false
     }
@@ -1413,6 +1479,15 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
         return true
     }
 
+
+
+    // Create a constant to convert nanoseconds to seconds
+    /*private val NS2S = 1.0f / 1000000000.0f
+    private val deltaRotationVector = FloatArray(4) { 0f }
+    private var timestamp = 0f
+    private val EPSILON = 0.1f*/
+
+
     // Detect user motion via sensors
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
     }
@@ -1421,10 +1496,14 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
     }
 
     override fun onSensorChanged(event: SensorEvent?) {
-        when (event?.sensor?.type) {
+        //========================================
+        // VERSIONE 1 (NON GIOCABILE!)
+
+        /*when (event?.sensor?.type) {
             //Sensor.TYPE_ACCELEROMETER  -> lastAcceleration = event.values.clone()
             //Sensor.TYPE_MAGNETIC_FIELD      -> gyroscopeValues    = event.values.clone()
             Sensor.TYPE_GYROSCOPE -> gyroscopeValues = event.values.clone()
+            else                  -> return
         }
 
         // Use X value if portrait mode, Y value otherwise
@@ -1434,20 +1513,140 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
             else                               gyroscopeValues[1]        // Reverse landscape
 
         // Enhance gyroscope value
-        if (value > 0f)
+        /*if (value > 0f)
             lastGyroscopeInput = max(1f, min(value * 10f, 20f))
         else if (value < 0f)
-            lastGyroscopeInput = min(-1f, max(value * 10f, -20f))
+            lastGyroscopeInput = min(-1f, max(value * 10f, -20f))*/
+        if (value > 0.4f)
+            lastGyroscopeInput = max(1f, min(value * 30f, 60f))
+        else if (value < -0.4f)
+            lastGyroscopeInput = min(-1f, max(value * 30f, -60f))
 
-        /*Log.d("SENSOR", "****************")
+        Log.d("SENSOR", "****************")
         Log.d("SENSOR", "value: $value")
         Log.d("SENSOR", "lastGyroscopeInput: $lastGyroscopeInput")
         Log.d("SENSOR", "rotation: $rotation")
         Log.d("SENSOR", "display.rotation: ${display?.rotation}")*/
+        //========================================
+
+
+
+        //========================================
+        // VERSIONE 2 (BUONA)
+
+        when (event?.sensor?.type) {
+            //Sensor.TYPE_ACCELEROMETER  -> lastAcceleration = event.values.clone()
+            //Sensor.TYPE_MAGNETIC_FIELD      -> gyroscopeValues    = event.values.clone()
+            Sensor.TYPE_GYROSCOPE -> gyroscopeValues = event.values.clone()
+            else                  -> return
+        }
+
+        //if (timestamp != 0f) {
+            // Calculate the delta angular speed
+        //    val dt = (event.timestamp - timestamp) * NS2S
+
+            // Axis of the rotation sample, not normalized yet
+            val axisX = event.values[0]
+            val axisY = event.values[1]
+            val axisZ = event.values[2]
+
+            // Calculate the angular speed of the sample
+            val angularSpeed = sqrt(axisX * axisX + axisY * axisY + axisZ * axisZ)
+
+
+            //=========================================
+            // PROVO AD USARE LA VELOCITÀ ANGOLARE 1
+
+            // Use X value if portrait mode, Y value otherwise
+            val value =
+                if (width < height)                axisX        // Portrait
+                else if (display?.rotation == 1)   axisY * -1f  // Landscape
+                else                               axisY        // Reverse landscape
+
+            // Filter the noise and enhance the angular speed
+            if (value > 0.2f)
+                lastGyroscopeInput = min(angularSpeed * 35f, 30f)
+            else if (value < -0.2f)
+                lastGyroscopeInput = max(angularSpeed * -35f, -30f)
+            /*else {
+                // Brake
+                if (lastGyroscopeInput > 0f)
+                    lastGyroscopeInput = max(0f, lastGyroscopeInput-1f)
+                else if (lastGyroscopeInput < 0f)
+                    lastGyroscopeInput = min(0f, lastGyroscopeInput+1f)
+            }*/
+
+            Log.d("SENSOR", "****************")
+            //Log.d("SENSOR", "dt: $dt")
+            Log.d("SENSOR", "value: $axisX")
+            Log.d("SENSOR", "angular speed: $angularSpeed")
+            //Log.d("SENSOR", "angular speed * dt: ${angularSpeed*dt}")
+            Log.d("SENSOR", "lastGyroscopeInput: $lastGyroscopeInput")
+            //=========================================
+        /*}
+
+        timestamp = event.timestamp.toFloat()*/
+
+
+
+
+
+
+
+
+
+
+        // From Google tutorial
+        // This timestep's delta rotation to be multiplied by the current rotation
+        // after computing it from the gyro sample data
+        /*if (timestamp != 0f && event != null) {
+            val dt = (event.timestamp - timestamp) * NS2S
+
+            // Axis of the rotation sample, not normalized yet
+            var axisX: Float = event.values[0]
+            var axisY: Float = event.values[1]
+            var axisZ: Float = event.values[2]
+
+            // Calculate the angular speed of the sample
+            val omegaMagnitude: Float = sqrt(axisX * axisX + axisY * axisY + axisZ * axisZ)
+
+            // Normalize the rotation vector if it's big enough to get the axis
+            // (that is, EPSILON should represent your maximum allowable margin of error)
+            if (omegaMagnitude > EPSILON) {
+                axisX /= omegaMagnitude
+                axisY /= omegaMagnitude
+                axisZ /= omegaMagnitude
+            }
+
+            // Integrate around this axis with the angular speed by the timestep
+            // in order to get a delta rotation from this sample over the timestep.
+            // We will convert this axis-angle representation of the delta rotation
+            // into a quaternion before turning it into the rotation matrix
+            val thetaOverTwo: Float = omegaMagnitude * dt / 2.0f
+            val sinThetaOverTwo: Float = sin(thetaOverTwo)
+            val cosThetaOverTwo: Float = cos(thetaOverTwo)
+
+            deltaRotationVector[0] = sinThetaOverTwo * axisX
+            deltaRotationVector[1] = sinThetaOverTwo * axisY
+            deltaRotationVector[2] = sinThetaOverTwo * axisZ
+            deltaRotationVector[3] = cosThetaOverTwo
+        }
+
+        timestamp = event?.timestamp?.toFloat() ?: 0f
+
+        val deltaRotationMatrix = FloatArray(9) { 0f }
+        SensorManager.getRotationMatrixFromVector(deltaRotationMatrix, deltaRotationVector)*/
+
+        // User code should concatenate the delta rotation we computed with the current rotation
+        // in order to get the updated rotation.
+        // rotationCurrent = rotationCurrent * deltaRotationMatrix
     }
 
     // Save game variables
     override fun onSaveInstanceState(): Parcelable? {
+        if (!::playerVehicle.isInitialized || !::cpuBuilding.isInitialized || !::cpuVehicle.isInitialized )
+            return null
+
         val bundle = Bundle()
         bundle.putParcelable("superState", super.onSaveInstanceState())
 
@@ -1519,7 +1718,7 @@ class GameView(context: Context?, lifecycleScope: CoroutineScope) : View(context
             val width  = resources.displayMetrics.widthPixels
             val height = resources.displayMetrics.heightPixels
 
-            lifecycleScope.launch(Dispatchers.Default) {
+            fragment.lifecycleScope.launch(Dispatchers.Default) {
                 val restorePlayerVehicle = async {
                     val py = state.getFloat("playerPosY")
 

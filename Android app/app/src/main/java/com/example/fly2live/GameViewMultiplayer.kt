@@ -10,18 +10,96 @@ import android.hardware.SensorManager
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
+import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.findFragment
+import androidx.lifecycle.lifecycleScope
 import com.example.fly2live.configuration.Configuration
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_01_DAY_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_01_DAY_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_01_NIGHT_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_01_NIGHT_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_02_DAY_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_02_DAY_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_02_NIGHT_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_02_NIGHT_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_03_DAY_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_03_DAY_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_03_NIGHT_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_03_NIGHT_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_04_DAY_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_04_DAY_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_04_NIGHT_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_04_NIGHT_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_05_DAY_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_05_DAY_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_05_NIGHT_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_05_NIGHT_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_06_DAY_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_06_DAY_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_06_NIGHT_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_06_NIGHT_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_07_DAY_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_07_DAY_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_07_NIGHT_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_07_NIGHT_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_08_DAY_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_08_DAY_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_08_NIGHT_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_08_NIGHT_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_09_DAY_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_09_DAY_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_09_NIGHT_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_09_NIGHT_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_10_DAY_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_10_DAY_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_10_NIGHT_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_10_NIGHT_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_11_DAY_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_11_DAY_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_11_NIGHT_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_11_NIGHT_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_12_DAY_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_12_DAY_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_13_DAY_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_13_DAY_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_14_DAY_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_14_DAY_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_15_DAY_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_15_DAY_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_16_DAY_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_16_DAY_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_17_DAY_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.BUILDING_17_DAY_WIDTH
 import com.example.fly2live.configuration.Configuration.Companion.MSG_CODE_GAME_END
 import com.example.fly2live.configuration.Configuration.Companion.PLAYER_HEIGHT
 import com.example.fly2live.configuration.Configuration.Companion.PLAYER_ID
 import com.example.fly2live.configuration.Configuration.Companion.PLAYER_WIDTH
 import com.example.fly2live.configuration.Configuration.Companion.REQ_CODE_NEW_MOVE
+import com.example.fly2live.configuration.Configuration.Companion.SCENARIO
+import com.example.fly2live.configuration.Configuration.Companion.SCENARIO_CITY_DAY
 import com.example.fly2live.configuration.Configuration.Companion.SOCKET_INSTANCE
+import com.example.fly2live.configuration.Configuration.Companion.VEHICLE_01_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.VEHICLE_01_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.VEHICLE_02_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.VEHICLE_02_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.VEHICLE_03_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.VEHICLE_03_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.VEHICLE_04_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.VEHICLE_04_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.VEHICLE_05_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.VEHICLE_05_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.VEHICLE_06_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.VEHICLE_06_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.VEHICLE_07_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.VEHICLE_07_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.VEHICLE_08_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.VEHICLE_08_WIDTH
+import com.example.fly2live.configuration.Configuration.Companion.VEHICLE_09_HEIGHT
+import com.example.fly2live.configuration.Configuration.Companion.VEHICLE_09_WIDTH
 import com.example.fly2live.configuration.Configuration.Companion.WINNER_ADVERSARY
 import com.example.fly2live.configuration.Configuration.Companion.WINNER_PLAYER
 import com.example.fly2live.configuration.Configuration.Companion.WINNER_UNDEFINED
@@ -29,18 +107,16 @@ import io.socket.client.Socket
 import kotlinx.coroutines.*
 import org.json.JSONException
 import org.json.JSONObject
+import java.lang.IllegalStateException
+import java.lang.Thread.sleep
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.sqrt
 
 
-class GameViewMultiplayer(context: Context?, lifecycleScope: CoroutineScope) : View(context), View.OnTouchListener, SensorEventListener2 {
-    //class GameView(context: Context?) : View(context), View.OnTouchListener, SensorEventListener2 {
-    private val lifecycleScope = lifecycleScope
-    /*private var lifecycleScope: CoroutineScope? = null
-
-    constructor(context: Context?, lifecycleScope: CoroutineScope) : this(context) {
-        this.lifecycleScope = lifecycleScope
-    }*/
+class GameViewMultiplayer(context: Context?, fragment: GameFragment) : View(context), View.OnTouchListener, SensorEventListener2 {
+    // Fragment associated with this view
+    private val fragment = fragment
 
     // Socket io
     private lateinit var mSocket: Socket
@@ -61,19 +137,19 @@ class GameViewMultiplayer(context: Context?, lifecycleScope: CoroutineScope) : V
 
 
     // Sensors values
-    private var lastAcceleration = FloatArray(3)
+    private var sensorManager: SensorManager
+    //private var lastAcceleration = FloatArray(3)
     private var gyroscopeValues = FloatArray(3)
     private var previousGyroscopeInput = 0f // meters
 
 
     // World constants
-    private val worldWidth  = 50f // meters
+    private val worldWidth  = 55f // meters
     //private var worldHeight = 60f // meters
 
     // Pixel per meter
     private var ppm = 1f
 
-    private var speed = 10f // m/s
     private var score = 0f  // meters traveled
     private var winner = -1 // -1, 0, 1, 2 -> -1 undefined, 0 if player loses, 1 if player wins, 2 if the players die in the same frame
 
@@ -84,12 +160,15 @@ class GameViewMultiplayer(context: Context?, lifecycleScope: CoroutineScope) : V
     // Variable to start drawing when game has been initialized
     private var startDrawing = false
 
-    // Variable for resume drawing when game variables has been restored
-    private var resumeDrawing = true
-
     // Variables for text to show when game is loading
     private val textRect    = Rect()
     private val loadingText = resources.getString(R.string.loading)
+
+
+    // For debug
+    /*private val cpuBuildingBounds = ArrayList<RectF>()
+    private val cpuVehicleBounds  = ArrayList<RectF>()
+    private var debugBoundsCpuObject = 0*/
 
 
     // Painter for text
@@ -100,16 +179,24 @@ class GameViewMultiplayer(context: Context?, lifecycleScope: CoroutineScope) : V
     }
 
     // Painter for the debug of bitmaps' physics bounds
-    private val painterStroke = Paint().apply {
+    /*private val painterStroke = Paint().apply {
         style       = Paint.Style.STROKE
         color       = Color.BLACK
         strokeWidth = 3f
+    }*/
+
+    // Painter for displaying a rect at the game start so that the player is aware of his game object
+    private val painterPlayer = Paint().apply {
+        style       = Paint.Style.STROKE
+        color       = Color.RED
+        strokeWidth = 3f
     }
+
 
     init {
         setOnTouchListener(this)
 
-        val sensorManager = context?.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        sensorManager = context?.getSystemService(Context.SENSOR_SERVICE) as SensorManager
 
         /*sensorManager.registerListener(
             this,
@@ -149,13 +236,13 @@ class GameViewMultiplayer(context: Context?, lifecycleScope: CoroutineScope) : V
         // Dispatchers.Default — is used by all standard builders if no dispatcher or any other ContinuationInterceptor is specified in their context.
         // It uses a common pool of shared background threads.
         // This is an appropriate choice for compute-intensive coroutines that consume CPU resources
-        lifecycleScope.launch(Dispatchers.Default) {
+        fragment.lifecycleScope.launch(Dispatchers.Default) {
             // Retrieve current socket
             mSocket = SOCKET_INSTANCE!!
 
             withContext(Dispatchers.Main) {
                 // Override back behavior
-                (context as FragmentActivity).onBackPressedDispatcher.addCallback(context as FragmentActivity) {
+                (context as FragmentActivity).onBackPressedDispatcher.addCallback(fragment) {
                     // Remove all listeners (for any event)
                     mSocket.off()
 
@@ -238,95 +325,94 @@ class GameViewMultiplayer(context: Context?, lifecycleScope: CoroutineScope) : V
                 Log.d("COROUTINE", "Load buildings")
 
                 // Convert the correct scenario images into bitmaps once
-                if (Configuration.SCENARIO == Configuration.SCENARIO_CITY_DAY) {
+                if (SCENARIO == SCENARIO_CITY_DAY) {
                     bg = ResourcesCompat.getDrawable(resources, R.drawable.city_bg_day, null)?.toBitmap(screenWidth, screenHeight)!!
 
                     buildings = arrayOf(
                         Object(
                             "building_01",
                             arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_day_01, null)?.toBitmap(screenWidth, screenHeight)!!),
-                            screenWidth, screenHeight, ppm, 25f, 70f, initialObstaclePosX, initialObstaclePosY // Measures in meters except screen dimensions
+                            screenWidth, screenHeight, ppm, BUILDING_01_DAY_WIDTH, BUILDING_01_DAY_HEIGHT, initialObstaclePosX, initialObstaclePosY // Measures in meters except screen dimensions
                         ),
                         Object(
                             "building_02",
                             arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_day_02, null)?.toBitmap(screenWidth, screenHeight)!!),
-                            screenWidth, screenHeight, ppm, 10f, 80f, initialObstaclePosX, initialObstaclePosY
+                            screenWidth, screenHeight, ppm, BUILDING_02_DAY_WIDTH, BUILDING_02_DAY_HEIGHT, initialObstaclePosX, initialObstaclePosY
                         ),
                         Object(
                             "building_03",
                             arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_day_03, null)?.toBitmap(screenWidth, screenHeight)!!),
-                            screenWidth, screenHeight, ppm, 25f, 110f,initialObstaclePosX, initialObstaclePosY
+                            screenWidth, screenHeight, ppm, BUILDING_03_DAY_WIDTH, BUILDING_03_DAY_HEIGHT,initialObstaclePosX, initialObstaclePosY
                         ),
                         Object(
                             "building_04",
                             arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_day_04, null)?.toBitmap(screenWidth, screenHeight)!!),
-                            screenWidth, screenHeight, ppm, 35f, 90f, initialObstaclePosX, initialObstaclePosY
+                            screenWidth, screenHeight, ppm, BUILDING_04_DAY_WIDTH, BUILDING_04_DAY_HEIGHT, initialObstaclePosX, initialObstaclePosY
                         ),
                         Object(
                             "building_05",
                             arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_day_05, null)?.toBitmap(screenWidth, screenHeight)!!),
-                            //arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_day_05, null)?.toBitmap()!!),
-                            screenWidth, screenHeight, ppm, 35f, 70f, initialObstaclePosX, initialObstaclePosY
+                            screenWidth, screenHeight, ppm, BUILDING_05_DAY_WIDTH, BUILDING_05_DAY_HEIGHT, initialObstaclePosX, initialObstaclePosY
                         ),
                         Object(
                             "building_06",
                             arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_day_06, null)?.toBitmap(screenWidth, screenHeight)!!),
-                            screenWidth, screenHeight, ppm, 45f, 50f, initialObstaclePosX, initialObstaclePosY
+                            screenWidth, screenHeight, ppm, BUILDING_06_DAY_WIDTH, BUILDING_06_DAY_HEIGHT, initialObstaclePosX, initialObstaclePosY
                         ),
                         Object(
                             "building_07",
                             arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_day_07, null)?.toBitmap(screenWidth, screenHeight)!!),
-                            screenWidth, screenHeight, ppm, 15f, 80f, initialObstaclePosX, initialObstaclePosY
+                            screenWidth, screenHeight, ppm, BUILDING_07_DAY_WIDTH, BUILDING_07_DAY_HEIGHT, initialObstaclePosX, initialObstaclePosY
                         ),
                         Object(
                             "building_08",
                             arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_day_08, null)?.toBitmap(screenWidth, screenHeight)!!),
-                            screenWidth, screenHeight, ppm, 13f, 70f, initialObstaclePosX, initialObstaclePosY
+                            screenWidth, screenHeight, ppm, BUILDING_08_DAY_WIDTH, BUILDING_08_DAY_HEIGHT, initialObstaclePosX, initialObstaclePosY
                         ),
                         Object(
                             "building_09",
                             arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_day_09, null)?.toBitmap(screenWidth, screenHeight)!!),
-                            screenWidth, screenHeight, ppm, 17f, 70f, initialObstaclePosX, initialObstaclePosY
+                            screenWidth, screenHeight, ppm, BUILDING_09_DAY_WIDTH, BUILDING_09_DAY_HEIGHT, initialObstaclePosX, initialObstaclePosY
                         ),
                         Object(
                             "building_10",
                             arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_day_10, null)?.toBitmap(screenWidth, screenHeight)!!),
-                            screenWidth, screenHeight, ppm, 13f, 60f, initialObstaclePosX, initialObstaclePosY
+                            screenWidth, screenHeight, ppm, BUILDING_10_DAY_WIDTH, BUILDING_10_DAY_HEIGHT, initialObstaclePosX, initialObstaclePosY
                         ),
                         Object(
                             "building_11",
                             arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_day_11, null)?.toBitmap(screenWidth, screenHeight)!!),
-                            screenWidth, screenHeight, ppm, 17f, 55f, initialObstaclePosX, initialObstaclePosY
+                            screenWidth, screenHeight, ppm, BUILDING_11_DAY_WIDTH, BUILDING_11_DAY_HEIGHT, initialObstaclePosX, initialObstaclePosY
                         ),
                         Object(
                             "building_12",
                             arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_day_12, null)?.toBitmap(screenWidth, screenHeight)!!),
-                            screenWidth, screenHeight, ppm, 15f, 50f, initialObstaclePosX, initialObstaclePosY
+                            screenWidth, screenHeight, ppm, BUILDING_12_DAY_WIDTH, BUILDING_12_DAY_HEIGHT, initialObstaclePosX, initialObstaclePosY
                         ),
                         Object(
                             "building_13",
                             arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_day_13, null)?.toBitmap(screenWidth, screenHeight)!!),
-                            screenWidth, screenHeight, ppm, 20f, 50f, initialObstaclePosX, initialObstaclePosY
+                            screenWidth, screenHeight, ppm, BUILDING_13_DAY_WIDTH, BUILDING_13_DAY_HEIGHT, initialObstaclePosX, initialObstaclePosY
                         ),
                         Object(
                             "building_14",
                             arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_day_14, null)?.toBitmap(screenWidth, screenHeight)!!),
-                            screenWidth, screenHeight, ppm, 30f, 55f, initialObstaclePosX, initialObstaclePosY
+                            screenWidth, screenHeight, ppm, BUILDING_14_DAY_WIDTH, BUILDING_14_DAY_HEIGHT, initialObstaclePosX, initialObstaclePosY
                         ),
                         Object(
                             "building_15",
                             arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_day_15, null)?.toBitmap(screenWidth, screenHeight)!!),
-                            screenWidth, screenHeight, ppm, 13f, 55f, initialObstaclePosX, initialObstaclePosY
+                            screenWidth, screenHeight, ppm, BUILDING_15_DAY_WIDTH, BUILDING_15_DAY_HEIGHT, initialObstaclePosX, initialObstaclePosY
                         ),
                         Object(
                             "building_16",
                             arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_day_16, null)?.toBitmap(screenWidth, screenHeight)!!),
-                            screenWidth, screenHeight, ppm, 20f, 50f, initialObstaclePosX, initialObstaclePosY
+                            screenWidth, screenHeight, ppm, BUILDING_16_DAY_WIDTH, BUILDING_16_DAY_HEIGHT, initialObstaclePosX, initialObstaclePosY
                         ),
                         Object(
                             "building_17",
                             arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_day_17, null)?.toBitmap(screenWidth, screenHeight)!!),
-                            screenWidth, screenHeight, ppm, 28f, 60f, initialObstaclePosX, initialObstaclePosY
+                            screenWidth, screenHeight, ppm, BUILDING_17_DAY_WIDTH, BUILDING_17_DAY_HEIGHT, initialObstaclePosX, initialObstaclePosY
                         )
                     )
                 }
@@ -337,57 +423,57 @@ class GameViewMultiplayer(context: Context?, lifecycleScope: CoroutineScope) : V
                         Object(
                             "building_01",
                             arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_night_01, null)?.toBitmap(screenWidth, screenHeight)!!),
-                            screenWidth, screenHeight, ppm, 15f, 100f, initialObstaclePosX, initialObstaclePosY
+                            screenWidth, screenHeight, ppm, BUILDING_01_NIGHT_WIDTH, BUILDING_01_NIGHT_HEIGHT, initialObstaclePosX, initialObstaclePosY
                         ),
                         Object(
                             "building_02",
                             arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_night_02, null)?.toBitmap(screenWidth, screenHeight)!!),
-                            screenWidth, screenHeight, ppm, 10f, 110f, initialObstaclePosX, initialObstaclePosY
+                            screenWidth, screenHeight, ppm,  BUILDING_02_NIGHT_WIDTH,  BUILDING_02_NIGHT_HEIGHT, initialObstaclePosX, initialObstaclePosY
                         ),
                         Object(
                             "building_03",
                             arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_night_03, null)?.toBitmap(screenWidth, screenHeight)!!),
-                            screenWidth, screenHeight, ppm, 18f, 70f, initialObstaclePosX, initialObstaclePosY
+                            screenWidth, screenHeight, ppm,  BUILDING_03_NIGHT_WIDTH,  BUILDING_03_NIGHT_HEIGHT, initialObstaclePosX, initialObstaclePosY
                         ),
                         Object(
                             "building_04",
                             arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_night_04, null)?.toBitmap(screenWidth, screenHeight)!!),
-                            screenWidth, screenHeight, ppm, 20f, 70f, initialObstaclePosX, initialObstaclePosY
+                            screenWidth, screenHeight, ppm,  BUILDING_04_NIGHT_WIDTH,  BUILDING_04_NIGHT_HEIGHT, initialObstaclePosX, initialObstaclePosY
                         ),
                         Object(
                             "building_05",
                             arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_night_05, null)?.toBitmap(screenWidth, screenHeight)!!),
-                            screenWidth, screenHeight, ppm, 25f, 60f, initialObstaclePosX, initialObstaclePosY
+                            screenWidth, screenHeight, ppm,  BUILDING_05_NIGHT_WIDTH,  BUILDING_05_NIGHT_HEIGHT, initialObstaclePosX, initialObstaclePosY
                         ),
                         Object(
                             "building_06",
                             arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_night_06, null)?.toBitmap(screenWidth, screenHeight)!!),
-                            screenWidth, screenHeight, ppm, 25f, 100f, initialObstaclePosX, initialObstaclePosY // Measures in meters except pos_y
+                            screenWidth, screenHeight, ppm,  BUILDING_06_NIGHT_WIDTH,  BUILDING_06_NIGHT_HEIGHT, initialObstaclePosX, initialObstaclePosY // Measures in meters except pos_y
                         ),
                         Object(
                             "building_07",
                             arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_night_07, null)?.toBitmap(screenWidth, screenHeight)!!),
-                            screenWidth, screenHeight, ppm, 18f, 80f, initialObstaclePosX, initialObstaclePosY // Measures in meters except pos_y
+                            screenWidth, screenHeight, ppm,  BUILDING_07_NIGHT_WIDTH,  BUILDING_07_NIGHT_HEIGHT, initialObstaclePosX, initialObstaclePosY // Measures in meters except pos_y
                         ),
                         Object(
                             "building_08",
                             arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_night_08, null)?.toBitmap(screenWidth, screenHeight)!!),
-                            screenWidth, screenHeight, ppm, 17f, 70f, initialObstaclePosX, initialObstaclePosY
+                            screenWidth, screenHeight, ppm,  BUILDING_08_NIGHT_WIDTH,  BUILDING_08_NIGHT_HEIGHT, initialObstaclePosX, initialObstaclePosY
                         ),
                         Object(
                             "building_09",
                             arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_night_09, null)?.toBitmap(screenWidth, screenHeight)!!),
-                            screenWidth, screenHeight, ppm, 25f, 70f, initialObstaclePosX, initialObstaclePosY
+                            screenWidth, screenHeight, ppm,  BUILDING_09_NIGHT_WIDTH,  BUILDING_09_NIGHT_HEIGHT, initialObstaclePosX, initialObstaclePosY
                         ),
                         Object(
                             "building_10",
                             arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_night_10, null)?.toBitmap(screenWidth, screenHeight)!!),
-                            screenWidth, screenHeight, ppm, 13f, 65f, initialObstaclePosX, initialObstaclePosY
+                            screenWidth, screenHeight, ppm,  BUILDING_10_NIGHT_WIDTH,  BUILDING_10_NIGHT_HEIGHT, initialObstaclePosX, initialObstaclePosY
                         ),
                         Object(
                             "building_11",
                             arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_night_11, null)?.toBitmap(screenWidth, screenHeight)!!),
-                            screenWidth, screenHeight, ppm, 13f, 80f, initialObstaclePosX, initialObstaclePosY
+                            screenWidth, screenHeight, ppm,  BUILDING_11_NIGHT_WIDTH,  BUILDING_11_NIGHT_HEIGHT, initialObstaclePosX, initialObstaclePosY
                         )
                     )
                 }
@@ -402,50 +488,50 @@ class GameViewMultiplayer(context: Context?, lifecycleScope: CoroutineScope) : V
                     Object(
                         "vehicle_01",
                         arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.vehicle_biplane, null)?.toBitmap(screenWidth, screenHeight)!!),
-                        screenWidth, screenHeight, ppm, 6f, 2.5f, initialObstaclePosX, initialObstaclePosY // Measures in meters except screen dimensions
+                        screenWidth, screenHeight, ppm, VEHICLE_01_WIDTH, VEHICLE_01_HEIGHT, initialObstaclePosX, initialObstaclePosY // Measures in meters except screen dimensions
                     ),
 
                     Object(
                         "vehicle_02",
                         arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.vehicle_dirigible_1, null)?.toBitmap(screenWidth, screenHeight)!!),
-                        screenWidth, screenHeight, ppm, 20f, 8f, initialObstaclePosX, initialObstaclePosY
+                        screenWidth, screenHeight, ppm, VEHICLE_02_WIDTH, VEHICLE_02_HEIGHT, initialObstaclePosX, initialObstaclePosY
                     ),
                     Object(
                         "vehicle_03",
                         arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.vehicle_dirigible_2, null)?.toBitmap(screenWidth, screenHeight)!!),
-                        screenWidth, screenHeight, ppm, 20f, 8f, initialObstaclePosX, initialObstaclePosY
+                        screenWidth, screenHeight, ppm, VEHICLE_03_WIDTH, VEHICLE_03_HEIGHT, initialObstaclePosX, initialObstaclePosY
                     ),
                     Object(
                         "vehicle_04",
                         arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.vehicle_dirigible_3, null)?.toBitmap(screenWidth, screenHeight)!!),
-                        screenWidth, screenHeight, ppm, 20f, 8f, initialObstaclePosX, initialObstaclePosY
+                        screenWidth, screenHeight, ppm, VEHICLE_04_WIDTH, VEHICLE_04_HEIGHT, initialObstaclePosX, initialObstaclePosY
                     ),
                     Object(
                         "vehicle_05",
                         arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.vehicle_dirigible_4, null)?.toBitmap(screenWidth, screenHeight)!!),
-                        screenWidth, screenHeight, ppm, 20f, 8f, initialObstaclePosX, initialObstaclePosY
+                        screenWidth, screenHeight, ppm, VEHICLE_05_WIDTH, VEHICLE_05_HEIGHT, initialObstaclePosX, initialObstaclePosY
                     ),
                     Object(
                         "vehicle_06",
                         arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.vehicle_dirigible_5, null)?.toBitmap(screenWidth, screenHeight)!!),
-                        screenWidth, screenHeight, ppm, 20f, 8f, initialObstaclePosX, initialObstaclePosY
+                        screenWidth, screenHeight, ppm, VEHICLE_06_WIDTH, VEHICLE_06_HEIGHT, initialObstaclePosX, initialObstaclePosY
                     ),
                     Object(
                         "vehicle_07",
                         arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.vehicle_dirigible_6, null)?.toBitmap(screenWidth, screenHeight)!!),
-                        screenWidth, screenHeight, ppm, 20f, 8f, initialObstaclePosX, initialObstaclePosY
+                        screenWidth, screenHeight, ppm, VEHICLE_07_WIDTH, VEHICLE_07_HEIGHT, initialObstaclePosX, initialObstaclePosY
                     ),
                     Object(
                         "vehicle_08",
                         arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.vehicle_dirigible_7, null)?.toBitmap(screenWidth, screenHeight)!!),
-                        screenWidth, screenHeight, ppm, 20f, 8f, initialObstaclePosX, initialObstaclePosY
+                        screenWidth, screenHeight, ppm, VEHICLE_08_WIDTH, VEHICLE_08_HEIGHT, initialObstaclePosX, initialObstaclePosY
                     ),
 
 
                     Object(
                         "vehicle_09",
                         arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.vehicle_ufo, null)?.toBitmap(screenWidth, screenHeight)!!),
-                        screenWidth, screenHeight, ppm, 4.2f, 2.1f, initialObstaclePosX, initialObstaclePosY
+                        screenWidth, screenHeight, ppm, VEHICLE_09_WIDTH, VEHICLE_09_HEIGHT, initialObstaclePosX, initialObstaclePosY
                     )
                 )
 
@@ -454,6 +540,7 @@ class GameViewMultiplayer(context: Context?, lifecycleScope: CoroutineScope) : V
 
             val loadPlayers = async {
                 Log.d("COROUTINE", "Load players vehicles")
+
                 val playerVehicles = arrayOf(
                     ObjectPlayer(
                         "player_0",
@@ -494,6 +581,39 @@ class GameViewMultiplayer(context: Context?, lifecycleScope: CoroutineScope) : V
             mSocket.emit("client ready", json)
             Log.d("json", "Client ready message sent to the server")
 
+            mSocket.on("client ready response") {args ->
+                Log.d("json", "Client ready response from server arrived in game view")
+
+                // Get data
+                val data = args[0] as JSONObject
+                val error: Boolean
+                val messageCode: Int
+
+                try {
+                    error           = data.getBoolean("error")
+                    messageCode     = data.getInt("msg_code")
+                } catch (e: JSONException) {
+                    e.printStackTrace()
+                    Log.d("json", "Error in retrieving data from server")
+                    return@on
+                }
+
+                // Check if an error occur (only at server side can happen as the client just receives data) or
+                // if game ended (the other player quit during loading)
+                if (error || messageCode == MSG_CODE_GAME_END) {
+                    // Remove all listeners (for any event)
+                    mSocket.off()
+
+                    // Disconnect the socket
+                    mSocket.disconnect()
+
+                    // Fragment navigation requires the main thread
+                    fragment.lifecycleScope.launch(Dispatchers.Main) {
+                        gameEnd()
+                    }
+                }
+            }
+
 
             mSocket.on(Socket.EVENT_DISCONNECT) { args ->
                 Log.d("json", "disconnected from the server in game view")
@@ -510,7 +630,8 @@ class GameViewMultiplayer(context: Context?, lifecycleScope: CoroutineScope) : V
 
 
                 // Fragment navigation requires the main thread
-                lifecycleScope.launch(Dispatchers.Main) {
+                fragment.lifecycleScope.launch(Dispatchers.Main) {
+                    Toast.makeText(context, "Disconnected from server", Toast.LENGTH_SHORT).show()
                     gameEnd()
                 }
             }
@@ -543,14 +664,26 @@ class GameViewMultiplayer(context: Context?, lifecycleScope: CoroutineScope) : V
                     return@on
                 }
 
-                // Check if a message occur, (only at server side can happen as the client just receives data)
+                // Check if an error occur (only at server side can happen as the client just receives data)
                 if (error) {
                     Log.d("json", "Server error")
-                    return@on
+
+                    // Remove all listeners (for any event)
+                    mSocket.off()
+
+                    // Disconnect the socket
+                    mSocket.disconnect()
+
+                    // Fragment navigation requires the main thread
+                    fragment.lifecycleScope.launch(Dispatchers.Main) {
+                        gameEnd()
+                    }
                 }
 
                 Log.d("json", "Update CPU objects")
+                //debugBoundsCpuObject = 0
                 cpuBuilding = updateObjectCpu(cpuBuildingJson, buildings, cpuBuilding)
+                //debugBoundsCpuObject = 1
                 cpuVehicle  = updateObjectCpu(cpuVehicleJson, vehicles, cpuVehicle)
 
                 Log.d("json", "Update players objects")
@@ -572,7 +705,7 @@ class GameViewMultiplayer(context: Context?, lifecycleScope: CoroutineScope) : V
                     mSocket.disconnect()
 
                     // Fragment navigation requires the main thread
-                    lifecycleScope.launch(Dispatchers.Main) {
+                    fragment.lifecycleScope.launch(Dispatchers.Main) {
                         gameEnd()
                     }
                 }
@@ -584,6 +717,8 @@ class GameViewMultiplayer(context: Context?, lifecycleScope: CoroutineScope) : V
             }
         }
     }
+
+    private var drawCount = 0
 
     // Use onDraw to just draw on canvas. Game logic in multithreading
     override fun onDraw(canvas: Canvas?) {
@@ -614,6 +749,8 @@ class GameViewMultiplayer(context: Context?, lifecycleScope: CoroutineScope) : V
             return
         }
 
+        drawCount++
+
         painterFill.textSize = 50f
 
         // Draw background
@@ -631,16 +768,39 @@ class GameViewMultiplayer(context: Context?, lifecycleScope: CoroutineScope) : V
         if (playerNumber == 0) {
             canvas?.drawBitmap(player1Vehicle.getBitmap(), player1Vehicle.getMatrix(), null)
             canvas?.drawBitmap(player0Vehicle.getBitmap(), player0Vehicle.getMatrix(), null)
+
+            // Check if the initial rect to be aware of the player game object has to be drawn
+            if (drawCount < 300) {
+                val playerX = player0Vehicle.getX()
+                val playerY = player0Vehicle.getY()
+                canvas?.drawRect(playerX, playerY, playerX + player0Vehicle.getBitmapScaledWidth(), playerY + player0Vehicle.getBitmapScaledHeight(), painterPlayer)
+            }
         }
         else {
             canvas?.drawBitmap(player0Vehicle.getBitmap(), player0Vehicle.getMatrix(), null)
             canvas?.drawBitmap(player1Vehicle.getBitmap(), player1Vehicle.getMatrix(), null)
+
+            // Check if the initial rect to be aware of the player game object has to be drawn
+            if (drawCount < 300) {
+                painterPlayer.color = Color.YELLOW
+                val playerX = player1Vehicle.getX()
+                val playerY = player1Vehicle.getY()
+                canvas?.drawRect(playerX, playerY, playerX + player0Vehicle.getBitmapScaledWidth(), playerY + player0Vehicle.getBitmapScaledHeight(), painterPlayer)
+            }
         }
 
         canvas?.drawBitmap(cpuVehicle.getBitmap(), cpuVehicle.getMatrix(), null)
         canvas?.drawBitmap(cpuBuilding.getBitmap(), cpuBuilding.getMatrix(), null)
 
         canvas?.drawText("SCORE " + score.toLong(), 20f, 60f, painterFill)
+
+        // Debug (draw cpuVehicle's bounds)
+        /*for (rect in cpuVehicleBounds)
+            canvas?.drawRect(rect, painterStroke)
+
+        // Debug (draw cpuBuilding's bounds)
+        for (rect in cpuBuildingBounds)
+            canvas?.drawRect(rect, painterStroke)*/
     }
 
 
@@ -667,11 +827,32 @@ class GameViewMultiplayer(context: Context?, lifecycleScope: CoroutineScope) : V
 
         try {
             //id     = jsonObject.getInt("id")
-            id     = jsonObject.getString("id")
-            posX   = jsonObject.getDouble("pos_x").toFloat()
-            posY   = jsonObject.getDouble("pos_y").toFloat()
+            id = jsonObject.getString("id")
+            posX = jsonObject.getDouble("pos_x").toFloat()
+            posY = jsonObject.getDouble("pos_y").toFloat()
             //width  = jsonObject.getDouble("width").toFloat()
             //height = jsonObject.getDouble("height").toFloat()
+
+            // For debug of bitmap bounds
+            /*if (debugBoundsCpuObject == 0)
+                cpuBuildingBounds.clear()
+            else
+                cpuVehicleBounds.clear()
+
+            val bounds = jsonObject.getJSONArray("bounds")
+            for (i in 0 until bounds.length()) {
+                val b = bounds.getJSONObject(i)
+
+                val x1 = b.getDouble("x1").toFloat() * ppm
+                val y1 = b.getDouble("y1").toFloat() * ppm
+                val x2 = b.getDouble("x2").toFloat() * ppm
+                val y2 = b.getDouble("y2").toFloat() * ppm
+
+                if (debugBoundsCpuObject == 0)
+                    cpuBuildingBounds.add(RectF(x1, y1, x2, y2))
+                else
+                    cpuVehicleBounds.add(RectF(x1, y1, x2, y2))
+            }*/
         } catch (e: JSONException) {
             e.printStackTrace()
             Log.d("json", "Error in retrieving data about cpu object")
@@ -750,8 +931,21 @@ class GameViewMultiplayer(context: Context?, lifecycleScope: CoroutineScope) : V
     private fun gameEnd() {
         gameEnd = true
 
-        val fragment = findFragment<GameFragment>()
+        sensorManager.unregisterListener(this@GameViewMultiplayer)
+
+        //val fragment = findFragment<GameFragment>()
         fragment.gameEnd(score.toLong(), winner)
+
+        /*var fragmentLoaded = false
+        while (!fragmentLoaded) {
+            try {
+                fragment.gameEnd(score.toLong(), winner)
+                fragmentLoaded = true
+            } catch (e: IllegalStateException) {
+                e.printStackTrace()
+                sleep(100)
+            }
+        }*/
     }
 
 
@@ -816,18 +1010,31 @@ class GameViewMultiplayer(context: Context?, lifecycleScope: CoroutineScope) : V
             //Sensor.TYPE_ACCELEROMETER  -> lastAcceleration = event.values.clone()
             //Sensor.TYPE_MAGNETIC_FIELD      -> gyroscopeValues    = event.values.clone()
             Sensor.TYPE_GYROSCOPE -> gyroscopeValues = event.values.clone()
+            else                  -> return
         }
+
+        // Axis of the rotation sample, not normalized yet
+        val axisX = event.values[0]
+        val axisY = event.values[1]
+        val axisZ = event.values[2]
+
+        // Calculate the angular speed of the sample
+        val angularSpeed = sqrt(axisX * axisX + axisY * axisY + axisZ * axisZ)
+
+
+        //=========================================
+        // PROVO AD USARE LA VELOCITÀ ANGOLARE
 
         // Use X value if portrait mode, Y value otherwise
         val value =
-            if (width < height)                gyroscopeValues[0]        // Portrait
-            else if (display?.rotation == 1)   gyroscopeValues[1] * -1f  // Landscape
-            else                               gyroscopeValues[1]        // Reverse landscape
+            if (width < height)                axisX        // Portrait
+            else if (display?.rotation == 1)   axisY * -1f  // Landscape
+            else                               axisY        // Reverse landscape
 
-        // Enhance gyroscopeValues value
+        // Filter the noise and enhance the angular speed
         val currentGyroscopeInput =
-            if (value > 0f)         max(1f, min(value * 10f, 20f))
-            else if (value < 0f)    min(-1f, max(value * 10f, -20f))
+            if (value > 0.2f)       min(angularSpeed * 35f, 30f)
+            else if (value < -0.2f) max(angularSpeed * -35f, -30f)
             else                    0f
 
         // Avoid to send useless data to the server
@@ -837,11 +1044,11 @@ class GameViewMultiplayer(context: Context?, lifecycleScope: CoroutineScope) : V
         }
 
         previousGyroscopeInput = currentGyroscopeInput
+        //=========================================
 
-        /*Log.d("SENSOR", "****************")
-        Log.d("SENSOR", "value: $value")
-        Log.d("SENSOR", "rotation: $rotation")
-        Log.d("SENSOR", "display.rotation: ${display?.rotation}")*/
+
+
+
 
         // Send to server
         val json = JSONObject()

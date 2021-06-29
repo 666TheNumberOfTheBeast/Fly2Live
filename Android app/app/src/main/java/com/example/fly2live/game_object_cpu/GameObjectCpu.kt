@@ -3,13 +3,14 @@ package com.example.fly2live.game_object_cpu
 import com.example.fly2live.game_object.GameObject
 import android.graphics.Bitmap
 
-class GameObjectCpu(name: String,
-              bitmaps: Array<Bitmap>,
-              bounds_offsets: Array<Array<Float>>,
-              width: Float, height: Float,
-              screen_width: Int, screen_height: Int, ppm: Float,
-              pos_x: Float, pos_y: Float, speed: Float) :
-    GameObject(name, bitmaps, bounds_offsets, width, height, screen_width, screen_height, ppm, pos_x, pos_y, speed) {
+class GameObjectCpu(
+        name: String,
+        bitmaps: Array<Bitmap>,
+        bounds_offsets: Array<Array<Float>>,
+        screen_width: Int, screen_height: Int, ppm: Float,
+        width: Float, height: Float,
+        pos_x: Float, pos_y: Float, speed: Float) :
+    GameObject(name, bitmaps, bounds_offsets, screen_width, screen_height, ppm, width, height, pos_x, pos_y, speed) {
 
     private var respawn: Boolean
     private val respawnPosX: Float
@@ -26,8 +27,6 @@ class GameObjectCpu(name: String,
 
     // Update UI
     override fun update(dt: Float) {
-        super.update(dt)
-
         // Move object to left
         setX( getX() - getSpeed() * dt )
 
@@ -38,6 +37,8 @@ class GameObjectCpu(name: String,
         }
         else
             respawn = false
+
+        super.update(dt)
     }
 
 }

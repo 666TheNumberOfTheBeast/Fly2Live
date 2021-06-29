@@ -75,14 +75,6 @@ class LoadingFragment : Fragment() {
         // VERSIONE CON SOCKETS
         // Connect to server and set ID
         connect()
-
-
-
-        // VERSIONE CON VOLLEY E POLLING
-        /*queue = Volley.newRequestQueue(context)
-
-        // Connect to server and set ID
-        getNewGame()*/
     }
 
 
@@ -138,7 +130,7 @@ class LoadingFragment : Fragment() {
         mSocket.once(Socket.EVENT_CONNECT_ERROR) { args ->
             activity?.runOnUiThread(Runnable {
                 // Create Toast outside the looper to avoid crashes due to bad context
-                val toast = Toast.makeText(context, "Error in connecting to the server", Toast.LENGTH_SHORT)
+                val toast = Toast.makeText(context, "Error in connecting to server", Toast.LENGTH_SHORT)
 
                 // Delay action for a better UX
                 Handler(Looper.myLooper()!!).postDelayed({
@@ -149,7 +141,7 @@ class LoadingFragment : Fragment() {
         }
 
         mSocket.once(Socket.EVENT_DISCONNECT) { args ->
-            Log.d("json", "disconnected from the server")
+            Log.d("json", "disconnected from server")
 
             /*Log.d("json", "args: $args")
             for (arg in args)
@@ -157,7 +149,7 @@ class LoadingFragment : Fragment() {
 
             activity?.runOnUiThread(Runnable {
                 // Create Toast outside the looper to avoid crashes due to bad context
-                val toast = Toast.makeText(context, "Disconnected from the server", Toast.LENGTH_SHORT)
+                val toast = Toast.makeText(context, "Disconnected from server", Toast.LENGTH_SHORT)
 
                 // Delay action for a better UX
                 Handler(Looper.myLooper()!!).postDelayed({
@@ -255,118 +247,5 @@ class LoadingFragment : Fragment() {
 
         return ""
     }
-
-
-
-
-
-
-
-
-
-// Connect to server with standard sockets
-/*private fun connect() {
-    val handler = Handler()
-    val thread = Thread(Runnable {
-        try {
-            val s = Socket(HOST, PORT)
-
-            val out = s.getOutputStream()
-            val output = PrintWriter(out)
-
-            output.println(msg)
-            output.flush()
-            val input = BufferedReader(InputStreamReader(s.getInputStream()))
-            val st = input.readLine()
-
-            handler.post {
-                val s = mTextViewReplyFromServer.getText().toString()
-                if (st.trim({ it <= ' ' }).length != 0)
-                    mTextViewReplyFromServer.setText(s + "\nFrom Server : " + st)
-            }
-
-            output.close()
-            out.close()
-            s.close()
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-    })
-
-    thread.start()
-}*/
-
-
-
-
-
-// VERSIONE CON VOLLEY E POLLING
-/*private fun getNewGame() {
-    // Request a JSON response from the provided URL
-    val req = JsonObjectRequest(
-        Request.Method.GET,
-        URL + "req=" + REQ_CODE_NEW_GAME + "&who=-1",
-        null,
-        { response ->
-            Log.d("getNewGame", response.toString())
-
-            // Get ID from JSON
-            ID = response.getInt("who")
-
-            textView.setText(R.string.waiting)
-
-            // Wait a player
-            poll()
-        },
-        { error ->
-            Log.d("getNewGame", error.toString())
-            Toast.makeText(context, "Error in connecting to the server", Toast.LENGTH_SHORT).show()
-
-            // Go back
-            Handler(Looper.myLooper()!!).postDelayed({ findNavController().navigateUp() }, 2*POLLING_PERIOD)
-        }
-    )
-
-    // Add the request to the RequestQueue
-    queue.add(req)
-}
-
-private fun waitAdversary() {
-    // Request a JSON response from the provided URL
-    val req = JsonObjectRequest(
-        Request.Method.GET,
-        URL + "req=" + POLLING + "&who=" + ID,
-        null,
-        { response ->
-            Log.d("getAdversary", response.toString())
-
-            // Get value from JSON
-            found = response.getBoolean("error") == false
-        },
-        { error ->
-            Log.d("getAdversary", error.toString())
-
-            Toast.makeText(context, "Error in connecting to the server", Toast.LENGTH_SHORT).show()
-
-            // Go back
-            Handler(Looper.myLooper()!!).postDelayed({ findNavController().navigateUp() }, 2*POLLING_PERIOD)
-        }
-    )
-
-    // Add the request to the RequestQueue
-    queue.add(req)
-}
-
-// Continuos polling
-private fun poll() {
-    // Check if an adversary joined the game
-    if (found) {
-        findNavController().navigate(R.id.action_loadingFragment_to_gameFragment)
-        return
-    }
-
-    waitAdversary()
-    Handler(Looper.myLooper()!!).postDelayed({ poll() }, POLLING_PERIOD)
-}*/
 
 }

@@ -222,7 +222,7 @@
             android:layout_margin="8dp"
             android:fontFamily="@font/audiowide"
             android:text="1"
-            android:textSize="14sp"
+            android:textSize="@dimen/text_size_paragraph_4"
             android:textColor="@color/green" />
     </LinearLayout>
 
@@ -244,7 +244,7 @@
             android:layout_margin="8dp"
             android:fontFamily="@font/audiowide"
             android:text="player_name"
-            android:textSize="14sp"
+            android:textSize="@dimen/text_size_paragraph_4"
             android:textColor="@color/green" />
     </LinearLayout>
 
@@ -266,7 +266,7 @@
             android:layout_margin="8dp"
             android:fontFamily="@font/audiowide"
             android:text="175"
-            android:textSize="14sp"
+            android:textSize="@dimen/text_size_paragraph_4"
             android:textColor="@color/green" />
     </LinearLayout>
 
@@ -288,7 +288,7 @@
             android:layout_margin="8dp"
             android:fontFamily="@font/audiowide"
             android:text="134"
-            android:textSize="14sp"
+            android:textSize="@dimen/text_size_paragraph_4"
             android:textColor="@color/green" />
     </LinearLayout>
 
@@ -311,7 +311,7 @@
             android:layout_margin="8dp"
             android:fontFamily="@font/audiowide"
             android:text="0.631"
-            android:textSize="14sp"
+            android:textSize="@dimen/text_size_paragraph_4"
             android:textColor="@color/green" />
     </LinearLayout>
 

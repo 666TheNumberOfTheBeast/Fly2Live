@@ -3,17 +3,20 @@ package com.example.fly2live.game_object_player
 
 import com.example.fly2live.game_object.GameObject
 import android.graphics.Bitmap
+import android.graphics.Matrix
 import kotlin.math.max
 
-class GameObjectPlayer(name: String,
-                    bitmaps: Array<Bitmap>,
-                    bounds_offsets: Array<Array<Float>>,
-                    width: Float, height: Float,
-                    screen_width: Int, screen_height: Int, ppm: Float,
-                    pos_x: Float, pos_y: Float, speed: Float) :
-    GameObject(name, bitmaps, bounds_offsets, width, height, screen_width, screen_height, ppm, pos_x, pos_y, speed) {
+class GameObjectPlayer(
+        name: String,
+        bitmaps: Array<Bitmap>,
+        bounds_offsets: Array<Array<Float>>,
+        screen_width: Int, screen_height: Int, ppm: Float,
+        width: Float, height: Float,
+        pos_x: Float, pos_y: Float, speed: Float) :
+    GameObject(name, bitmaps, bounds_offsets, screen_width, screen_height, ppm, width, height, pos_x, pos_y, speed) {
 
     private var bitmapRotation = 8f // Degrees
+    private val rotationMatrix = Matrix()
 
     private val rotationIncrement = 0.5f
     private val maxRotation = 10f
@@ -21,10 +24,13 @@ class GameObjectPlayer(name: String,
 
     private val screenHeightPortrait = max(screen_width, screen_height)
 
+    // Getters
+    fun getBitmapRotation(): Float {
+        return bitmapRotation // Degrees
+    }
+
     // Update UI
     override fun update(dt: Float) {
-        super.update(dt)
-
         // Set player Y based on last gyroscope input (in pixels for efficiency of update calls)
         setY( getY() + getSpeed() * dt )
 
@@ -47,6 +53,19 @@ class GameObjectPlayer(name: String,
             bitmapRotation += rotationIncrement
         else if (getSpeed() < 0f && bitmapRotation >= minRotation)
             bitmapRotation -= rotationIncrement
+
+        super.update(dt)
+
+        for (i in bitmapBounds.indices) {
+            val rect = bitmapBounds[i]
+
+            // The output RectF is just a new non-rotated rect whose edges touch the corner points of the rotated rectangle that you are wanting
+            rotationMatrix.setRotate(getBitmapRotation(), getX(), getY())
+            rotationMatrix.mapRect(rect)
+
+            // Set the rotated rect
+            bitmapBounds[i].set(rect)
+        }
     }
 
     override fun transform() {

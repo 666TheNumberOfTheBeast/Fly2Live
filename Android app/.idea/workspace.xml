@@ -32,7 +32,6 @@
       <change beforePath="$PROJECT_DIR$/.gradle/5.4.1/javaCompile/javaCompile.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/5.4.1/javaCompile/javaCompile.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/5.4.1/javaCompile/taskHistory.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/5.4.1/javaCompile/taskHistory.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/navEditor.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/navEditor.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/GameEndFragment.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/GameEndFragment.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/GameFragment.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/GameFragment.kt" afterDir="false" />
@@ -40,8 +39,23 @@
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/GameViewMultiplayer.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/GameViewMultiplayer.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/LoadingFragment.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/LoadingFragment.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/configuration/Configuration.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/configuration/Configuration.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/navigation/nav_graph.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/navigation/nav_graph.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/game_object/GameObject.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/game_object/GameObject.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/game_object_cpu/GameObjectCpu.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/game_object_cpu/GameObjectCpu.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/game_object_player/GameObjectPlayer.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/game_object_player/GameObjectPlayer.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/heli_1_1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/heli_1_2.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/heli_1_3.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/heli_1_4.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/fragment_credits.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/fragment_credits.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/fragment_game_end.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/fragment_game_end.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/fragment_loading.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/fragment_loading.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/fragment_main.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/fragment_main.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/fragment_scenarios.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/fragment_scenarios.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/fragment_settings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/fragment_settings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/fragment_stats_slide_scores_multiplayer.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/fragment_stats_slide_scores_multiplayer.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/fragment_stats_slide_wins_multiplayer.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/fragment_stats_slide_wins_multiplayer.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/stats_players_scores_item.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/stats_players_scores_item.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/stats_players_wins_item.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/stats_players_wins_item.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../Server/Server_socket.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Server/Server_socket.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -53,7 +67,7 @@
   <component name="DefaultGradleProjectSettings">
     <option name="isMigrated" value="true" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="Pixel_XL_API_29" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="Nexus_5X_API_30" />
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
       <ProjectState />
@@ -71,8 +85,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/LoadingFragment.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1392">
-              <caret line="224" column="44" selection-start-line="224" selection-start-column="44" selection-end-line="224" selection-end-column="44" />
+            <state relative-caret-position="928">
+              <caret line="103" selection-start-line="103" selection-end-line="103" />
             </state>
           </provider>
         </entry>
@@ -80,26 +94,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/GameFragment.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2320">
-              <caret line="92" column="5" selection-start-line="92" selection-start-column="5" selection-end-line="92" selection-end-column="5" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/configuration/Configuration.kt">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="899">
-              <caret line="46" column="41" selection-start-line="46" selection-start-column="41" selection-end-line="46" selection-end-column="41" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/GameEndFragment.kt">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="816">
-              <caret line="144" column="9" lean-forward="true" selection-start-line="144" selection-start-column="9" selection-end-line="144" selection-end-column="9" />
+            <state relative-caret-position="382">
+              <caret line="82" selection-start-line="82" selection-end-line="82" />
             </state>
           </provider>
         </entry>
@@ -107,8 +103,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/GameView.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="609">
-              <caret line="1353" column="56" selection-start-line="1353" selection-start-column="56" selection-end-line="1353" selection-end-column="56" />
+            <state relative-caret-position="145">
+              <caret line="1395" column="48" lean-forward="true" selection-start-line="1395" selection-start-column="48" selection-end-line="1395" selection-end-column="48" />
             </state>
           </provider>
         </entry>
@@ -116,8 +112,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/GameViewMultiplayer.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-11624">
-              <caret line="169" column="29" selection-start-line="169" selection-start-column="29" selection-end-line="169" selection-end-column="29" />
+            <state relative-caret-position="799">
+              <caret line="602" column="64" lean-forward="true" selection-start-line="602" selection-start-column="64" selection-end-line="602" selection-end-column="64" />
             </state>
           </provider>
         </entry>
@@ -125,10 +121,31 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/game_object/GameObject.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="957">
-              <caret line="162" column="9" lean-forward="true" selection-start-line="162" selection-start-column="9" selection-end-line="162" selection-end-column="9" />
+            <state relative-caret-position="638">
+              <caret line="64" column="40" selection-start-line="64" selection-start-column="40" selection-end-line="64" selection-end-column="40" />
               <folding>
                 <element signature="e#42#133#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/game_object_cpu/GameObjectCpu.kt">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="841">
+              <caret line="30" column="8" selection-start-line="30" selection-start-column="8" selection-end-line="30" selection-end-column="8" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/game_object_player/GameObjectPlayer.kt">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="991">
+              <caret line="57" selection-start-line="57" selection-end-line="57" />
+              <folding>
+                <element signature="e#50#154#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -139,10 +156,10 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="valueResourceFile" />
         <option value="layoutResourceFile_vertical" />
         <option value="resourceFile" />
         <option value="Kotlin File" />
+        <option value="valueResourceFile" />
       </list>
     </option>
   </component>
@@ -157,6 +174,9 @@
       <find>lastGyroscopeInput</find>
       <find>lastGyroscope</find>
       <find>gyroscope</find>
+      <find>lifecycleScope</find>
+      <find>fragment</find>
+      <find>fragment.gameEnd</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -165,25 +185,14 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/GameOverFragment.kt" />
-        <option value="$PROJECT_DIR$/app/src/main/res/layout/fragment_stats_slide_scores.xml" />
-        <option value="$PROJECT_DIR$/app/src/main/res/layout/fragment_stats_slide_score.xml" />
-        <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/player/Player.kt" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/StatsFragment.kt" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/StatsSlideFragment.kt" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/ScenarioFragment.kt" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/CreditsFragment.kt" />
-        <option value="$PROJECT_DIR$/app/src/main/res/layout/fragment_stats_slide_scores_multiplayer.xml" />
-        <option value="$PROJECT_DIR$/app/src/main/res/layout/fragment_settings.xml" />
-        <option value="$PROJECT_DIR$/app/src/main/res/layout/fragment_credits.xml" />
-        <option value="$PROJECT_DIR$/app/src/main/res/layout/fragment_main.xml" />
         <option value="$PROJECT_DIR$/app/build.gradle" />
         <option value="$PROJECT_DIR$/build.gradle" />
-        <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/SettingsFragment.kt" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/player/PlayerRealmModel.kt" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/player/PlayersLevelsCollection.kt" />
-        <option value="$PROJECT_DIR$/app/src/main/res/layout/fragment_scenarios.xml" />
-        <option value="$PROJECT_DIR$/app/src/main/res/layout/fragment_loading.xml" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/LoginFragment.kt" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/utils/Utils.kt" />
         <option value="$PROJECT_DIR$/app/src/main/res/anim/fade_in.xml" />
@@ -202,20 +211,31 @@
         <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/MainActivity.kt" />
         <option value="$PROJECT_DIR$/app/src/main/res/layout/fragment_login.xml" />
         <option value="$PROJECT_DIR$/app/src/main/res/layout/fragment_intro.xml" />
-        <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/game_object_cpu/GameObjectCpu.kt" />
-        <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/game_object/GameObject.kt" />
-        <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/game_object_player/GameObjectPlayer.kt" />
         <option value="$PROJECT_DIR$/app/src/main/res/values/colors.xml" />
-        <option value="$PROJECT_DIR$/app/src/main/res/layout/fragment_game_end.xml" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/ScenariosFragment.kt" />
         <option value="$PROJECT_DIR$/app/src/main/res/values/strings.xml" />
-        <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/GameViewMultiplayer.kt" />
-        <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/GameFragment.kt" />
         <option value="$PROJECT_DIR$/app/src/main/res/navigation/nav_graph.xml" />
-        <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/GameEndFragment.kt" />
-        <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/configuration/Configuration.kt" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/LoadingFragment.kt" />
+        <option value="$PROJECT_DIR$/app/src/main/res/layout/fragment_settings.xml" />
+        <option value="$PROJECT_DIR$/app/src/main/res/layout/fragment_credits.xml" />
+        <option value="$PROJECT_DIR$/app/src/main/res/layout/fragment_game_end.xml" />
+        <option value="$PROJECT_DIR$/app/src/main/res/layout/fragment_scenarios.xml" />
+        <option value="$PROJECT_DIR$/app/src/main/res/layout/fragment_loading.xml" />
+        <option value="$PROJECT_DIR$/app/src/main/res/layout/fragment_stats_slide_wins_multiplayer.xml" />
+        <option value="$PROJECT_DIR$/app/src/main/res/layout/fragment_stats_slide_scores_multiplayer.xml" />
+        <option value="$PROJECT_DIR$/app/src/main/res/layout/stats_players_scores_item.xml" />
+        <option value="$PROJECT_DIR$/app/src/main/res/layout/stats_players_wins_item.xml" />
+        <option value="$PROJECT_DIR$/app/src/main/res/layout/fragment_main.xml" />
+        <option value="$PROJECT_DIR$/app/src/main/res/values/dimensions.xml" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/game_object/GameObject.kt" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/game_object_cpu/GameObjectCpu.kt" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/game_object_player/GameObjectPlayer.kt" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/GameView.kt" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/configuration/Configuration.kt" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/SettingsFragment.kt" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/GameEndFragment.kt" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/GameFragment.kt" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/example/fly2live/GameViewMultiplayer.kt" />
       </list>
     </option>
   </component>
@@ -230,7 +250,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="AndroidView">
         <subPane>
           <expand>
@@ -252,9 +271,7 @@
             <path>
               <item name="Fly2Live" type="1abcf292:AndroidViewProjectNode" />
               <item name="app" type="feadf853:AndroidModuleNode" />
-              <item name="java" type="edd41e36:AndroidSourceTypeNode" />
-              <item name="fly2live" type="cbb59c9e:AndroidPsiDirectoryNode" />
-              <item name="game_object" type="462c0819:PsiDirectoryNode" />
+              <item name="res" type="d4f16f75:AndroidResFolderNode" />
             </path>
           </expand>
           <select />
@@ -262,11 +279,12 @@
       </pane>
       <pane id="PackagesPane" />
       <pane id="ProjectPane" />
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="DeviceAndSnapshotComboBoxAction.selectedDevice" value="Pixel_XL_API_29" />
-    <property name="DeviceAndSnapshotComboBoxAction.selectionTime" value="2021-06-26T19:19:11.371Z" />
+    <property name="DeviceAndSnapshotComboBoxAction.selectedDevice" value="Nexus_5X_API_30" />
+    <property name="DeviceAndSnapshotComboBoxAction.selectionTime" value="2021-06-28T10:48:39.381Z" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="android.sdk.path" value="$USER_HOME$/Android/Sdk" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
@@ -382,7 +400,7 @@
     <editor active="true" />
     <layout>
       <window_info id="Captures" order="0" side_tool="true" weight="0.25" />
-      <window_info active="true" content_ui="combo" id="Project" order="1" visible="true" weight="0.21188699" />
+      <window_info content_ui="combo" id="Project" order="1" visible="true" weight="0.21188699" />
       <window_info id="Structure" order="2" side_tool="true" />
       <window_info id="Favorites" order="3" side_tool="true" />
       <window_info id="Build Variants" order="4" side_tool="true" />
@@ -391,21 +409,21 @@
       <window_info id="Resources Explorer" order="7" />
       <window_info id="Capture Tool" order="8" />
       <window_info anchor="bottom" id="Version Control" order="0" />
-      <window_info anchor="bottom" id="Logcat" order="1" weight="0.3237838" />
+      <window_info active="true" anchor="bottom" id="Logcat" order="1" visible="true" weight="0.32324323" />
       <window_info anchor="bottom" id="TODO" order="2" weight="0.32972974" />
-      <window_info anchor="bottom" id="Terminal" order="3" />
+      <window_info anchor="bottom" id="Terminal" order="3" weight="0.32972974" />
       <window_info anchor="bottom" id="Event Log" order="4" sideWeight="0.50026655" side_tool="true" weight="0.32972974" />
       <window_info anchor="bottom" id="Build" order="5" sideWeight="0.49973348" weight="0.32972974" />
-      <window_info anchor="bottom" id="Android Profiler" order="6" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Android Profiler" order="6" />
       <window_info anchor="bottom" id="Run" order="7" weight="0.32972974" />
       <window_info anchor="bottom" id="Debug" order="8" />
       <window_info anchor="bottom" id="Find" order="9" weight="0.32972974" />
-      <window_info anchor="right" id="Device File Explorer" order="0" side_tool="true" />
-      <window_info anchor="right" id="Capture Analysis" order="1" />
-      <window_info anchor="right" id="Gradle" order="2" />
-      <window_info anchor="right" id="Theme Preview" order="3" />
-      <window_info anchor="right" id="Palette&#9;" order="4" />
-      <window_info anchor="right" id="Preview" order="5" />
+      <window_info anchor="right" id="Capture Analysis" order="0" />
+      <window_info anchor="right" id="Gradle" order="1" />
+      <window_info anchor="right" id="Theme Preview" order="2" />
+      <window_info anchor="right" id="Palette&#9;" order="3" />
+      <window_info anchor="right" id="Preview" order="4" />
+      <window_info anchor="right" id="Device File Explorer" order="5" side_tool="true" weight="0.32995737" />
     </layout>
     <layout-to-restore>
       <window_info id="Captures" order="0" side_tool="true" weight="0.25" />
@@ -436,13 +454,6 @@
     </layout-to-restore>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/player/Player.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1885">
-          <caret line="65" column="8" selection-start-line="65" selection-start-column="8" selection-end-line="65" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml">
       <provider editor-type-id="text-editor">
         <state relative-caret-position="348">
@@ -450,65 +461,6 @@
         </state>
       </provider>
       <provider selected="true" editor-type-id="android-designer2" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_game.xml">
-      <provider selected="true" editor-type-id="text-editor" />
-      <provider editor-type-id="android-designer2" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_stats.xml">
-      <provider editor-type-id="text-editor">
-        <state relative-caret-position="261">
-          <caret line="9" column="45" selection-start-line="9" selection-start-column="45" selection-end-line="9" selection-end-column="45" />
-        </state>
-      </provider>
-      <provider selected="true" editor-type-id="android-designer2" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_stats_slide_scores_multiplayer.xml">
-      <provider editor-type-id="text-editor">
-        <state relative-caret-position="1074">
-          <caret line="48" lean-forward="true" selection-start-line="48" selection-end-line="48" />
-        </state>
-      </provider>
-      <provider selected="true" editor-type-id="android-designer2" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_stats_slide_scores_single_player.xml">
-      <provider editor-type-id="text-editor">
-        <state relative-caret-position="435">
-          <caret line="15" column="30" selection-start-line="15" selection-start-column="30" selection-end-line="15" selection-end-column="30" />
-        </state>
-      </provider>
-      <provider selected="true" editor-type-id="android-designer2" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_stats_slide_wins_multiplayer.xml">
-      <provider editor-type-id="text-editor">
-        <state relative-caret-position="812">
-          <caret line="28" column="48" selection-start-line="28" selection-start-column="48" selection-end-line="28" selection-end-column="48" />
-        </state>
-      </provider>
-      <provider selected="true" editor-type-id="android-designer2" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/stats_players_scores_item.xml">
-      <provider editor-type-id="text-editor">
-        <state relative-caret-position="418">
-          <caret line="97" column="47" lean-forward="true" selection-start-line="97" selection-start-column="47" selection-end-line="97" selection-end-column="47" />
-        </state>
-      </provider>
-      <provider selected="true" editor-type-id="android-designer2" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/stats_players_wins_item.xml">
-      <provider editor-type-id="text-editor">
-        <state relative-caret-position="6525">
-          <caret line="225" column="43" selection-start-line="225" selection-start-column="43" selection-end-line="225" selection-end-column="43" />
-        </state>
-      </provider>
-      <provider selected="true" editor-type-id="android-designer2" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/SettingsFragment.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="937">
-          <caret line="125" column="74" selection-start-line="125" selection-start-column="74" selection-end-line="125" selection-end-column="74" />
-        </state>
-      </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/player/PlayersLevelsCollection.kt">
       <provider selected="true" editor-type-id="text-editor">
@@ -519,30 +471,6 @@
           </folding>
         </state>
       </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_credits.xml">
-      <provider editor-type-id="text-editor">
-        <state relative-caret-position="3712">
-          <caret line="128" column="75" selection-start-line="128" selection-start-column="75" selection-end-line="128" selection-end-column="75" />
-        </state>
-      </provider>
-      <provider selected="true" editor-type-id="android-designer2" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_scenarios.xml">
-      <provider editor-type-id="text-editor">
-        <state relative-caret-position="435">
-          <caret line="15" column="40" lean-forward="true" selection-start-line="15" selection-start-column="40" selection-end-line="15" selection-end-column="40" />
-        </state>
-      </provider>
-      <provider selected="true" editor-type-id="android-designer2" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_settings.xml">
-      <provider editor-type-id="text-editor">
-        <state relative-caret-position="1537">
-          <caret line="53" column="39" selection-start-line="53" selection-start-column="39" selection-end-line="53" selection-end-column="39" />
-        </state>
-      </provider>
-      <provider selected="true" editor-type-id="android-designer2" />
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/StatsFragment.kt">
       <provider selected="true" editor-type-id="text-editor">
@@ -568,14 +496,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_main.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="522">
-          <caret line="18" column="61" lean-forward="true" selection-start-line="18" selection-start-column="61" selection-end-line="18" selection-end-column="61" />
-        </state>
-      </provider>
-      <provider editor-type-id="android-designer2" />
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/LoginFragment.kt">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2726">
@@ -598,12 +518,12 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/AndroidManifest.xml">
+      <provider editor-type-id="android-manifest" />
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="696">
           <caret line="24" column="44" lean-forward="true" selection-start-line="24" selection-start-column="44" selection-end-line="24" selection-end-column="44" />
         </state>
       </provider>
-      <provider editor-type-id="android-manifest" />
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/res/values/ids.xml">
       <provider selected="true" editor-type-id="text-editor">
@@ -640,39 +560,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_loading.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="464">
-          <caret line="16" column="47" selection-start-line="16" selection-start-column="47" selection-end-line="16" selection-end-column="47" />
-        </state>
-      </provider>
-      <provider editor-type-id="android-designer2" />
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/res/drawable/Heli_yellow_0.png" />
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_login.xml">
-      <provider editor-type-id="text-editor">
-        <state relative-caret-position="174">
-          <caret line="6" column="42" selection-start-line="6" selection-start-column="42" selection-end-line="6" selection-end-column="42" />
-        </state>
-      </provider>
-      <provider selected="true" editor-type-id="android-designer2" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_intro.xml">
-      <provider editor-type-id="text-editor">
-        <state relative-caret-position="435">
-          <caret line="15" column="39" selection-start-line="15" selection-start-column="39" selection-end-line="15" selection-end-column="39" />
-        </state>
-      </provider>
-      <provider selected="true" editor-type-id="android-designer2" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_game_end.xml">
-      <provider editor-type-id="text-editor">
-        <state relative-caret-position="435">
-          <caret line="15" column="37" selection-start-line="15" selection-start-column="37" selection-end-line="15" selection-end-column="37" />
-        </state>
-      </provider>
-      <provider selected="true" editor-type-id="android-designer2" />
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/res/values/colors.xml">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="899">
@@ -701,13 +589,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/MainFragment.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1972">
-          <caret line="33" column="46" selection-start-line="33" selection-start-column="46" selection-end-line="33" selection-end-column="46" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/res/navigation/nav_graph.xml">
       <provider selected="true" editor-type-id="nav-designer" />
       <provider editor-type-id="text-editor">
@@ -723,72 +604,266 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/GameFragment.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2320">
-          <caret line="92" column="5" selection-start-line="92" selection-start-column="5" selection-end-line="92" selection-end-column="5" />
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_game.xml">
+      <provider selected="true" editor-type-id="text-editor" />
+      <provider editor-type-id="android-designer2" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_intro.xml">
+      <provider editor-type-id="text-editor">
+        <state relative-caret-position="435">
+          <caret line="15" column="39" selection-start-line="15" selection-start-column="39" selection-end-line="15" selection-end-column="39" />
         </state>
       </provider>
+      <provider selected="true" editor-type-id="android-designer2" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/GameEndFragment.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="816">
-          <caret line="144" column="9" lean-forward="true" selection-start-line="144" selection-start-column="9" selection-end-line="144" selection-end-column="9" />
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_login.xml">
+      <provider editor-type-id="text-editor">
+        <state relative-caret-position="174">
+          <caret line="6" column="42" selection-start-line="6" selection-start-column="42" selection-end-line="6" selection-end-column="42" />
         </state>
       </provider>
+      <provider selected="true" editor-type-id="android-designer2" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/configuration/Configuration.kt">
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_stats_slide_scores_single_player.xml">
+      <provider editor-type-id="text-editor">
+        <state relative-caret-position="435">
+          <caret line="15" column="30" selection-start-line="15" selection-start-column="30" selection-end-line="15" selection-end-column="30" />
+        </state>
+      </provider>
+      <provider selected="true" editor-type-id="android-designer2" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_game_end.xml">
+      <provider editor-type-id="text-editor">
+        <state relative-caret-position="1711">
+          <caret line="59" column="54" selection-start-line="59" selection-start-column="54" selection-end-line="59" selection-end-column="54" />
+          <folding>
+            <element signature="e#718#742#0" expanded="true" />
+            <element signature="e#1325#1355#0" expanded="true" />
+            <element signature="e#1915#1945#0" expanded="true" />
+            <element signature="e#3156#3183#0" expanded="true" />
+            <element signature="e#3773#3800#0" expanded="true" />
+            <element signature="e#4380#4407#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+      <provider selected="true" editor-type-id="android-designer2" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_stats_slide_scores_multiplayer.xml">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="899">
-          <caret line="46" column="41" selection-start-line="46" selection-start-column="41" selection-end-line="46" selection-end-column="41" />
+        <state relative-caret-position="459">
+          <caret line="41" column="54" selection-start-line="41" selection-start-column="54" selection-end-line="41" selection-end-column="54" />
+          <folding>
+            <element signature="e#617#641#0" expanded="true" />
+            <element signature="e#1249#1279#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+      <provider editor-type-id="android-designer2" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_stats_slide_wins_multiplayer.xml">
+      <provider editor-type-id="text-editor">
+        <state relative-caret-position="2030">
+          <caret line="70" column="54" selection-start-line="70" selection-start-column="54" selection-end-line="70" selection-end-column="54" />
+          <folding>
+            <element signature="e#615#639#0" expanded="true" />
+            <element signature="e#1247#1277#0" expanded="true" />
+            <element signature="e#1722#1752#0" expanded="true" />
+            <element signature="e#2324#2354#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+      <provider selected="true" editor-type-id="android-designer2" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_scenarios.xml">
+      <provider editor-type-id="text-editor">
+        <state relative-caret-position="2059">
+          <caret line="71" column="54" selection-start-line="71" selection-start-column="54" selection-end-line="71" selection-end-column="54" />
+          <folding>
+            <element signature="e#714#738#0" expanded="true" />
+            <element signature="e#1343#1370#0" expanded="true" />
+            <element signature="e#1955#1982#0" expanded="true" />
+            <element signature="e#2534#2564#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+      <provider selected="true" editor-type-id="android-designer2" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_loading.xml">
+      <provider editor-type-id="text-editor">
+        <state relative-caret-position="493">
+          <caret line="17" column="55" selection-start-line="17" selection-start-column="55" selection-end-line="17" selection-end-column="55" />
+          <folding>
+            <element signature="e#790#820#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+      <provider selected="true" editor-type-id="android-designer2" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_settings.xml">
+      <provider editor-type-id="text-editor">
+        <state relative-caret-position="1711">
+          <caret line="59" column="51" selection-start-line="59" selection-start-column="51" selection-end-line="59" selection-end-column="51" />
+          <folding>
+            <element signature="e#714#738#0" expanded="true" />
+            <element signature="e#1338#1365#0" expanded="true" />
+            <element signature="e#1943#1970#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+      <provider selected="true" editor-type-id="android-designer2" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/stats_players_wins_item.xml">
+      <provider editor-type-id="text-editor">
+        <state relative-caret-position="807">
+          <caret line="313" column="58" selection-start-line="313" selection-start-column="58" selection-end-line="313" selection-end-column="58" />
+          <folding>
+            <element signature="e#8876#8906#0" expanded="true" />
+            <element signature="e#9757#9787#0" expanded="true" />
+            <element signature="e#10638#10668#0" expanded="true" />
+            <element signature="e#11502#11532#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+      <provider selected="true" editor-type-id="android-designer2" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/stats_players_scores_item.xml">
+      <provider editor-type-id="text-editor">
+        <state relative-caret-position="807">
+          <caret line="140" column="58" selection-start-line="140" selection-start-column="58" selection-end-line="140" selection-end-column="58" />
+          <folding>
+            <element signature="e#3852#3882#0" expanded="true" />
+            <element signature="e#4736#4766#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+      <provider selected="true" editor-type-id="android-designer2" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_stats.xml">
+      <provider editor-type-id="text-editor">
+        <state relative-caret-position="261">
+          <caret line="9" column="45" selection-start-line="9" selection-start-column="45" selection-end-line="9" selection-end-column="45" />
+        </state>
+      </provider>
+      <provider selected="true" editor-type-id="android-designer2" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_credits.xml">
+      <provider editor-type-id="text-editor">
+        <state relative-caret-position="812">
+          <caret line="34" column="48" lean-forward="true" selection-start-line="34" selection-start-column="48" selection-end-line="34" selection-end-column="48" />
+          <folding>
+            <element signature="e#944#968#0" expanded="true" />
+            <element signature="e#1627#1654#0" expanded="true" />
+            <element signature="e#2293#2323#0" expanded="true" />
+            <element signature="e#2966#2993#0" expanded="true" />
+            <element signature="e#3707#3737#0" expanded="true" />
+            <element signature="e#4394#4424#0" expanded="true" />
+            <element signature="e#5135#5165#0" expanded="true" />
+            <element signature="e#5876#5906#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+      <provider selected="true" editor-type-id="android-designer2" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_main.xml">
+      <provider editor-type-id="text-editor">
+        <state relative-caret-position="807">
+          <caret line="66" column="54" selection-start-line="66" selection-start-column="54" selection-end-line="66" selection-end-column="54" />
+          <folding>
+            <element signature="e#2151#2181#0" expanded="true" />
+            <element signature="e#3483#3513#0" expanded="true" />
+            <element signature="e#4209#4239#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+      <provider selected="true" editor-type-id="android-designer2" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/values/dimensions.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="290">
+          <caret line="10" column="42" selection-start-line="10" selection-start-column="42" selection-end-line="10" selection-end-column="42" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/LoadingFragment.kt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1392">
-          <caret line="224" column="44" selection-start-line="224" selection-start-column="44" selection-end-line="224" selection-end-column="44" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/game_object_player/GameObjectPlayer.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1479">
-          <caret line="51" column="30" lean-forward="true" selection-start-line="51" selection-start-column="30" selection-end-line="51" selection-end-column="30" />
-          <folding>
-            <element signature="e#50#154#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="928">
+          <caret line="103" selection-start-line="103" selection-end-line="103" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/game_object_cpu/GameObjectCpu.kt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="870">
-          <caret line="31" column="33" selection-start-line="31" selection-start-column="33" selection-end-line="31" selection-end-column="33" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/GameViewMultiplayer.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-11624">
-          <caret line="169" column="29" selection-start-line="169" selection-start-column="29" selection-end-line="169" selection-end-column="29" />
+        <state relative-caret-position="841">
+          <caret line="30" column="8" selection-start-line="30" selection-start-column="8" selection-end-line="30" selection-end-column="8" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/game_object/GameObject.kt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="957">
-          <caret line="162" column="9" lean-forward="true" selection-start-line="162" selection-start-column="9" selection-end-line="162" selection-end-column="9" />
+        <state relative-caret-position="638">
+          <caret line="64" column="40" selection-start-line="64" selection-start-column="40" selection-end-line="64" selection-end-column="40" />
           <folding>
             <element signature="e#42#133#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/game_object_player/GameObjectPlayer.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="991">
+          <caret line="57" selection-start-line="57" selection-end-line="57" />
+          <folding>
+            <element signature="e#50#154#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/MainFragment.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="377">
+          <caret line="33" column="46" selection-start-line="33" selection-start-column="46" selection-end-line="33" selection-end-column="46" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/SettingsFragment.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="464">
+          <caret line="30" column="67" selection-start-line="30" selection-start-column="67" selection-end-line="30" selection-end-column="67" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/GameEndFragment.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="266">
+          <caret line="76" column="69" lean-forward="true" selection-start-line="76" selection-start-column="69" selection-end-line="76" selection-end-column="69" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/configuration/Configuration.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="625">
+          <caret line="61" column="47" selection-start-line="61" selection-start-column="47" selection-end-line="61" selection-end-column="47" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/GameViewMultiplayer.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="799">
+          <caret line="602" column="64" lean-forward="true" selection-start-line="602" selection-start-column="64" selection-end-line="602" selection-end-column="64" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/GameFragment.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="382">
+          <caret line="82" selection-start-line="82" selection-end-line="82" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/fly2live/GameView.kt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="609">
-          <caret line="1353" column="56" selection-start-line="1353" selection-start-column="56" selection-end-line="1353" selection-end-column="56" />
+        <state relative-caret-position="145">
+          <caret line="1395" column="48" lean-forward="true" selection-start-line="1395" selection-start-column="48" selection-end-line="1395" selection-end-column="48" />
         </state>
       </provider>
     </entry>

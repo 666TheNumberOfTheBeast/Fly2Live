@@ -13,6 +13,7 @@ import androidx.activity.addCallback
 import androidx.lifecycle.lifecycleScope
 import com.example.fly2live.configuration.Configuration.Companion.MULTIPLAYER
 import com.example.fly2live.configuration.Configuration.Companion.WINNER_UNDEFINED
+import java.lang.IllegalArgumentException
 
 class GameFragment : Fragment() {
     private var soundtrack: MediaPlayer? = null
@@ -62,8 +63,7 @@ class GameFragment : Fragment() {
         if (MULTIPLAYER)
             findNavController().popBackStack(R.id.loadingFragment, true)
 
-        //val view = GameView(context, lifecycleScope)
-        val view: View = if (MULTIPLAYER) GameViewMultiplayer(context, lifecycleScope) else GameView(context, lifecycleScope)
+        val view: View = if (MULTIPLAYER) GameViewMultiplayer(context, this) else GameView(context, this)
 
         // Set view ID to override onSaveInstanceState and onRestoreInstanceState of the view
         view.id = R.id.game_view
@@ -89,7 +89,12 @@ class GameFragment : Fragment() {
         bundle.putLong("score", score)
         bundle.putInt("winner", winner)
 
-        findNavController().navigate(R.id.action_gameFragment_to_gameEndFragment, bundle)
+        // Try to go to next fragment in order to avoid possible crashes
+        try {
+            findNavController().navigate(R.id.action_gameFragment_to_gameEndFragment, bundle)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     private fun playSoundtrack() {

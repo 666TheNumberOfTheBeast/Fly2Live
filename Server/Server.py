@@ -90,7 +90,7 @@ player_bitmap_bounds_offsets = [
 player_bitmap_width  = 10.0  # In meters
 player_bitmap_height = 3.0   # In meters
 player_initial_pos_x = 1.0   # In meters
-player_initial_pos_y = 20.0  # In meters
+player_initial_pos_y = 4.0   # In meters
 #player_initial_pos_x = 0.02  # In width ratio
 #player_initial_pos_y = 0.4   # In height ratio
 
@@ -216,8 +216,8 @@ buildings_day = [
     Obstacle(
         "building_11",
         [
-            [0.0, 0.03, 1.0, 1.0],   # Bottom rect
-            [0.15, 0.0, 0.57, 1.0]  # Top rect
+            [0.0, 0.03, 1.0, 1.0], # Bottom rect
+            [0.15, 0.0, 0.57, 1.0] # Top rect
         ],
         35.0, 110.0, obstacle_initial_pos_x, obstacle_initial_pos_y, speed
     ),
@@ -290,7 +290,7 @@ buildings_night = [
     Obstacle(
         "building_01",
         [
-            [0.0, 0.19, 1.0, 1.0],   # Bottom rect
+            [0.0, 0.19, 1.0, 1.0],    # Bottom rect
             [0.05, 0.175, 1.0, 1.0],  # Bottom rect
             [0.05, 0.151, 0.92, 1.0], # Middle rect 1
             [0.85, 0.135, 0.92, 1.0], # Middle rect 1
@@ -403,7 +403,7 @@ buildings_night = [
     Obstacle(
         "building_11",
         [
-            [0.0, 0.183, 1.0, 1.0], # Bottom rect
+            [0.0, 0.183, 1.0, 1.0],  # Bottom rect
             [0.1, 0.16, 0.9, 1.0],   # Middle rect
             [0.2, 0.14, 0.8, 1.0],   # Middle rect
             [0.3, 0.125, 0.7, 1.0],  # Middle rect
@@ -533,21 +533,12 @@ eventlet.monkey_patch()
 def connect():
     # No need global variables declaration to read but not modify them
     print("=========================")
-    print("Client connected: " + request.sid)
+    print("New client connected: " + request.sid)
 
     # Add the player socket ID to the dictionary of players currently connected to the server
     players_connected[request.sid] = { "id": None, "room": None, "scenario": None }
 
     print("Players connected to the server: ", players_connected)
-
-
-# Event join a room
-'''@socketio.on('join')
-def on_join(data):
-    username = data['username']
-    room = data['room']
-    join_room(room)
-    send(username + ' has entered the room.', to=room)'''
 
 
 # Event disconnect from server
@@ -764,13 +755,6 @@ def __notifyPlayerConnected():
         # tell him to resend a new game message to restart the process
         for player in players_connected:
             __notify(player)
-            '''with app.app_context():
-                socketio.emit("new game response",
-                     { "error": False,
-                       "msg_code": MSG_CODE_RESEND
-                     }, to=player )
-
-                print("Resend request new game sent to client: ", player)'''
             return
 
     # Else, select two players from the dictionary of connected players
@@ -795,20 +779,6 @@ def __notifyPlayerConnected():
 
             __notify(player_sid)
             __notify(players_by_scenarios[s])
-
-            '''with app.app_context():
-                socketio.emit("new game response",
-                     { "error": False,
-                       "msg_code": MSG_CODE_RESEND
-                     }, to=player )
-
-                socketio.emit("new game response",
-                     { "error": False,
-                       "msg_code": MSG_CODE_RESEND
-                     }, to=players_by_scenarios[s] )
-
-                print("Resend request new game sent to client: ", player)
-                print("Resend request new game sent to client: ", players_by_scenarios[s])'''
 
             return
 
@@ -904,7 +874,12 @@ def new_game_event(json):
             player_initial_pos_x, player_initial_pos_y, 0.0)
         player_1 = None
 
-        # Reset obstacles variables
+        # Reset obstacles variables & positions
+        if cpu_building:
+            cpu_building.setX(obstacle_initial_pos_x)
+        if cpu_vehicle:
+            cpu_vehicle.setX(obstacle_initial_pos_x)
+
         cpu_building = None
         cpu_vehicle  = None
 
@@ -1118,9 +1093,8 @@ def __pickBuilding():
     #height_ratio = random.randrange(20, 58) / 100.0
 
     # Building pos Y in meters
-    building_pos_y = random.randrange(17, 48)
+    building_pos_y = random.randrange(17, 33)
 
-    #building.setX(15.0)
     #building.setY(height_ratio)
     building.setY(building_pos_y)
 
@@ -1148,7 +1122,6 @@ def __pickVehicle():
     #vehicle_pos_y = random.randrange(0, 17)
     vehicle_pos_y = random.randrange(0, 5)
 
-    #vehicle.setX(15.0)
     #vehicle.setY(height_ratio)
     vehicle.setY(vehicle_pos_y)
 
@@ -1169,7 +1142,7 @@ def __checkCollisions():
         return { "x1": x, "y1": y, "x2": x2, "y2": y2 }
 
     # Create rects based on PPM of the player
-    def createRects(obstacles, player):
+    '''def createRects(obstacles, player):
         obstacles_rects = []
 
         for obstacle in obstacles:
@@ -1181,7 +1154,7 @@ def __checkCollisions():
 
             obstacles_rects.append(obstacle_rect)
 
-        return obstacles_rects
+        return obstacles_rects'''
 
     def checkCollisionsAux(list_rects_a, list_rects_b):
         for r1 in list_rects_a:
@@ -1217,38 +1190,17 @@ def __checkCollisions():
     res_1 = checkCollisionsAux(player_1_rect, obstacles_1_rects)'''
 
 
-    # All verifications in meters (VERSION WITH ONE RECT FOR EACH OBJECT)
-    '''player_0_rect = createRect(player_0.getX(), player_0.getY(), player_0.getBitmapWidth(), player_0.getBitmapHeight())
-    player_1_rect = createRect(player_1.getX(), player_1.getY(), player_1.getBitmapWidth(), player_1.getBitmapHeight())
-
-    cpu_building_rect = createRect(
-        cpu_building.getX(),
-        cpu_building.getY(),
-        cpu_building.getWidth(),
-        cpu_building.getHeight())
-    cpu_vehicle_rect  = createRect(
-        cpu_vehicle.getX(),
-        cpu_vehicle.getY(),
-        cpu_vehicle.getWidth(),
-        cpu_vehicle.getHeight())
-
-    obstacles_rects = [cpu_building_rect, cpu_vehicle_rect]
-    res_0 = checkCollisionsAux(player_0_rect, obstacles_rects)
-    res_1 = checkCollisionsAux(player_1_rect, obstacles_rects)'''
-
-
     # All verifications in meters (VERSION WITH MULTIPLE RECTS FOR EACH OBJECT)
     player_0_rects = player_0.getBounds()
     player_1_rects = player_1.getBounds()
 
-    #cpu_building_rects = cpu_building.getBounds()
-    #cpu_vehicle_rects  = cpu_vehicle.getBounds()
     obstacles_rects = cpu_building.getBounds() + cpu_vehicle.getBounds()
 
     res_0 = checkCollisionsAux(player_0_rects, obstacles_rects)
     res_1 = checkCollisionsAux(player_1_rects, obstacles_rects)
 
     return (res_0, res_1)
+
 
 # Thread that updates game logic
 def game_thread():
@@ -1270,7 +1222,6 @@ def game_thread():
         #time_current_frame = int(round(time.time() * 1000))                           # In ms
         time_current_frame = time.time()                                       # In s
         dt = min(time_current_frame - time_previous_frame, target_frame_time)  # In s
-        #dt = target_frame_time
 
         time_previous_frame = time_current_frame
 
@@ -1333,11 +1284,10 @@ def game_thread():
             #time_current_frame_end = int(round(time.time() * 1000))                           # In ms
             time_current_frame_end = time.time()                                           # In s
             wait_time = target_frame_time - (time_current_frame_end - time_current_frame)  # In s
-            #wait_time = target_frame_time
 
             #print("wait_time: ", wait_time)
 
-            if wait_time > 0:
+            if wait_time > 0.0:
                 time.sleep(wait_time)
 
         with app.app_context():
@@ -1382,5 +1332,5 @@ def game_thread():
 
 
 if __name__ == "__main__":
-    socketio.run(app, host="0.0.0.0", debug=True)
-    #socketio.run(app)
+    #socketio.run(app, host="0.0.0.0", debug=True) # Development server
+    socketio.run(app) # Production server

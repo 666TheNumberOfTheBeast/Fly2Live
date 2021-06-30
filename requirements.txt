@@ -1,0 +1,13 @@
+eventlet==0.30.2
+Events
+Flask
+Flask-RESTful
+Flask-SocketIO
+Flask-Sockets
+greenlet
+gunicorn
+itsdangerous
+python-dateutil
+python-engineio
+python-socketio
+Werkzeug

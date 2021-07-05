@@ -541,7 +541,108 @@ class GameViewMultiplayer(context: Context?, fragment: GameFragment) : View(cont
             val loadPlayers = async {
                 Log.d("COROUTINE", "Load players vehicles")
 
-                val playerVehicles = arrayOf(
+                val playerBitmaps: Array<Array<Bitmap>>
+
+                // Convert the correct scenario images into bitmaps once
+                if (SCENARIO == SCENARIO_CITY_DAY) {
+                    playerBitmaps = arrayOf(
+                        arrayOf(
+                            ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_red_0, null)?.toBitmap(screenWidth, screenHeight)!!,
+                            ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_red_1, null)?.toBitmap(screenWidth, screenHeight)!!,
+                            ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_red_2, null)?.toBitmap(screenWidth, screenHeight)!!,
+                            ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_red_3, null)?.toBitmap(screenWidth, screenHeight)!!
+                        ),
+                        arrayOf(
+                            ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_yellow_0, null)?.toBitmap(screenWidth, screenHeight)!!,
+                            ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_yellow_1, null)?.toBitmap(screenWidth, screenHeight)!!,
+                            ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_yellow_2, null)?.toBitmap(screenWidth, screenHeight)!!,
+                            ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_yellow_3, null)?.toBitmap(screenWidth, screenHeight)!!
+                        )
+                    )
+                }
+                else {
+                    val b = arrayOf(
+                        arrayOf(
+                            // Top light on
+                            ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_red_night_0, null)?.toBitmap(screenWidth, screenHeight)!!,
+                            ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_red_night_1, null)?.toBitmap(screenWidth, screenHeight)!!,
+                            ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_red_night_2, null)?.toBitmap(screenWidth, screenHeight)!!,
+                            ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_red_night_3, null)?.toBitmap(screenWidth, screenHeight)!!,
+
+                            // Top light off
+                            ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_red_night_00, null)?.toBitmap(screenWidth, screenHeight)!!,
+                            ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_red_night_01, null)?.toBitmap(screenWidth, screenHeight)!!,
+                            ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_red_night_02, null)?.toBitmap(screenWidth, screenHeight)!!,
+                            ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_red_night_03, null)?.toBitmap(screenWidth, screenHeight)!!
+                        ),
+                        arrayOf(
+                            // Top light on
+                            ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_yellow_night_0, null)?.toBitmap(screenWidth, screenHeight)!!,
+                            ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_yellow_night_1, null)?.toBitmap(screenWidth, screenHeight)!!,
+                            ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_yellow_night_2, null)?.toBitmap(screenWidth, screenHeight)!!,
+                            ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_yellow_night_3, null)?.toBitmap(screenWidth, screenHeight)!!,
+
+                            // Top light off
+                            ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_yellow_night_00, null)?.toBitmap(screenWidth, screenHeight)!!,
+                            ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_yellow_night_01, null)?.toBitmap(screenWidth, screenHeight)!!,
+                            ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_yellow_night_02, null)?.toBitmap(screenWidth, screenHeight)!!,
+                            ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_yellow_night_03, null)?.toBitmap(screenWidth, screenHeight)!!
+                        )
+                    )
+
+                    playerBitmaps = arrayOf(
+                        arrayOf(
+                            b[0][0], b[0][1], b[0][2], b[0][3], // All frames top light on
+                            b[0][0], b[0][1], b[0][2], b[0][3], // All frames top light on
+                            b[0][0], b[0][1], b[0][2], b[0][3], // All frames top light on
+                            b[0][4], b[0][5], b[0][6], b[0][7], // All frames top light off
+                            b[0][4], b[0][5], b[0][6], b[0][7], // All frames top light off
+                            b[0][4], b[0][5], b[0][6], b[0][7], // All frames top light off
+                            b[0][4], b[0][5], b[0][6], b[0][7], // All frames top light off
+                            b[0][4], b[0][5], b[0][6], b[0][7], // All frames top light off
+                            b[0][4], b[0][5], b[0][6], b[0][7], // All frames top light off
+                            b[0][4], b[0][5], b[0][6], b[0][7], // All frames top light off
+                            b[0][4], b[0][5], b[0][6], b[0][7], // All frames top light off
+                            b[0][4], b[0][5], b[0][6], b[0][7], // All frames top light off
+                            b[0][4], b[0][5], b[0][6], b[0][7], // All frames top light off
+                            b[0][4], b[0][5], b[0][6], b[0][7], // All frames top light off
+                            b[0][4], b[0][5], b[0][6], b[0][7], // All frames top light off
+                            b[0][4], b[0][5], b[0][6], b[0][7], // All frames top light off
+                            b[0][4], b[0][5], b[0][6], b[0][7], // All frames top light off
+                            b[0][4], b[0][5], b[0][6], b[0][7], // All frames top light off
+                            b[0][4], b[0][5], b[0][6], b[0][7], // All frames top light off
+                            b[0][4], b[0][5], b[0][6], b[0][7], // All frames top light off
+                            b[0][4], b[0][5], b[0][6], b[0][7], // All frames top light off
+                            b[0][4], b[0][5], b[0][6], b[0][7]  // All frames top light off
+                        ),
+                        arrayOf(
+                            b[1][0], b[1][1], b[1][2], b[1][3], // All frames top light on
+                            b[1][0], b[1][1], b[1][2], b[1][3], // All frames top light on
+                            b[1][0], b[1][1], b[1][2], b[1][3], // All frames top light on
+                            b[1][4], b[1][5], b[1][6], b[1][7], // All frames top light off
+                            b[1][4], b[1][5], b[1][6], b[1][7], // All frames top light off
+                            b[1][4], b[1][5], b[1][6], b[1][7], // All frames top light off
+                            b[1][4], b[1][5], b[1][6], b[1][7], // All frames top light off
+                            b[1][4], b[1][5], b[1][6], b[1][7], // All frames top light off
+                            b[1][4], b[1][5], b[1][6], b[1][7], // All frames top light off
+                            b[1][4], b[1][5], b[1][6], b[1][7], // All frames top light off
+                            b[1][4], b[1][5], b[1][6], b[1][7], // All frames top light off
+                            b[1][4], b[1][5], b[1][6], b[1][7], // All frames top light off
+                            b[1][4], b[1][5], b[1][6], b[1][7], // All frames top light off
+                            b[1][4], b[1][5], b[1][6], b[1][7], // All frames top light off
+                            b[1][4], b[1][5], b[1][6], b[1][7], // All frames top light off
+                            b[1][4], b[1][5], b[1][6], b[1][7], // All frames top light off
+                            b[1][4], b[1][5], b[1][6], b[1][7], // All frames top light off
+                            b[1][4], b[1][5], b[1][6], b[1][7], // All frames top light off
+                            b[1][4], b[1][5], b[1][6], b[1][7], // All frames top light off
+                            b[1][4], b[1][5], b[1][6], b[1][7], // All frames top light off
+                            b[1][4], b[1][5], b[1][6], b[1][7], // All frames top light off
+                            b[1][4], b[1][5], b[1][6], b[1][7]  // All frames top light off
+                        )
+                    )
+                }
+
+                /*val playerVehicles = arrayOf(
                     ObjectPlayer(
                         "player_0",
                         arrayOf(
@@ -560,6 +661,19 @@ class GameViewMultiplayer(context: Context?, fragment: GameFragment) : View(cont
                             ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_yellow_2, null)?.toBitmap(screenWidth, screenHeight)!!,
                             ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_yellow_3, null)?.toBitmap(screenWidth, screenHeight)!!
                         ),
+                        screenWidth, screenHeight, ppm, PLAYER_WIDTH, PLAYER_HEIGHT, 0f, 0f // Measures in meters except screen dimensions
+                    )
+                )*/
+
+                val playerVehicles = arrayOf(
+                    ObjectPlayer(
+                        "player_0",
+                        playerBitmaps[0],
+                        screenWidth, screenHeight, ppm, PLAYER_WIDTH, PLAYER_HEIGHT, 0f, 0f // Measures in meters except screen dimensions
+                    ),
+                    ObjectPlayer(
+                        "player_1",
+                        playerBitmaps[1],
                         screenWidth, screenHeight, ppm, PLAYER_WIDTH, PLAYER_HEIGHT, 0f, 0f // Measures in meters except screen dimensions
                     )
                 )

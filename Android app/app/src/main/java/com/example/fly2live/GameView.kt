@@ -361,6 +361,8 @@ class GameView(context: Context?, fragment: GameFragment) : View(context), View.
 
                 val initialObstaclePosY = 40f  // In meters
 
+                SCENARIO = SCENARIO_CITY_NIGHT
+
                 // Convert the correct scenario images into bitmaps once
                 if (SCENARIO == SCENARIO_CITY_DAY) {
                     bg = ResourcesCompat.getDrawable(resources, R.drawable.city_bg_day, null)?.toBitmap(screenWidth, screenHeight)!!
@@ -988,48 +990,94 @@ class GameView(context: Context?, fragment: GameFragment) : View(context), View.
 
 
             val loadPlayer = async {
-                val playerBitmaps = arrayOf(
-                    ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_green_0, null)?.toBitmap(screenWidth, screenHeight)!!,
-                    ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_green_1, null)?.toBitmap(screenWidth, screenHeight)!!,
-                    ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_green_2, null)?.toBitmap(screenWidth, screenHeight)!!,
-                    ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_green_3, null)?.toBitmap(screenWidth, screenHeight)!!
-                )
-                /*val playerBitmaps = arrayOf(
-                    ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_red_0, null)?.toBitmap(screenWidth, screenHeight)!!,
-                    ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_red_1, null)?.toBitmap(screenWidth, screenHeight)!!,
-                    ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_red_2, null)?.toBitmap(screenWidth, screenHeight)!!,
-                    ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_red_3, null)?.toBitmap(screenWidth, screenHeight)!!
-                )
-                val playerBitmaps = arrayOf(
-                    ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_yellow_0, null)?.toBitmap(screenWidth, screenHeight)!!,
-                    ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_yellow_1, null)?.toBitmap(screenWidth, screenHeight)!!,
-                    ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_yellow_2, null)?.toBitmap(screenWidth, screenHeight)!!,
-                    ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_yellow_3, null)?.toBitmap(screenWidth, screenHeight)!!
-                )*/
+                val playerBitmaps: Array<Bitmap>
 
-                /*val i = (0..2).random()
+                // Convert the correct scenario images into bitmaps once
+                if (SCENARIO == SCENARIO_CITY_DAY) {
+                    playerBitmaps = arrayOf(
+                        ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_green_0, null)?.toBitmap(screenWidth, screenHeight)!!,
+                        ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_green_1, null)?.toBitmap(screenWidth, screenHeight)!!,
+                        ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_green_2, null)?.toBitmap(screenWidth, screenHeight)!!,
+                        ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_green_3, null)?.toBitmap(screenWidth, screenHeight)!!
+                    )
+                    /*playerBitmaps = arrayOf(
+                        ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_red_0, null)?.toBitmap(screenWidth, screenHeight)!!,
+                        ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_red_1, null)?.toBitmap(screenWidth, screenHeight)!!,
+                        ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_red_2, null)?.toBitmap(screenWidth, screenHeight)!!,
+                        ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_red_3, null)?.toBitmap(screenWidth, screenHeight)!!
+                    )
+                    playerBitmaps = arrayOf(
+                        ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_yellow_0, null)?.toBitmap(screenWidth, screenHeight)!!,
+                        ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_yellow_1, null)?.toBitmap(screenWidth, screenHeight)!!,
+                        ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_yellow_2, null)?.toBitmap(screenWidth, screenHeight)!!,
+                        ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_yellow_3, null)?.toBitmap(screenWidth, screenHeight)!!
+                    )*/
 
-                val playerBitmaps =
-                    when (i) {
-                        0 -> arrayOf(
-                                ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_green_0, null)?.toBitmap(screenWidth, screenHeight)!!,
-                                ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_green_1, null)?.toBitmap(screenWidth, screenHeight)!!,
-                                ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_green_2, null)?.toBitmap(screenWidth, screenHeight)!!,
-                                ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_green_3, null)?.toBitmap(screenWidth, screenHeight)!!
-                            )
-                        1 -> arrayOf(
-                                ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_red_0, null)?.toBitmap(screenWidth, screenHeight)!!,
-                                ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_red_1, null)?.toBitmap(screenWidth, screenHeight)!!,
-                                ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_red_2, null)?.toBitmap(screenWidth, screenHeight)!!,
-                                ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_red_3, null)?.toBitmap(screenWidth, screenHeight)!!
-                            )
-                        else -> arrayOf(
-                                ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_yellow_0, null)?.toBitmap(screenWidth, screenHeight)!!,
-                                ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_yellow_1, null)?.toBitmap(screenWidth, screenHeight)!!,
-                                ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_yellow_2, null)?.toBitmap(screenWidth, screenHeight)!!,
-                                ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_yellow_3, null)?.toBitmap(screenWidth, screenHeight)!!
-                            )
-                    }*/
+                    /*val i = (0..2).random()
+
+                    val playerBitmaps =
+                        when (i) {
+                            0 -> arrayOf(
+                                    ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_green_0, null)?.toBitmap(screenWidth, screenHeight)!!,
+                                    ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_green_1, null)?.toBitmap(screenWidth, screenHeight)!!,
+                                    ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_green_2, null)?.toBitmap(screenWidth, screenHeight)!!,
+                                    ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_green_3, null)?.toBitmap(screenWidth, screenHeight)!!
+                                )
+                            1 -> arrayOf(
+                                    ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_red_0, null)?.toBitmap(screenWidth, screenHeight)!!,
+                                    ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_red_1, null)?.toBitmap(screenWidth, screenHeight)!!,
+                                    ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_red_2, null)?.toBitmap(screenWidth, screenHeight)!!,
+                                    ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_red_3, null)?.toBitmap(screenWidth, screenHeight)!!
+                                )
+                            else -> arrayOf(
+                                    ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_yellow_0, null)?.toBitmap(screenWidth, screenHeight)!!,
+                                    ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_yellow_1, null)?.toBitmap(screenWidth, screenHeight)!!,
+                                    ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_yellow_2, null)?.toBitmap(screenWidth, screenHeight)!!,
+                                    ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_yellow_3, null)?.toBitmap(screenWidth, screenHeight)!!
+                                )
+                        }*/
+
+                }
+                else {
+                    val b = arrayOf(
+                        // Top light on
+                        ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_green_night_0, null)?.toBitmap(screenWidth, screenHeight)!!,
+                        ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_green_night_1, null)?.toBitmap(screenWidth, screenHeight)!!,
+                        ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_green_night_2, null)?.toBitmap(screenWidth, screenHeight)!!,
+                        ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_green_night_3, null)?.toBitmap(screenWidth, screenHeight)!!,
+
+                        // Top light off
+                        ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_green_night_00, null)?.toBitmap(screenWidth, screenHeight)!!,
+                        ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_green_night_01, null)?.toBitmap(screenWidth, screenHeight)!!,
+                        ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_green_night_02, null)?.toBitmap(screenWidth, screenHeight)!!,
+                        ResourcesCompat.getDrawable(resources, R.drawable.vehicle_heli_green_night_03, null)?.toBitmap(screenWidth, screenHeight)!!
+                    )
+
+                    playerBitmaps = arrayOf(
+                        b[0], b[1], b[2], b[3], // All frames top light on
+                        b[0], b[1], b[2], b[3], // All frames top light on
+                        b[0], b[1], b[2], b[3], // All frames top light on
+                        b[4], b[5], b[6], b[7], // All frames top light off
+                        b[4], b[5], b[6], b[7], // All frames top light off
+                        b[4], b[5], b[6], b[7], // All frames top light off
+                        b[4], b[5], b[6], b[7], // All frames top light off
+                        b[4], b[5], b[6], b[7], // All frames top light off
+                        b[4], b[5], b[6], b[7], // All frames top light off
+                        b[4], b[5], b[6], b[7], // All frames top light off
+                        b[4], b[5], b[6], b[7], // All frames top light off
+                        b[4], b[5], b[6], b[7], // All frames top light off
+                        b[4], b[5], b[6], b[7], // All frames top light off
+                        b[4], b[5], b[6], b[7], // All frames top light off
+                        b[4], b[5], b[6], b[7], // All frames top light off
+                        b[4], b[5], b[6], b[7], // All frames top light off
+                        b[4], b[5], b[6], b[7], // All frames top light off
+                        b[4], b[5], b[6], b[7], // All frames top light off
+                        b[4], b[5], b[6], b[7], // All frames top light off
+                        b[4], b[5], b[6], b[7], // All frames top light off
+                        b[4], b[5], b[6], b[7], // All frames top light off
+                        b[4], b[5], b[6], b[7]  // All frames top light off
+                    )
+                }
 
                 playerVehicle = GameObjectPlayer(
                     "player_vehicle",
@@ -1039,11 +1087,8 @@ class GameView(context: Context?, fragment: GameFragment) : View(context), View.
                         arrayOf(0.07f, 0.2f, 0.33f, 0.5f),   // Middle rect
                         arrayOf(0.64f, 0.19f, 0.95f, 0.21f)  // Top rect
                     ),
-                    //screenWidth, screenHeight, ppm, PLAYER_WIDTH * scaleFactor, PLAYER_HEIGHT * scaleFactor, 1f, 20f, 0f // Measures in meters
                     screenWidth, screenHeight, ppm, PLAYER_WIDTH * scaleFactor, PLAYER_HEIGHT * scaleFactor, 1f, 4f, 0f // Measures in meters
                 )
-
-                // I put the vehicle at 20 m from the top. See comment above about the height
             }
 
             loadBuildings.await()

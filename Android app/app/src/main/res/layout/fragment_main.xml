@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@drawable/city_bg_main"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context=".MainFragment">
+    tools:context="com.pumpkinsoftware.fly2live.MainFragment">
 
     <!--<ImageView
         android:id="@+id/bg"

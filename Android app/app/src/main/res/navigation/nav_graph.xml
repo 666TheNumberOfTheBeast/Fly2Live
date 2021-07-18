@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/introFragment"
-        android:name="com.example.fly2live.IntroFragment"
+        android:name="com.pumpkinsoftware.fly2live.IntroFragment"
         android:label="IntroFragment"
         tools:layout="@layout/fragment_intro">
         <action
@@ -24,7 +24,7 @@
 
     <fragment
         android:id="@+id/loginFragment"
-        android:name="com.example.fly2live.LoginFragment"
+        android:name="com.pumpkinsoftware.fly2live.LoginFragment"
         android:label="LoginFragment"
         tools:layout="@layout/fragment_login">
         <action
@@ -36,7 +36,7 @@
 
     <fragment
         android:id="@+id/mainFragment"
-        android:name="com.example.fly2live.MainFragment"
+        android:name="com.pumpkinsoftware.fly2live.MainFragment"
         android:label="fragment_main"
         tools:layout="@layout/fragment_main" >
         <action
@@ -57,13 +57,13 @@
 
     <fragment
         android:id="@+id/statsFragment"
-        android:name="com.example.fly2live.StatsFragment"
+        android:name="com.pumpkinsoftware.fly2live.StatsFragment"
         android:label="StatsFragment"
         tools:layout="@layout/fragment_stats" />
 
     <fragment
         android:id="@+id/settingsFragment"
-        android:name="com.example.fly2live.SettingsFragment"
+        android:name="com.pumpkinsoftware.fly2live.SettingsFragment"
         android:label="SettingsFragment"
         tools:layout="@layout/fragment_settings">
         <action
@@ -78,13 +78,13 @@
 
     <fragment
         android:id="@+id/creditsFragment"
-        android:name="com.example.fly2live.CreditsFragment"
+        android:name="com.pumpkinsoftware.fly2live.CreditsFragment"
         android:label="CreditsFragment"
         tools:layout="@layout/fragment_credits" />
 
     <fragment
         android:id="@+id/scenariosFragment"
-        android:name="com.example.fly2live.ScenariosFragment"
+        android:name="com.pumpkinsoftware.fly2live.ScenariosFragment"
         android:label="ScenariosFragment"
         tools:layout="@layout/fragment_scenarios">
         <action
@@ -97,7 +97,7 @@
 
     <fragment
         android:id="@+id/loadingFragment"
-        android:name="com.example.fly2live.LoadingFragment"
+        android:name="com.pumpkinsoftware.fly2live.LoadingFragment"
         android:label="fragment_loading"
         tools:layout="@layout/fragment_loading" >
         <action
@@ -108,7 +108,7 @@
 
     <fragment
         android:id="@+id/gameFragment"
-        android:name="com.example.fly2live.GameFragment"
+        android:name="com.pumpkinsoftware.fly2live.GameFragment"
         android:label="fragment_game"
         tools:layout="@layout/fragment_game" >
         <action
@@ -119,7 +119,7 @@
 
     <fragment
         android:id="@+id/gameEndFragment"
-        android:name="com.example.fly2live.GameEndFragment"
+        android:name="com.pumpkinsoftware.fly2live.GameEndFragment"
         android:label="fragment_game_end"
         tools:layout="@layout/fragment_game_end">
         <action

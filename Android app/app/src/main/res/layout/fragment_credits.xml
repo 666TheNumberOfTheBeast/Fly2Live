@@ -5,13 +5,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/black"
-    tools:context=".SettingsFragment">
+    tools:context="com.pumpkinsoftware.fly2live.SettingsFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@android:color/black"
-        tools:context=".SettingsFragment">
+        tools:context="com.pumpkinsoftware.fly2live.SettingsFragment">
 
         <TextView
             android:id="@+id/menu_title"

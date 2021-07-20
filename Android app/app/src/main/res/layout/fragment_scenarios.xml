@@ -7,6 +7,20 @@
     android:background="@android:color/black"
     tools:context="com.pumpkinsoftware.fly2live.SettingsFragment">
 
+    <ImageView
+        android:id="@+id/back_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/logo"
+        android:src="@drawable/back_button"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0" />
+
     <TextView
         android:id="@+id/menu_title"
         android:layout_width="wrap_content"
@@ -14,7 +28,7 @@
         android:fontFamily="@font/audiowide"
         android:text="@string/scenario"
         android:textColor="@color/green"
-        android:textSize="@dimen/text_size_title"
+        android:textSize="@dimen/text_size_title_1"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -89,7 +103,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/button_scenario_2"
-        app:layout_constraintVertical_bias="0.882"
+        app:layout_constraintVertical_bias="0.8"
         app:layout_constraintWidth_percent="0.5"/>
     <!--
         android:secondaryProgressTint="#FFFFFF"
@@ -98,6 +112,7 @@
         android:progressTint="#40E0D0"
         android:progressTint="#0096FF
         android:progressTint="#00FFFF"
-        style="@android:style/Widget.ProgressBar.Horizontal" -->
+        style="@android:style/Widget.ProgressBar.Horizontal"
+        app:layout_constraintVertical_bias="0.882" -->
 
 </androidx.constraintlayout.widget.ConstraintLayout>

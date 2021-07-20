@@ -12,6 +12,8 @@ import android.widget.ImageView
 import android.widget.Toast
 import android.app.Activity.RESULT_OK
 import android.content.Intent
+import android.graphics.Rect
+import android.os.Build
 import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
@@ -19,6 +21,7 @@ import com.pumpkinsoftware.fly2live.utils.logIn
 import com.google.android.gms.auth.api.Auth
 import com.google.android.gms.auth.api.signin.*
 import com.google.android.gms.games.Games
+import com.pumpkinsoftware.fly2live.utils.adaptBackButton2notch
 
 
 class LoginFragment : Fragment() {
@@ -71,19 +74,40 @@ class LoginFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val logo = view.findViewById<ImageView>(R.id.logo)
-        val orientation = resources.configuration.orientation
+        val logo         = view.findViewById<ImageView>(R.id.logo)
+        val btnBack      = view.findViewById<ImageView>(R.id.back_button)
+        val signInButton = view.findViewById<SignInButton>(R.id.button_sign_in)
 
+        val orientation = resources.configuration.orientation
         if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
             logo.scaleX = 0.6f
             logo.scaleY = 0.6f
         }
 
-        val signInButton = view.findViewById<SignInButton>(R.id.button_sign_in)
-        signInButton.setSize(SignInButton.SIZE_STANDARD)
+        // Set buttons listeners
+        btnBack.setOnClickListener {
+            activity?.onBackPressed()
+        }
 
+        signInButton.setSize(SignInButton.SIZE_STANDARD)
         signInButton.setOnClickListener{
             signIn()
+        }
+
+
+        var notchRects: List<Rect>? = null
+
+        // Get notch rects
+        view.setOnApplyWindowInsetsListener { _, windowInsets ->
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
+                notchRects = windowInsets.displayCutout?.boundingRects
+
+            return@setOnApplyWindowInsetsListener windowInsets
+        }
+
+        // Use post to wait btnBack measures
+        btnBack.post {
+            adaptBackButton2notch(btnBack, notchRects, activity)
         }
     }
 

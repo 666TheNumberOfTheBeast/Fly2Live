@@ -1,5 +1,7 @@
 package com.pumpkinsoftware.fly2live
 
+import android.graphics.Rect
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -10,6 +12,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.navigation.fragment.findNavController
@@ -38,6 +41,7 @@ import com.pumpkinsoftware.fly2live.configuration.Configuration.Companion.SCENAR
 import com.pumpkinsoftware.fly2live.configuration.Configuration.Companion.SOCKET_INSTANCE
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.pumpkinsoftware.fly2live.utils.adaptBackButton2notch
 import kotlinx.coroutines.Runnable
 
 
@@ -76,9 +80,28 @@ class LoadingFragment : Fragment() {
         if (account == null)
             return
 
-        textView = view.findViewById(R.id.textView)
+        textView    = view.findViewById(R.id.textView)
+        val btnBack = view.findViewById<ImageView>(R.id.back_button)
 
-        // VERSIONE CON SOCKETS
+        btnBack.setOnClickListener {
+            findNavController().popBackStack()
+        }
+
+        var notchRects: List<Rect>? = null
+
+        // Get notch rects
+        view.setOnApplyWindowInsetsListener { _, windowInsets ->
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
+                notchRects = windowInsets.displayCutout?.boundingRects
+
+            return@setOnApplyWindowInsetsListener windowInsets
+        }
+
+        // Use post to wait btnBack measures
+        btnBack.post {
+            adaptBackButton2notch(btnBack, notchRects, activity)
+        }
+
         // Connect to server and set ID
         connect()
     }

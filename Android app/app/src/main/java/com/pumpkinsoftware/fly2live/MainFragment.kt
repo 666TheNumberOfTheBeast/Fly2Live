@@ -10,12 +10,15 @@ import android.view.animation.Animation
 import android.widget.ImageView
 import androidx.navigation.fragment.findNavController
 import android.content.res.Configuration
+import android.graphics.Rect
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.widget.TextView
 import com.pumpkinsoftware.fly2live.utils.createScaleAnimation
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.pumpkinsoftware.fly2live.utils.adaptBackButton2notch
 import com.pumpkinsoftware.fly2live.configuration.Configuration as myConfiguration
 
 
@@ -51,6 +54,7 @@ class MainFragment : Fragment() {
         val cockpit = view.findViewById<ImageView>(R.id.cockpit)
         val logo = view.findViewById<ImageView>(R.id.logo)
 
+        val btnBack         = view.findViewById<ImageView>(R.id.back_button)
         val btnSinglePlayer = view.findViewById<TextView>(R.id.button_single_player)
         val btnMultiplayer  = view.findViewById<TextView>(R.id.button_multiplayer)
         val btnStats        = view.findViewById<TextView>(R.id.button_stats)
@@ -133,6 +137,10 @@ class MainFragment : Fragment() {
         }
 
         // Set buttons listeners
+        btnBack.setOnClickListener {
+            activity?.onBackPressed()
+        }
+
         btnSinglePlayer.setOnClickListener{
             myConfiguration.MULTIPLAYER = false
             findNavController().navigate(R.id.action_mainFragment_to_scenariosFragment)
@@ -149,6 +157,22 @@ class MainFragment : Fragment() {
 
         btnSettings.setOnClickListener{
             findNavController().navigate(R.id.action_mainFragment_to_settingsFragment)
+        }
+
+
+        var notchRects: List<Rect>? = null
+
+        // Get notch rects
+        view.setOnApplyWindowInsetsListener { _, windowInsets ->
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
+                notchRects = windowInsets.displayCutout?.boundingRects
+
+            return@setOnApplyWindowInsetsListener windowInsets
+        }
+
+        // Use post to wait btnBack measures
+        btnBack.post {
+            adaptBackButton2notch(btnBack, notchRects, activity)
         }
     }
 

@@ -6,6 +6,9 @@ import android.media.MediaPlayer
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.WindowManager
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import io.realm.Realm
 
 
@@ -22,7 +25,19 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         //setSupportActionBar(toolbar)
 
+        // Set always screen on
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
+        // Set fullscreen
+        // For notch (together with style)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        val insetsController = WindowInsetsControllerCompat(window, window.decorView)
+        // "Sticky immersive mode". Swipe from the edge to temporarily reveal the hidden bar
+        insetsController.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        // Hide both the status bar and the navigation bar
+        insetsController.hide(WindowInsetsCompat.Type.systemBars())
+        // Hide the status bar
+        //insetsController.hide(WindowInsetsCompat.Type.statusBars())
 
         // Load soundtrack for all fragments
         soundtrack = MediaPlayer.create(this, R.raw.soundtrack_main)
@@ -98,14 +113,14 @@ class MainActivity : AppCompatActivity() {
 
     // Save main soundtrack current position and pause it
     override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+
         //Log.d("save", "save state main activity")
         if (soundtrack != null) {
             outState.putInt("mainSoundtrackPosition", soundtrack!!.currentPosition)
 
             stopMainSoundtrack()
         }
-
-        super.onSaveInstanceState(outState)
     }
 
     // Restore main soundtrack position and play it

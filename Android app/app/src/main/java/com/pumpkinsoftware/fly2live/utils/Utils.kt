@@ -1,11 +1,16 @@
 package com.pumpkinsoftware.fly2live.utils
 
+import android.app.Activity
 import android.content.Context
+import android.graphics.Rect
 import android.os.Build
 import android.util.Base64
 import android.util.Log
+import android.view.View
+import android.view.Window
 import android.view.animation.Animation
 import android.view.animation.ScaleAnimation
+import android.widget.ImageView
 import com.pumpkinsoftware.fly2live.configuration.Configuration
 import com.pumpkinsoftware.fly2live.configuration.Configuration.Companion.PLAYER_JWT
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -410,4 +415,38 @@ fun createScaleAnimation(fromX: Float, toX: Float, fromY: Float, toY: Float, piv
     anim.duration  = duration
 
     return anim
+}
+
+
+fun adaptBackButton2notch(btnBack: ImageView, notchRects: List<Rect>?, activity: Activity?) {
+    // Get back button rect
+    val btnBackRect = Rect(btnBack.left, btnBack.top, btnBack.right, btnBack.bottom)
+
+    /*Log.d("notch", "back button left: ${btnBackRect.left}")
+    Log.d("notch", "back button top: ${btnBackRect.top}")
+    Log.d("notch", "back button right: ${btnBackRect.right}")
+    Log.d("notch", "back button bottom: ${btnBackRect.bottom}")*/
+
+    if (notchRects == null) {
+        btnBack.visibility = View.VISIBLE
+        return
+    }
+
+    // Check if back button is cutout by the notch
+    for (rect in notchRects) {
+        /*Log.d("notch", "notch left: ${rect.left}")
+        Log.d("notch", "notch top: ${rect.top}")
+        Log.d("notch", "notch right: ${rect.right}")
+        Log.d("notch", "notch bottom: ${rect.bottom}")*/
+
+        val isBackBtnCutout = rect.contains(btnBackRect)
+        if (isBackBtnCutout) {
+            // Move the back button to bottom
+            btnBack.y = activity?.window?.decorView?.height?.minus(btnBack.height.toFloat()) ?: 0f
+            btnBack.setImageResource(R.drawable.back_button_bottom)
+            break
+        }
+    }
+
+    btnBack.visibility = View.VISIBLE
 }

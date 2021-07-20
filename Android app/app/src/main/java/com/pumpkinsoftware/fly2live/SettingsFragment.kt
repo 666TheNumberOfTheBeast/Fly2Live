@@ -2,17 +2,22 @@ package com.pumpkinsoftware.fly2live
 
 import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
+import android.content.res.Configuration.ORIENTATION_PORTRAIT
+import android.graphics.Rect
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.pumpkinsoftware.fly2live.utils.adaptBackButton2notch
 import io.realm.mongodb.App
 import io.realm.mongodb.AppConfiguration
 
@@ -55,6 +60,33 @@ class SettingsFragment : Fragment() {
         if (account == null)
             return
 
+        var notchRects: List<Rect>? = null
+
+        // Adapt top margin to notch
+        view.setOnApplyWindowInsetsListener { _, windowInsets ->
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                // Get notch margin top value (0 if notch is not present)
+                val notchMarginTop = windowInsets.displayCutout?.safeInsetTop ?: 0
+
+                // Check if notch is present and device is in portrait orientation
+                if (notchMarginTop > 0 && resources.configuration.orientation == ORIENTATION_PORTRAIT) {
+                    // Display the text below the notch
+                    val title = view.findViewById<TextView>(R.id.menu_title)
+
+                    // Update top margin parameter once
+                    val params = title.layoutParams as ViewGroup.MarginLayoutParams
+                    if (params.topMargin < notchMarginTop)
+                        params.topMargin += notchMarginTop
+                }
+
+                // Get notch rects
+                notchRects = windowInsets.displayCutout?.boundingRects
+            }
+
+            return@setOnApplyWindowInsetsListener windowInsets
+        }
+
+        val btnBack    = view.findViewById<ImageView>(R.id.back_button)
         btnAudio       = view.findViewById(R.id.button_audio)
         val btnLogout  = view.findViewById<TextView>(R.id.button_logout)
         val btnCredits = view.findViewById<TextView>(R.id.button_credits)
@@ -63,6 +95,10 @@ class SettingsFragment : Fragment() {
         handleAudio()
 
         // Set buttons listeners
+        btnBack.setOnClickListener {
+            findNavController().popBackStack()
+        }
+
         btnAudio.setOnClickListener {
             isAudioEnabled = !isAudioEnabled
             handleAudio()
@@ -74,6 +110,11 @@ class SettingsFragment : Fragment() {
 
         btnCredits.setOnClickListener {
             findNavController().navigate(R.id.action_settingsFragment_to_creditsFragment)
+        }
+
+        // Use post to wait btnBack measures
+        btnBack.post {
+            adaptBackButton2notch(btnBack, notchRects, activity)
         }
     }
 

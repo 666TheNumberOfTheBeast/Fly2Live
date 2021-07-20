@@ -136,14 +136,14 @@ class GameFragment : Fragment() {
 
     // Save gameplay soundtrack current position and pause it
     override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+
         //Log.d("save", "save state game fragment")
         if (soundtrack != null) {
             outState.putInt("gameplaySoundtrackPosition", soundtrack!!.currentPosition)
 
             stopSoundtrack()
         }
-
-        super.onSaveInstanceState(outState)
     }
 
 }

@@ -1,16 +1,23 @@
 package com.pumpkinsoftware.fly2live
 
+import android.content.res.Configuration
+import android.graphics.Rect
+import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import androidx.activity.addCallback
 import androidx.navigation.fragment.findNavController
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.pumpkinsoftware.fly2live.utils.adaptBackButton2notch
 
 
 class StatsFragment : Fragment() {
@@ -71,6 +78,33 @@ class StatsFragment : Fragment() {
 
         // The pager adapter, which provides the pages to the view pager widget
         mPager.adapter = ScreenSlidePagerAdapter(this)
+
+        // Set custom back button
+        val btnBack = view.findViewById<ImageView>(R.id.back_button)
+        btnBack.setOnClickListener {
+            if (mPager.currentItem == 0)
+                // If the user is currently looking at the first step,
+                // go back
+                findNavController().popBackStack()
+            else
+                // Otherwise, select the first step
+                mPager.currentItem = 0
+        }
+
+        var notchRects: List<Rect>? = null
+
+        // Get notch rects
+        view.setOnApplyWindowInsetsListener { _, windowInsets ->
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
+                notchRects = windowInsets.displayCutout?.boundingRects
+
+            return@setOnApplyWindowInsetsListener windowInsets
+        }
+
+        // Use post to wait btnBack measures
+        btnBack.post {
+            adaptBackButton2notch(btnBack, notchRects, activity)
+        }
     }
 
     private inner class ScreenSlidePagerAdapter(fm: Fragment) : FragmentStateAdapter(fm) {

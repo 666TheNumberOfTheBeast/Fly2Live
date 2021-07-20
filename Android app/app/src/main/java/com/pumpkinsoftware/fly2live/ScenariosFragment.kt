@@ -1,12 +1,15 @@
 package com.pumpkinsoftware.fly2live
 
 import android.animation.ObjectAnimator
+import android.graphics.Rect
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.DecelerateInterpolator
+import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
@@ -25,6 +28,8 @@ import com.pumpkinsoftware.fly2live.player.PlayersLevelsCollection
 import com.pumpkinsoftware.fly2live.utils.getCurrentLevelMaxXp
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.pumpkinsoftware.fly2live.configuration.Configuration
+import com.pumpkinsoftware.fly2live.utils.adaptBackButton2notch
 import io.realm.Realm
 import io.realm.kotlin.syncSession
 import io.realm.mongodb.App
@@ -69,6 +74,43 @@ class ScenariosFragment : Fragment() {
         // Access control (continue)
         if (account == null)
             return
+
+        var notchRects: List<Rect>? = null
+
+        // Adapt top margin to notch
+        view.setOnApplyWindowInsetsListener { _, windowInsets ->
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                // Get notch margin top value (0 if notch is not present)
+                val notchMarginTop = windowInsets.displayCutout?.safeInsetTop ?: 0
+
+                // Check if notch is present and device is in portrait orientation
+                if (notchMarginTop > 0 && resources.configuration.orientation == android.content.res.Configuration.ORIENTATION_PORTRAIT) {
+                    // Display the text below the notch
+                    val title = view.findViewById<TextView>(R.id.menu_title)
+
+                    // Update top margin parameter once
+                    val params = title.layoutParams as ViewGroup.MarginLayoutParams
+                    if (params.topMargin < notchMarginTop)
+                        params.topMargin += notchMarginTop
+                }
+
+                // Get notch rects
+                notchRects = windowInsets.displayCutout?.boundingRects
+            }
+
+            return@setOnApplyWindowInsetsListener windowInsets
+        }
+
+        // Set custom back button
+        val btnBack = view.findViewById<ImageView>(R.id.back_button)
+        btnBack.setOnClickListener {
+            findNavController().popBackStack()
+        }
+
+        // Use post to wait btnBack measures
+        btnBack.post {
+            adaptBackButton2notch(btnBack, notchRects, activity)
+        }
 
         // Check if local configuration has been initialized
         if (PLAYER_LEVEL <= 0) {

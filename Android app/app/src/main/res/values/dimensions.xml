@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!--<dimen name="text_size_title">50sp</dimen>
+    <!--<dimen name="text_size_title_1">50sp</dimen>
+    <dimen name="text_size_title_2">40sp</dimen>
     <dimen name="text_size_subtitle">33sp</dimen>
     <dimen name="text_size_paragraph_1">25sp</dimen>
     <dimen name="text_size_paragraph_2">24sp</dimen>
@@ -10,7 +11,8 @@
     <dimen name="text_size_paragraph_6">10sp</dimen>
     <dimen name="text_size_paragraph_7">9sp</dimen>-->
 
-    <dimen name="text_size_title">50dp</dimen>
+    <dimen name="text_size_title_1">50dp</dimen>
+    <dimen name="text_size_title_2">40dp</dimen>
     <dimen name="text_size_subtitle">33dp</dimen>
     <dimen name="text_size_paragraph_1">25dp</dimen>
     <dimen name="text_size_paragraph_2">24dp</dimen>

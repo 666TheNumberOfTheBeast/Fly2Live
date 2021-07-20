@@ -1,10 +1,15 @@
 package com.pumpkinsoftware.fly2live
 
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.TextView
+import androidx.core.view.updateMargins
+import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -20,6 +25,8 @@ import com.google.android.gms.games.Games
 import com.google.android.gms.games.LeaderboardsClient
 import com.google.android.gms.games.leaderboard.LeaderboardVariant.COLLECTION_PUBLIC
 import com.google.android.gms.games.leaderboard.LeaderboardVariant.TIME_SPAN_ALL_TIME
+import com.pumpkinsoftware.fly2live.configuration.Configuration
+import org.json.JSONObject
 
 class StatsSlideFragment() : Fragment() {
     private var position = -1
@@ -64,8 +71,17 @@ class StatsSlideFragment() : Fragment() {
         // Inflate the layout for this fragment
         return when (position) {
             0 -> inflater.inflate(R.layout.fragment_stats_slide_wins_multiplayer, container, false)
-            1 -> inflater.inflate(R.layout.fragment_stats_slide_scores_multiplayer, container, false)
-            2 -> inflater.inflate(R.layout.fragment_stats_slide_scores_multiplayer, container, false)
+            //1,2 -> inflater.inflate(R.layout.fragment_stats_slide_scores_multiplayer, container, false)
+            1 -> {
+                val view = inflater.inflate(R.layout.fragment_stats_slide_scores_multiplayer, container, false)
+                view.findViewById<TextView>(R.id.menu_title).text = getString(R.string.score_leaderboard) + " MP" //Multiplayer"
+                view
+            }
+            2 -> {
+                val view = inflater.inflate(R.layout.fragment_stats_slide_scores_multiplayer, container, false)
+                view.findViewById<TextView>(R.id.menu_title).text = getString(R.string.score_leaderboard) + " SP" //Single player"
+                view
+            }
             //2 -> inflater.inflate(R.layout.fragment_stats_slide_scores_single_player, container, false)
             else -> null
         }
@@ -82,18 +98,21 @@ class StatsSlideFragment() : Fragment() {
         if (position >= NUM_PAGES)
             return
 
+        adapt2notch()
+
         when (position) {
             0 -> handleWinsMultiplayerFragment()
             1 -> handleScoresMultiplayerFragment()
             2 -> handleScoresSinglePlayerFragment()
-        }
+        } // DISABLE TO SAVE API CALLS
 
 
         // Temp sol to locally populate recycler views with fake data
         /*val names = arrayOf("Anna Paola", "Andrea", "Barbara", "Frank", "Ivan", "Maria", "Vittorio")
         val players = ArrayList<Player>()
 
-        for (i in 1..20) {
+        //for (i in 1..20) {
+        for (i in 1..40) {
             val player = JSONObject()
             player.put("name", names.random())
             player.put("W", Math.random() * 310)
@@ -101,11 +120,18 @@ class StatsSlideFragment() : Fragment() {
             player.put("best_score", Math.random() * 3100)
 
             val name      = player.getString("name")
-            val wins      = player.getInt("W")
-            val loses     = player.getInt("L")
+            val wins      = player.getLong("W")
+            val loses     = player.getLong("L")
             val bestScore = player.getLong("best_score")
 
-            players.add(Player(name, wins, loses, bestScore))
+            //players.add(Player(name, wins, loses, bestScore))
+
+            val p = Player(name)
+            p.setWins(wins)
+            p.setLoses(loses)
+            p.calculateWinPercentage()
+            p.setBestScore(bestScore)
+            players.add(p)
         }
 
         lateinit var playersAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>
@@ -115,7 +141,7 @@ class StatsSlideFragment() : Fragment() {
                 @Suppress("UNCHECKED_CAST")
                 playersAdapter = PlayersWinsAdapter(players) as RecyclerView.Adapter<RecyclerView.ViewHolder>
             }
-            1 -> {
+            1,2 -> {
                 players.sortByDescending { player -> player.getBestScore() }
                 @Suppress("UNCHECKED_CAST")
                 playersAdapter = PlayersScoresAdapter(players) as RecyclerView.Adapter<RecyclerView.ViewHolder>
@@ -130,6 +156,65 @@ class StatsSlideFragment() : Fragment() {
             DividerItemDecoration.VERTICAL
         )
         recyclerView.addItemDecoration(dividerItemDecoration)*/
+    }
+
+    // Adapt text to notch (if present)
+    private fun adapt2notch() {
+        view?.setOnApplyWindowInsetsListener { _, windowInsets ->
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                // Get notch margin values (0 if notch is not present)
+                val displayCutout = windowInsets.displayCutout
+                val notchMarginTop   = displayCutout?.safeInsetTop   ?: 0
+                val notchMarginLeft  = displayCutout?.safeInsetLeft  ?: 0
+                val notchMarginRight = displayCutout?.safeInsetRight ?: 0
+                Log.d("notch", "in stats slide fragment position $position")
+                Log.d("notch", "in stats slide fragment NOTCH MARGIN TOP: $notchMarginTop")
+                Log.d("notch", "in stats slide fragment NOTCH MARGIN LEFT: $notchMarginLeft")
+                Log.d("notch", "in stats slide fragment NOTCH MARGIN RIGHT: $notchMarginRight")
+
+                // Display the text outside the notch
+                val title = requireView().findViewById<TextView>(R.id.menu_title)
+                val params = title.layoutParams as ViewGroup.MarginLayoutParams
+
+                // Get also recycler view parameters that are not automatically updated
+                val rv = requireView().findViewById<RecyclerView>(R.id.recycler_view)
+                val paramsRv = rv.layoutParams as ViewGroup.MarginLayoutParams
+
+                /*Log.d("notch", "(PRE) in stats slide fragment recycler view width: ${paramsRv.width}")
+                paramsRv.width = activity?.window?.decorView?.width?.minus(notchMarginLeft) ?: -1
+                Log.d("notch", "(POST) in stats slide fragment recycler view width: ${paramsRv.width}")*/
+
+                if (notchMarginTop > 0) {
+                    // Update top margin parameter once
+                    //Log.d("notch", "(PRE) in stats slide fragment params.topMargin: ${params.topMargin}")
+                    if (params.topMargin < notchMarginTop)
+                        params.topMargin += notchMarginTop
+                    //Log.d("notch", "(POST) in stats slide fragment params.topMargin: ${params.topMargin}")
+                }
+                if (notchMarginLeft > 0) {
+                    // Update left margin parameter once
+                    //Log.d("notch", "(PRE) in stats slide fragment params.leftMargin: ${params.leftMargin}")
+                    if (params.leftMargin < notchMarginLeft) {
+                        params.leftMargin   += notchMarginLeft
+                        paramsRv.leftMargin += notchMarginLeft
+                    }
+                    //Log.d("notch", "(POST) in stats slide fragment params.leftMargin: ${params.leftMargin}")
+                }
+                if (notchMarginRight > 0) {
+                    // Update right margin parameter once
+                    //Log.d("notch", "(PRE) in stats slide fragment params.rightMargin: ${params.rightMargin}")
+                    if (params.rightMargin < notchMarginRight) {
+                        params.rightMargin   += notchMarginRight
+                        paramsRv.rightMargin += notchMarginRight
+                    }
+                    //Log.d("notch", "(POST) in stats slide fragment params.rightMargin: ${params.rightMargin}")
+                }
+
+                title.layoutParams = params
+            }
+
+            return@setOnApplyWindowInsetsListener windowInsets
+        }
     }
 
     private fun handleWinsMultiplayerFragment() {

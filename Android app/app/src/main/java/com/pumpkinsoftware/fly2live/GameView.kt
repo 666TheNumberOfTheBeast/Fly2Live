@@ -6,6 +6,7 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener2
 import android.hardware.SensorManager
+import android.os.Build
 import android.os.Parcelable
 import android.util.Log
 import android.view.MotionEvent
@@ -212,13 +213,83 @@ class GameView(context: Context?, fragment: GameFragment) : View(context), View.
         //Log.d("ppm", "height: $height")
 
         // Get screen width and height
-        val screenWidth  = resources.displayMetrics.widthPixels
-        val screenHeight = resources.displayMetrics.heightPixels
-        Log.d("ppm", "w: $screenWidth")
-        Log.d("ppm", "h: $screenHeight")
+        // METHOD 1 - Returns the screen size excluding the status and navigation bars
+        /*var screenWidth  = resources.displayMetrics.widthPixels
+        var screenHeight = resources.displayMetrics.heightPixels
+        Log.d("ppm", "screenWidth: $screenWidth")
+        Log.d("ppm", "screenHeight: $screenHeight")
 
-        init(screenWidth, screenHeight)
+        // Returns the screen size excluding the navigation bar
+        if (screenWidth < screenHeight)
+            screenHeight += getResourceDim("status_bar_height")
+        else
+            screenWidth += getResourceDim("status_bar_width") // non ok
+        Log.d("ppm", "screenWidth (including status bar width): $screenWidth")
+        Log.d("ppm", "screenHeight (including status bar height): $screenHeight")
+
+
+        // METHOD 2 - Returns the screen size including the status and navigation bars (returns zero when device rotates)
+        screenWidth  = context.window.decorView.width
+        screenHeight = context.window.decorView.height
+        Log.d("ppm", "screen width decorView: $screenWidth")
+        Log.d("ppm", "screen height decorView: $screenHeight")
+
+        // Returns the screen size excluding the navigation bar
+        if (screenWidth < screenHeight)
+            screenHeight -= getNavBarHeight()
+        else
+            screenWidth -= getNavBarWidth()
+        Log.d("ppm", "screen width decorView: $screenWidth")
+        Log.d("ppm", "screen height decorView (excluding nav bar height): $screenHeight")
+
+        init(screenWidth, screenHeight)*/
+
+        // METHOD 3 - use post
+        // Post queues the code after the view's measure
+        post {
+            Log.d("ppm", "width: $width")
+            Log.d("ppm", "height: $height")
+
+            init(width, height)
+
+            // Returns the screen size including the status and navigation bars
+            /*var screenWidth  = context.window.decorView.width
+            var screenHeight = context.window.decorView.height
+            Log.d("ppm", "screen width decorView: $screenWidth")
+            Log.d("ppm", "screen height decorView: $screenHeight")
+
+            // Returns the screen size excluding the navigation bar
+            if (screenWidth < screenHeight)
+                screenHeight -= getNavBarHeight()
+            else
+                screenWidth -= getNavBarWidth()
+            Log.d("ppm", "screen width decorView (excluding nav bar width): $screenWidth")
+            Log.d("ppm", "screen height decorView (excluding nav bar height): $screenHeight")
+
+            init(screenWidth, screenHeight)*/
+        }
     }
+
+    /*private fun getResourceDim(res: String): Int {
+        val resId = resources.getIdentifier(res, "dimen", "android")
+        if (resId > 0)
+            return resources.getDimensionPixelSize(resId)
+        return 0
+    }*/
+
+    /*private fun getNavBarWidth(): Int {
+        val navBar = resources.getIdentifier("navigation_bar_width", "dimen", "android")
+        if (navBar > 0)
+            return resources.getDimensionPixelSize(navBar)
+        return 0
+    }
+
+    private fun getNavBarHeight(): Int {
+        val navBar = resources.getIdentifier("navigation_bar_height", "dimen", "android")
+        if (navBar > 0)
+            return resources.getDimensionPixelSize(navBar)
+        return 0
+    }*/
 
     // Multithreading version
     private fun init(screenWidth: Int, screenHeight: Int) {
@@ -1832,6 +1903,8 @@ class GameView(context: Context?, fragment: GameFragment) : View(context), View.
 
     // Save game variables
     override fun onSaveInstanceState(): Parcelable? {
+        super.onSaveInstanceState()
+
         if (!::playerVehicle.isInitialized || !::cpuBuilding.isInitialized || !::cpuVehicle.isInitialized )
             return null
 

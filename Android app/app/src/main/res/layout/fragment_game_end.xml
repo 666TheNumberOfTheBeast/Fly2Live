@@ -14,7 +14,7 @@
         android:fontFamily="@font/audiowide"
         android:text="@string/game_over"
         android:textColor="@color/red"
-        android:textSize="@dimen/text_size_title"
+        android:textSize="@dimen/text_size_title_1"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

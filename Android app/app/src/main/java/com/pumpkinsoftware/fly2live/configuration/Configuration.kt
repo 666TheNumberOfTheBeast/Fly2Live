@@ -63,8 +63,8 @@ class Configuration {
         const val BUILDING_04_DAY_HEIGHT = 120f
         const val BUILDING_05_DAY_WIDTH  = 80f
         const val BUILDING_05_DAY_HEIGHT = 110f
-        const val BUILDING_06_DAY_WIDTH  = 160f
-        const val BUILDING_06_DAY_HEIGHT = 80f
+        const val BUILDING_06_DAY_WIDTH  = 165f
+        const val BUILDING_06_DAY_HEIGHT = 90f
         const val BUILDING_07_DAY_WIDTH  = 30f
         const val BUILDING_07_DAY_HEIGHT = 120f
         const val BUILDING_08_DAY_WIDTH  = 28f
@@ -87,6 +87,8 @@ class Configuration {
         const val BUILDING_16_DAY_HEIGHT = 120f
         const val BUILDING_17_DAY_WIDTH  = 50f
         const val BUILDING_17_DAY_HEIGHT = 120f
+        const val BUILDING_20_DAY_WIDTH  = 55f
+        const val BUILDING_20_DAY_HEIGHT = 100f
 
         const val BUILDING_01_NIGHT_WIDTH  = 22f
         const val BUILDING_01_NIGHT_HEIGHT = 140f

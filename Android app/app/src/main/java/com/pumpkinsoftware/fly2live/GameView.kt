@@ -77,6 +77,8 @@ import com.pumpkinsoftware.fly2live.configuration.Configuration.Companion.BUILDI
 import com.pumpkinsoftware.fly2live.configuration.Configuration.Companion.BUILDING_16_DAY_WIDTH
 import com.pumpkinsoftware.fly2live.configuration.Configuration.Companion.BUILDING_17_DAY_HEIGHT
 import com.pumpkinsoftware.fly2live.configuration.Configuration.Companion.BUILDING_17_DAY_WIDTH
+import com.pumpkinsoftware.fly2live.configuration.Configuration.Companion.BUILDING_20_DAY_HEIGHT
+import com.pumpkinsoftware.fly2live.configuration.Configuration.Companion.BUILDING_20_DAY_WIDTH
 import com.pumpkinsoftware.fly2live.configuration.Configuration.Companion.SCENARIO_CITY_NIGHT
 import com.pumpkinsoftware.fly2live.configuration.Configuration.Companion.VEHICLE_01_HEIGHT
 import com.pumpkinsoftware.fly2live.configuration.Configuration.Companion.VEHICLE_01_WIDTH
@@ -104,7 +106,7 @@ import com.pumpkinsoftware.fly2live.configuration.Configuration.Companion.PLAYER
 import com.pumpkinsoftware.fly2live.configuration.Configuration.Companion.PLAYER_WIDTH
 
 
-class GameView(context: Context?, fragment: GameFragment) : View(context), View.OnTouchListener, SensorEventListener2 {
+class GameView(context: Context?, fragment: GameFragment) : View(context),/* View.OnTouchListener,*/ SensorEventListener2 {
     // Fragment associated with this view
     private val fragment = fragment
 
@@ -173,7 +175,7 @@ class GameView(context: Context?, fragment: GameFragment) : View(context), View.
 
 
     init {
-        setOnTouchListener(this)
+        //setOnTouchListener(this)
 
         sensorManager = context?.getSystemService(Context.SENSOR_SERVICE) as SensorManager
 
@@ -665,7 +667,23 @@ class GameView(context: Context?, fragment: GameFragment) : View(context), View.
                             screenWidth, screenHeight, ppm,
                             BUILDING_17_DAY_WIDTH * scaleFactor, BUILDING_17_DAY_HEIGHT * scaleFactor,
                             initialObstaclePosX, initialObstaclePosY, speed
-                        )
+                        )/*,
+                        GameObjectCpu(
+                            "building_20",
+                            arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.building_day_20, null)?.toBitmap(screenWidth, screenHeight)!!),
+                            arrayOf(
+                                arrayOf(0f, 0.25f, 1f, 1f),        // Bottom rect
+                                arrayOf(0.29f, 0.21f, 0.71f, 1f),  // Middle rect 1
+                                arrayOf(0.31f, 0.18f, 0.69f, 1f),  // Middle rect 2
+                                arrayOf(0.34f, 0.16f, 0.66f, 1f),  // Middle rect 3
+                                arrayOf(0.38f, 0.14f, 0.62f, 1f),  // Middle rect 4
+                                arrayOf(0.41f, 0.13f, 0.59f, 1f),  // Middle rect 5
+                                arrayOf(0.48f, 0f, 0.52f, 1f)      // Top rect
+                            ),
+                            screenWidth, screenHeight, ppm,
+                            BUILDING_20_DAY_WIDTH * scaleFactor, BUILDING_20_DAY_HEIGHT * scaleFactor,
+                            initialObstaclePosX, initialObstaclePosY, speed
+                        )*/
                     )
                 }
                 else {
@@ -1332,6 +1350,12 @@ class GameView(context: Context?, fragment: GameFragment) : View(context), View.
                 val updatePlayer = async {
                     //Log.d("COROUTINE", "ASYNC UPDATE USER - I'm working in thread ${Thread.currentThread().name}")
 
+                    // Static player position for screenshots (to be removed)
+                    /*if (SCENARIO == SCENARIO_CITY_DAY)
+                        playerVehicle.setY(16f * ppm)
+                    else
+                        playerVehicle.setY(11f * ppm)*/
+
                     playerVehicle.setSpeed(lastGyroscopeInput)
                     playerVehicle.update(dt)
 
@@ -1414,6 +1438,16 @@ class GameView(context: Context?, fragment: GameFragment) : View(context), View.
                     // s = v * dt  in m
                     score += speed * dt
 
+                    // Static score for screenshot (to be removed)
+                    /*if (SCENARIO == SCENARIO_CITY_DAY)
+                        // Scene 1
+                        //score = 1059f
+
+                        // Scene 2
+                        score = 947f
+                    else
+                        score = 1138f*/
+
                     // Update the speed (max about 36-43 m/s. 50 m/s very difficult!)
                     if (speed < 40f)
                         speed += 0.001f
@@ -1489,7 +1523,8 @@ class GameView(context: Context?, fragment: GameFragment) : View(context), View.
         canvas?.drawBitmap(cpuVehicle.getBitmap(), cpuVehicle.getMatrix(), null)
         canvas?.drawBitmap(cpuBuilding.getBitmap(), cpuBuilding.getMatrix(), null)
 
-        canvas?.drawText("SCORE " + score.toLong(), 20f, 60f, painterFill)
+        canvas?.drawText("SCORE " + score.toLong(), 30f, 60f, painterFill)
+        //canvas?.drawText("SCORE " + score.toLong(), 50f, 120f, painterFill) // For screenshots (slides)
 
 
         // Debug (draw player's bounds)
@@ -1571,6 +1606,31 @@ class GameView(context: Context?, fragment: GameFragment) : View(context), View.
         // Building pos Y in meters
         val buildingPosY = (17..33).random()
 
+        // Static building and position for screenshots (to be removed)
+        /*val buildingPosY: Int
+        if (SCENARIO == SCENARIO_CITY_DAY) {
+            // Scene 1
+            //cpuBuilding = buildings[6]
+            //cpuBuilding.setX(22f * ppm)
+            //buildingPosY = 17
+
+            // Scene 2
+            //cpuBuilding = buildings[0]
+            //cpuBuilding = buildings[1]
+            //cpuBuilding = buildings[2]
+            cpuBuilding = buildings[7]
+            //cpuBuilding = buildings[15]
+            cpuBuilding.setX(16f * ppm)
+            buildingPosY = 23
+        }
+        else {
+            cpuBuilding = buildings[6]
+            cpuBuilding.setX(8f * ppm)
+            buildingPosY = 25
+        }*/
+
+
+
         //=================
         // For debug
         //val r = 0.2f
@@ -1643,6 +1703,26 @@ class GameView(context: Context?, fragment: GameFragment) : View(context), View.
         val vehiclePosY = (0..5).random()
 
 
+        // Static vehicle and position for screenshots (to be removed)
+        /*val vehiclePosY: Int
+        if (SCENARIO == SCENARIO_CITY_DAY) {
+            // Scene 1
+            //cpuVehicle = vehicles[3]
+            //cpuVehicle.setX(6f * ppm)
+            //vehiclePosY = 7 //3
+
+            // Scene 2
+            cpuVehicle = vehicles[5]
+            cpuVehicle.setX(18f * ppm)
+            vehiclePosY = 6
+        }
+        else {
+            cpuVehicle = vehicles[7]
+            cpuVehicle.setX(25f * ppm)
+            vehiclePosY = 2
+        }*/
+
+
         //=================
         // For debug
         //val r = 0f
@@ -1693,8 +1773,8 @@ class GameView(context: Context?, fragment: GameFragment) : View(context), View.
 
 
     // Detect user touch
-    override fun onTouch(v: View?, event: MotionEvent?): Boolean {
-        /*when (event?.action) {
+    /*override fun onTouch(v: View?, event: MotionEvent?): Boolean {
+        when (event?.action) {
             MotionEvent.ACTION_DOWN,
             MotionEvent.ACTION_MOVE -> {
                 // Get user click coordinates
@@ -1733,10 +1813,10 @@ class GameView(context: Context?, fragment: GameFragment) : View(context), View.
 
                 invalidate()
             }
-        }*/
+        }
 
         return true
-    }
+    }*/
 
 
 

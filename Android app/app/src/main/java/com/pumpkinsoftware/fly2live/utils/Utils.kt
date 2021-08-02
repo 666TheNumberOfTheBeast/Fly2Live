@@ -439,7 +439,7 @@ fun adaptBackButton2notch(btnBack: ImageView, notchRects: List<Rect>?, activity:
         Log.d("notch", "notch right: ${rect.right}")
         Log.d("notch", "notch bottom: ${rect.bottom}")*/
 
-        val isBackBtnCutout = rect.contains(btnBackRect)
+        val isBackBtnCutout = rect.intersect(btnBackRect)
         if (isBackBtnCutout) {
             // Move the back button to bottom
             btnBack.y = activity?.window?.decorView?.height?.minus(btnBack.height.toFloat()) ?: 0f

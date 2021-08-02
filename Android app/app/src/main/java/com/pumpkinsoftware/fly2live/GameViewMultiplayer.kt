@@ -110,12 +110,12 @@ import kotlin.math.min
 import kotlin.math.sqrt
 
 
-class GameViewMultiplayer(context: Context?, fragment: GameFragment) : View(context), View.OnTouchListener, SensorEventListener2 {
+class GameViewMultiplayer(context: Context?, fragment: GameFragment) : View(context),/* View.OnTouchListener,*/ SensorEventListener2 {
     // Fragment associated with this view
     private var fragment = fragment
 
     // Socket io
-    private lateinit var mSocket: Socket
+    private val mSocket = SOCKET_INSTANCE!!
 
     // Background bitmap
     private lateinit var bg: Bitmap
@@ -157,7 +157,8 @@ class GameViewMultiplayer(context: Context?, fragment: GameFragment) : View(cont
     private var gameEnd = false
 
     // Variable to start drawing when game has been initialized
-    private var startDrawing = false
+    private var startDrawing  = false
+    private var bitmapsLoaded = false
 
     // Variables for text to show when game is loading
     private val textRect    = Rect()
@@ -193,7 +194,12 @@ class GameViewMultiplayer(context: Context?, fragment: GameFragment) : View(cont
 
 
     init {
-        setOnTouchListener(this)
+        // Remove all listeners (for any event)
+        mSocket.off()
+
+        registerSocketListeners()
+
+        //setOnTouchListener(this)
 
         sensorManager = context?.getSystemService(Context.SENSOR_SERVICE) as SensorManager
 
@@ -222,12 +228,181 @@ class GameViewMultiplayer(context: Context?, fragment: GameFragment) : View(cont
         //Log.d("ppm", "height: $height")
 
         // Get screen width and height
-        val screenWidth  = resources.displayMetrics.widthPixels
+        /*val screenWidth  = resources.displayMetrics.widthPixels
         val screenHeight = resources.displayMetrics.heightPixels
         Log.d("ppm", "w: $screenWidth")
         Log.d("ppm", "h: $screenHeight")
 
-        init(screenWidth, screenHeight)
+        init(screenWidth, screenHeight)*/
+
+        // Post queues the code after the view's measure
+        post {
+            Log.d("ppm", "width: $width")
+            Log.d("ppm", "height: $height")
+
+            init(width, height)
+        }
+    }
+
+    private fun registerSocketListeners() {
+        mSocket.on("client ready response") {args ->
+            Log.d("json", "Client ready response from server arrived in game view")
+
+            // Get data
+            val data = args[0] as JSONObject
+            val error: Boolean
+            val messageCode: Int
+
+            try {
+                error           = data.getBoolean("error")
+                messageCode     = data.getInt("msg_code")
+            } catch (e: JSONException) {
+                e.printStackTrace()
+                Log.d("json", "Error in retrieving data from server")
+                return@on
+            }
+
+            // Check if an error occur (only at server side can happen as the client just receives data) or
+            // if game ended (the other player quit during loading)
+            if (error || messageCode == MSG_CODE_GAME_END) {
+                Log.d("json", "Client ready response error or game end")
+                // Remove all listeners (for any event)
+                mSocket.off()
+
+                // Disconnect the socket
+                mSocket.disconnect()
+
+                // Fragment navigation requires the main thread
+                fragment.lifecycleScope.launch(Dispatchers.Main) {
+                    gameEnd()
+                }
+            }
+        }
+
+        mSocket.on(Socket.EVENT_DISCONNECT) { args ->
+            Log.d("json", "disconnected from the server in game view")
+
+            // Assume no temporary disconnection,
+            // so if player disconnects & started drawing, he loses
+
+            // If the server disconnects, the client is disconnected too but it's a server fault.
+            // However, the server should never disconnect
+
+            winner =
+                if (!startDrawing)  WINNER_UNDEFINED  // Disconnection before start drawing, winner undefined
+                else                WINNER_ADVERSARY  // Disconnection during gameplay, so adversary is the winner
+
+
+            // Fragment navigation requires the main thread
+            fragment.lifecycleScope.launch(Dispatchers.Main) {
+                Toast.makeText(context, "Disconnected from server", Toast.LENGTH_SHORT).show()
+                gameEnd()
+            }
+        }
+
+        // Add a listener for the game update event
+        mSocket.on("game update") { args ->
+            Log.d("json", "Gameplay message from server arrived in game view")
+
+            // Get data
+            val data = args[0] as JSONObject
+            val error: Boolean
+            val messageCode: Int
+            val cpuBuildingJson: JSONObject
+            val cpuVehicleJson: JSONObject
+            val player0: JSONObject
+            val player1: JSONObject
+
+            try {
+                error           = data.getBoolean("error")
+                messageCode     = data.getInt("msg_code")
+                cpuBuildingJson = data.getJSONObject("cpu_building")
+                cpuVehicleJson  = data.getJSONObject("cpu_vehicle")
+                player0         = data.getJSONObject("player_0")
+                player1         = data.getJSONObject("player_1")
+                score           = data.getDouble("score").toFloat()
+                winner          = data.getInt("winner")
+            } catch (e: JSONException) {
+                e.printStackTrace()
+                Log.d("json", "Error in retrieving data from server")
+                return@on
+            }
+
+            // Check if an error occur (only at server side can happen as the client just receives data)
+            if (error) {
+                Log.d("json", "Server error")
+
+                // Remove all listeners (for any event)
+                mSocket.off()
+
+                // Disconnect the socket
+                mSocket.disconnect()
+
+                // Fragment navigation requires the main thread
+                fragment.lifecycleScope.launch(Dispatchers.Main) {
+                    gameEnd()
+                }
+            }
+
+            // Check if bitmaps has been loaded
+            if(bitmapsLoaded) {
+                //Log.d("json", "Update CPU objects")
+                //debugBoundsCpuObject = 0
+                cpuBuilding = updateObjectCpu(cpuBuildingJson, buildings, cpuBuilding)
+                //debugBoundsCpuObject = 1
+                cpuVehicle = updateObjectCpu(cpuVehicleJson, vehicles, cpuVehicle)
+
+                //Log.d("json", "Update players objects")
+                updateObjectPlayer(player0, player0Vehicle, 0)
+                updateObjectPlayer(player1, player1Vehicle, 1)
+            }
+
+            // Check if game ended (after update object player to get the playerNumber)
+            if (messageCode == MSG_CODE_GAME_END) {
+                //Log.d("json", "Update game end")
+
+                // Check if bitmaps has been loaded
+                if(bitmapsLoaded) {
+                    // Check vehicle to explode
+                    when (winner) {
+                        0 ->
+                            player1Vehicle.explode()
+                        1 ->
+                            player0Vehicle.explode()
+                        else -> {
+                            player0Vehicle.explode()
+                            player1Vehicle.explode()
+                        }
+                    }
+                }
+
+                // Check winner
+                if (winner == playerNumber)             winner = WINNER_PLAYER     // The player wins
+                else if (winner == 0 || winner == 1)    winner = WINNER_ADVERSARY  // The player loses
+
+                // Otherwise keep the received winner value
+
+                // Remove all listeners (for any event)
+                mSocket.off()
+
+                // Disconnect the socket
+                mSocket.disconnect()
+
+                // Check if bitmaps has been loaded
+                if(bitmapsLoaded)
+                    startExplosion()
+                else
+                    // Fragment navigation requires the main thread
+                    fragment.lifecycleScope.launch(Dispatchers.Main) {
+                        gameEnd()
+                    }
+            }
+
+            //Log.d("json", "Draw bitmaps!")
+            startDrawing = true
+
+            invalidate()
+        }
     }
 
     // Multithreading version
@@ -236,9 +411,6 @@ class GameViewMultiplayer(context: Context?, fragment: GameFragment) : View(cont
         // It uses a common pool of shared background threads.
         // This is an appropriate choice for compute-intensive coroutines that consume CPU resources
         fragment.lifecycleScope.launch(Dispatchers.Default) {
-            // Retrieve current socket
-            mSocket = SOCKET_INSTANCE!!
-
             withContext(Dispatchers.Main) {
                 // Override back behavior
                 (context as FragmentActivity).onBackPressedDispatcher.addCallback(fragment) {
@@ -826,7 +998,7 @@ class GameViewMultiplayer(context: Context?, fragment: GameFragment) : View(cont
             mSocket.emit("client ready", json)
             Log.d("json", "Client ready message sent to the server")
 
-            mSocket.on("client ready response") {args ->
+            /*mSocket.on("client ready response") {args ->
                 Log.d("json", "Client ready response from server arrived in game view")
 
                 // Get data
@@ -846,6 +1018,7 @@ class GameViewMultiplayer(context: Context?, fragment: GameFragment) : View(cont
                 // Check if an error occur (only at server side can happen as the client just receives data) or
                 // if game ended (the other player quit during loading)
                 if (error || messageCode == MSG_CODE_GAME_END) {
+                    Log.d("json", "Client ready response error or game end")
                     // Remove all listeners (for any event)
                     mSocket.off()
 
@@ -858,7 +1031,6 @@ class GameViewMultiplayer(context: Context?, fragment: GameFragment) : View(cont
                     }
                 }
             }
-
 
             mSocket.on(Socket.EVENT_DISCONNECT) { args ->
                 Log.d("json", "disconnected from the server in game view")
@@ -925,19 +1097,20 @@ class GameViewMultiplayer(context: Context?, fragment: GameFragment) : View(cont
                     }
                 }
 
-                Log.d("json", "Update CPU objects")
+                //Log.d("json", "Update CPU objects")
                 //debugBoundsCpuObject = 0
                 cpuBuilding = updateObjectCpu(cpuBuildingJson, buildings, cpuBuilding)
                 //debugBoundsCpuObject = 1
                 cpuVehicle  = updateObjectCpu(cpuVehicleJson, vehicles, cpuVehicle)
 
-                Log.d("json", "Update players objects")
+                //Log.d("json", "Update players objects")
                 updateObjectPlayer(player0, player0Vehicle, 0)
                 updateObjectPlayer(player1, player1Vehicle, 1)
 
 
                 // Check if game ended (after update object player to get the playerNumber)
                 if (messageCode == MSG_CODE_GAME_END) {
+                    Log.d("json", "Update game end")
                     // Check vehicle to explode
                     when (winner) {
                         0 ->
@@ -970,11 +1143,14 @@ class GameViewMultiplayer(context: Context?, fragment: GameFragment) : View(cont
                     }*/
                 }
 
-                Log.d("json", "Draw bitmaps!")
+                //Log.d("json", "Draw bitmaps!")
                 startDrawing = true
 
                 invalidate()
-            }
+            }*/
+
+            bitmapsLoaded = true
+            invalidate()
         }
     }
 
@@ -993,7 +1169,7 @@ class GameViewMultiplayer(context: Context?, fragment: GameFragment) : View(cont
             return
 
         // Check if game has been initialized
-        if (!startDrawing) {
+        if (!startDrawing || !bitmapsLoaded) {
             // Get the rect of the text to center this in the screen
             painterFill.textSize = 80f
             painterFill.getTextBounds(loadingText, 0, loadingText.length, textRect)
@@ -1052,7 +1228,8 @@ class GameViewMultiplayer(context: Context?, fragment: GameFragment) : View(cont
         canvas?.drawBitmap(cpuVehicle.getBitmap(), cpuVehicle.getMatrix(), null)
         canvas?.drawBitmap(cpuBuilding.getBitmap(), cpuBuilding.getMatrix(), null)
 
-        canvas?.drawText("SCORE " + score.toLong(), 20f, 60f, painterFill)
+        canvas?.drawText("SCORE " + score.toLong(), 30f, 60f, painterFill)
+        //canvas?.drawText("SCORE " + score.toLong(), 50f, 120f, painterFill) // For screenshots (slides)
 
 
         // Debug (draw cpuVehicle's bounds)
@@ -1255,8 +1432,8 @@ class GameViewMultiplayer(context: Context?, fragment: GameFragment) : View(cont
 
 
     // Detect user touch
-    override fun onTouch(v: View?, event: MotionEvent?): Boolean {
-        /*when (event?.action) {
+    /*override fun onTouch(v: View?, event: MotionEvent?): Boolean {
+        when (event?.action) {
             MotionEvent.ACTION_DOWN,
             MotionEvent.ACTION_MOVE -> {
                 // Get user click coordinates
@@ -1295,10 +1472,10 @@ class GameViewMultiplayer(context: Context?, fragment: GameFragment) : View(cont
 
                 invalidate()
             }
-        }*/
+        }
 
         return true
-    }
+    }*/
 
     // Detect user motion via sensors
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {

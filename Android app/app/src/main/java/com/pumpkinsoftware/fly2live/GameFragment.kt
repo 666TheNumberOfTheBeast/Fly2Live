@@ -105,10 +105,15 @@ class GameFragment : Fragment() {
         bundle.putInt("winner", winner)
 
         // Try to go to next fragment in order to avoid possible crashes
-        try {
+        /*try {
+            Log.d("json", "Try to go to end fragment")
             findNavController().navigate(R.id.action_gameFragment_to_gameEndFragment, bundle)
         } catch (e: Exception) {
             e.printStackTrace()
+        }*/
+
+        lifecycleScope.launchWhenResumed {
+            findNavController().navigate(R.id.action_gameFragment_to_gameEndFragment, bundle)
         }
     }
 

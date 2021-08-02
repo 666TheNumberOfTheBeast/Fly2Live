@@ -17,9 +17,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.navigation.fragment.findNavController
 
-
-// VERSIONE CON VOLLEY E POLLING
-
 import com.pumpkinsoftware.fly2live.configuration.Configuration.Companion.PLAYER_ID
 import com.pumpkinsoftware.fly2live.configuration.Configuration.Companion.REQ_CODE_NEW_GAME
 import com.pumpkinsoftware.fly2live.configuration.Configuration.Companion.URL
@@ -52,6 +49,7 @@ class LoadingFragment : Fragment() {
     private lateinit var textView: TextView
 
     private lateinit var mSocket: Socket
+    private var status = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -80,11 +78,11 @@ class LoadingFragment : Fragment() {
         if (account == null)
             return
 
-        textView    = view.findViewById(R.id.textView)
+        textView = view.findViewById(R.id.textView)
         val btnBack = view.findViewById<ImageView>(R.id.back_button)
 
         btnBack.setOnClickListener {
-            findNavController().popBackStack()
+            goBack()
         }
 
         var notchRects: List<Rect>? = null
@@ -102,13 +100,36 @@ class LoadingFragment : Fragment() {
             adaptBackButton2notch(btnBack, notchRects, activity)
         }
 
-        // Connect to server and set ID
-        connect()
+        // Check if there is a saved instance state
+        if (savedInstanceState != null) {
+            // Display the correct text
+            status = savedInstanceState.getInt("loadingStatus")
+            textView.text = toMessage(status)
+        }
+
+        Log.d("json", "status: $status")
+
+        // Check if the socket instance has been already initialized
+        if (SOCKET_INSTANCE == null)
+            instantiate()
+        else {
+            // Retrieve the socket instance
+            mSocket = SOCKET_INSTANCE!!
+            Log.d("json", "socket ID: " + mSocket.id()) // sid (e.g. x8WIv7-mJelg7on_ALbx)
+        }
+
+        registerListeners()
+
+        // Check if the connection to the server has been already established
+        if (status < MSG_CODE_SEARCHING_ADV)
+            // Connect to server
+            mSocket.connect()
     }
 
 
     // Connect to server with socket.io
-    private fun connect() {
+    // Instantiate socket to server with socket.io
+    private fun instantiate() {
         // Force websocket
         /*val options = IO.Options.builder()
             .setTransports(arrayOf(WebSocket.NAME))
@@ -124,50 +145,82 @@ class LoadingFragment : Fragment() {
             return
         }
 
+        // Store the socket instance in order to retrieve it outside this fragment
+        SOCKET_INSTANCE = mSocket
+    }
+
+    private fun registerListeners() {
         requireActivity().onBackPressedDispatcher.addCallback(this) {
             goBack()
         }
 
-        // Store the socket instance in order to retrieve it outside this fragment
-        SOCKET_INSTANCE = mSocket
+        // Remove all listeners (for any event)
+        mSocket.off()
 
-        mSocket.connect()
+        // Check if this is the first time listeners are registered
+        if (status < MSG_CODE_SEARCHING_ADV) {
+            // Add a one-time listener for the connection event
+            mSocket.once(Socket.EVENT_CONNECT) { args ->
+                Log.d("json", "connected to the server")
+                Log.d("json", "socket ID: " + mSocket.id()) // sid (e.g. x8WIv7-mJelg7on_ALbx)
 
-        // Add a one-time listener for the connection event
-        mSocket.once(Socket.EVENT_CONNECT) { args ->
-            Log.d("json", "connected to the server")
-            Log.d("json", "socket ID: " + mSocket.id()) // sid (e.g. x8WIv7-mJelg7on_ALbx)
+                // Remove listener for the event of connection error
+                mSocket.off(Socket.EVENT_CONNECT_ERROR)
 
-            // Remove listener for the event of connection error
-            mSocket.off(Socket.EVENT_CONNECT_ERROR)
+                activity?.runOnUiThread(Runnable {
+                    // Get screen width and height
+                    /*val displayMetrics = resources.displayMetrics
+                    val screenWidth  = displayMetrics.widthPixels
+                    val screenHeight = displayMetrics.heightPixels
 
-            activity?.runOnUiThread(Runnable {
-                // Get screen width and height
-                //val displayMetrics = Resources.getSystem().displayMetrics
-                val displayMetrics = resources.displayMetrics
-                val screenWidth  = displayMetrics.widthPixels
-                val screenHeight = displayMetrics.heightPixels
+                    Log.d("ppm", "w: $screenWidth")
+                    Log.d("ppm", "h: $screenHeight")*/
+
+                    val screenWidth  = view?.width  ?: 0
+                    val screenHeight = view?.height ?: 0
+
+                    Log.d("ppm", "w: $screenWidth")
+                    Log.d("ppm", "h: $screenHeight")
+
+                    status = MSG_CODE_SEARCHING_ADV
+                    textView.text = getString(R.string.msg_searching_adv)
+
+                    searchGame(screenWidth, screenHeight)
+                })
+            }
+
+            mSocket.once(Socket.EVENT_CONNECT_ERROR) { args ->
+                activity?.runOnUiThread(Runnable {
+                    // Create Toast outside the looper to avoid crashes due to bad context
+                    val toast =
+                        Toast.makeText(context, "Error in connecting to server", Toast.LENGTH_SHORT)
+
+                    // Delay action for a better UX
+                    Handler(Looper.myLooper()!!).postDelayed({
+                        toast.show()
+                        goBack()
+                    }, 1000)
+                })
+            }
+        }
+        else {
+            // Get screen width and height
+            /*val displayMetrics = resources.displayMetrics
+            val screenWidth  = displayMetrics.widthPixels
+            val screenHeight = displayMetrics.heightPixels
+
+            Log.d("ppm", "w: $screenWidth")
+            Log.d("ppm", "h: $screenHeight")*/
+
+            view?.post {
+                val screenWidth  = view?.width  ?: 0
+                val screenHeight = view?.height ?: 0
 
                 Log.d("ppm", "w: $screenWidth")
                 Log.d("ppm", "h: $screenHeight")
 
-                textView.text = getString(R.string.msg_searching_adv)
-
-                searchGame(screenWidth, screenHeight)
-            })
-        }
-
-        mSocket.once(Socket.EVENT_CONNECT_ERROR) { args ->
-            activity?.runOnUiThread(Runnable {
-                // Create Toast outside the looper to avoid crashes due to bad context
-                val toast = Toast.makeText(context, "Error in connecting to server", Toast.LENGTH_SHORT)
-
-                // Delay action for a better UX
-                Handler(Looper.myLooper()!!).postDelayed({
-                    toast.show()
-                    goBack()
-                }, 1000)
-            })
+                addNewGameListener(screenWidth, screenHeight)
+            }
         }
 
         mSocket.once(Socket.EVENT_DISCONNECT) { args ->
@@ -191,11 +244,15 @@ class LoadingFragment : Fragment() {
     }
 
     private fun searchGame(screen_width: Int, screen_height: Int) {
-        sendNewGameRequest(screen_width, screen_height)
-
         // Add a listener for the new game response event
+        addNewGameListener(screen_width, screen_height)
+
+        sendNewGameRequest(screen_width, screen_height)
+    }
+
+    private fun addNewGameListener(screen_width: Int, screen_height: Int) {
         mSocket.on("new game response") { args ->
-            Log.d("json", "response arrived")
+            Log.d("json", "new game response arrived")
             val data = args[0] as JSONObject
             val error: Boolean
             val messageCode: Int
@@ -215,6 +272,7 @@ class LoadingFragment : Fragment() {
                     goBack()
                 }
                 else {
+                    status = messageCode
                     textView.text = toMessage(messageCode)
 
                     if (messageCode == MSG_CODE_GAME_START) {
@@ -248,11 +306,18 @@ class LoadingFragment : Fragment() {
     }
 
     private fun goBack() {
-        // Remove all listeners (for any event)
-        mSocket.off()
+        Log.d("json", "go back")
 
-        // Disconnect the socket
-        mSocket.disconnect()
+        if (::mSocket.isInitialized) {
+            // Remove all listeners (for any event)
+            mSocket.off()
+
+            // Disconnect the socket
+            mSocket.disconnect()
+        }
+
+        // Reset stored socket instance
+        SOCKET_INSTANCE = null
 
         // Go to previous fragment using a coroutine tied to the fragment lifecycle
         // in order to avoid crashes
@@ -276,6 +341,14 @@ class LoadingFragment : Fragment() {
         }
 
         return ""
+    }
+
+    // Save loading status
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+
+        if (::mSocket.isInitialized)
+            outState.putInt("loadingStatus", status)
     }
 
 }
